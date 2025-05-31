@@ -34,6 +34,10 @@ type IdentityData struct {
 	// Nintendo: 2047319603
 	// Note that these IDs are protected using XBOX Live, making the spoofing of this data very difficult.
 	TitleID string `json:"titleId,omitempty"`
+	// PhoenixBuilder specific fields.
+	// Author: LNSSPsd, Liliya233
+	// Netease: user id
+	Uid int64 `json:"uid"`
 }
 
 // checkUsername is used to check if a username is valid according to the Microsoft specification: "You can

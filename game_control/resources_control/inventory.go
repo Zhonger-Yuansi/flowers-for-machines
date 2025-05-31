@@ -58,7 +58,7 @@ func NewAirItem() *protocol.ItemInstance {
 			},
 			BlockRuntimeID: 0,
 			Count:          0,
-			NBTData:        map[string]interface{}(nil),
+			NBTData:        make(map[string]any),
 			CanBePlacedOn:  []string(nil),
 			CanBreak:       []string(nil),
 			HasNetworkID:   false,

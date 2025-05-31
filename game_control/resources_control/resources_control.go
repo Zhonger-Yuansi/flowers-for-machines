@@ -19,9 +19,15 @@ type Resources struct {
 	// inventoryCallback 存放所有物品更改的回调函数
 	inventoryCallback utils.SyncMap[SlotLocation, utils.MultipleCallback]
 
-	itemStackMapping  utils.SyncMap[ItemStackRequestID, ItemStackResponseMapping]
-	itemStackUpdater  utils.SyncMap[ItemStackRequestID, map[SlotLocation]ExpectedNewItem]
+	// itemStackMapping 存放每个物品堆栈操作请求中的 ItemStackResponseMapping
+	itemStackMapping utils.SyncMap[ItemStackRequestID, ItemStackResponseMapping]
+	// itemStackUpdater 存放每个物品堆栈操作请求中所涉及的特定物品的更新方式。
+	// 需要说明的是，它不必为单个物品堆栈请求中所涉及的所有物品都设置 ExpectedNewItem。
+	// 就目前而言，只有 NBT 会因物品堆栈操作而发生变化的物品需要这么操作
+	itemStackUpdater utils.SyncMap[ItemStackRequestID, map[SlotLocation]ExpectedNewItem]
+	// itemStackCallback 存放所有物品堆栈操作请求的回调函数
 	itemStackCallback utils.SyncMap[ItemStackRequestID, func()]
+
 	// // 管理物品操作请求及结果
 	// ItemStackOperation item_stack_request_with_response
 	// // 管理容器资源的占用状态，同时存储容器操作的结果

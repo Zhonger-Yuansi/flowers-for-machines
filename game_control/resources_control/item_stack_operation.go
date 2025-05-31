@@ -14,7 +14,8 @@ type (
 // 其最终应当拥有的一些数据信息。应当说明的是，这些数据信息不
 // 会由服务器告知，它应当是客户端内部处理的
 type ExpectedNewItem struct {
-	// NBTData 指示经过相应的物品堆栈操作后，其 NBT 字段的最终状态
+	// NBTData 指示经过相应的物品堆栈操作后，其 NBT 字段的最终状态。
+	// 需要说明的是，物品名称的 NBT 字段无需在此处更改，它会被自动维护
 	NBTData map[string]any
 }
 

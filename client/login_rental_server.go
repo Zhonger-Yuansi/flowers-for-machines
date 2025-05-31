@@ -27,7 +27,7 @@ func LoginRentalServer(cfg Config) (client *Client, err error) {
 		cfg.AuthServerToken,
 		"", "",
 	)
-	conn, err := createConnection(ctx, authenticator)
+	conn, err := openConnection(ctx, authenticator)
 	if err != nil {
 		return nil, fmt.Errorf("LoginRentalServer: %v", err)
 	}

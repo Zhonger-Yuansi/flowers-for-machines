@@ -141,14 +141,6 @@ func (m *MCPCheckChallengesSolver) onPyRpc(p *packet.PyRpc) error {
 
 	// do some actions for some specific PyRpc packets
 	switch c := content.(type) {
-	case *py_rpc.HeartBeat:
-		// heart beat to test the device is still alive?
-		// it seems that we just need to return it back to the server is OK
-		c.Type = py_rpc.ClientToServerHeartBeat
-		conn.WritePacket(&packet.PyRpc{
-			Value:         py_rpc.Marshal(c),
-			OperationType: packet.PyRpcOperationTypeSend,
-		})
 	case *py_rpc.StartType:
 		// get data and send packet
 		c.Content, err = client.TransferData(c.Content)

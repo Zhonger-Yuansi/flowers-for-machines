@@ -15,9 +15,9 @@ import (
 	mei "github.com/Happy2018new/the-last-problem-of-the-humankind/core/py_rpc/mod_event/interface"
 )
 
-// createConnection 通过 authenticator 连接到租赁服，
+// openConnection 通过 authenticator 连接到租赁服，
 // 并初始化 Minecraft 连接
-func createConnection(
+func openConnection(
 	ctx context.Context,
 	authenticator minecraft.Authenticator,
 ) (conn *minecraft.Conn, err error) {

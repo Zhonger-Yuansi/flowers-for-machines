@@ -73,7 +73,6 @@ func (m *MCPCheckChallengesSolver) solveMCPCheckChallenges() error {
 	select {
 	case <-challengeSolved:
 		err = m.waitMCPCheckChallengesDown(commandOutput)
-		close(challengeSolved)
 		close(cachedPkt)
 		if err != nil {
 			return fmt.Errorf("solveMCPCheckChallenges: %v", err)

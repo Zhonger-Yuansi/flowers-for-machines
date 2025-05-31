@@ -31,6 +31,11 @@ func (c Client) Conn() *minecraft.Conn {
 	return c.connection
 }
 
+// CachedPacket ..
+func (c Client) CachedPacket() chan packet.Packet {
+	return c.cachedPacket
+}
+
 // ------------------------- MCPCheckChallengesSolver -------------------------
 
 // MCPCheckChallengesSolver ..

@@ -154,7 +154,7 @@ func (m *MCPCheckChallengesSolver) onPyRpc(p *packet.PyRpc) error {
 		// get data and send packet
 		c.Content, err = client.TransferData(c.Content)
 		if err != nil {
-			panic(err)
+			return fmt.Errorf("onPyRpc: %v", err)
 		}
 		c.Type = py_rpc.StartTypeResponse
 		conn.WritePacket(&packet.PyRpc{
@@ -175,7 +175,7 @@ func (m *MCPCheckChallengesSolver) onPyRpc(p *packet.PyRpc) error {
 		})
 		ret, err := client.TransferCheckNum(string(arg))
 		if err != nil {
-			panic(err)
+			return fmt.Errorf("onPyRpc: %v", err)
 		}
 		// unmarshal response and adjust the data included
 		ret_p := []any{}

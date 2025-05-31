@@ -20,10 +20,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/bunker/auth"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/login"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
-	fbauth "github.com/Happy2018new/the-last-problem-of-the-humankind/fastbuilder/mv4"
 
 	"github.com/go-jose/go-jose/v3/jwt"
 	"github.com/google/uuid"
@@ -32,7 +32,7 @@ import (
 // PhoenixBuilder specific interface.
 // Author: LNSSPsd, Liliya233, Happy2018new
 type Authenticator interface {
-	GetAccess(ctx context.Context, publicKey []byte) (fbauth.AuthResponse, error)
+	GetAccess(ctx context.Context, publicKey []byte) (auth.AuthResponse, error)
 }
 
 // Dialer allows specifying specific settings for connection to a Minecraft server.
@@ -115,7 +115,7 @@ Dial dials a Minecraft connection to the address passed over the network passed.
 A zero value of a Dialer struct is used to initiate the connection. A custom Dialer may be used to specify
 additional behaviour.
 */
-func Dial(network string) (*Conn, fbauth.AuthResponse, error) {
+func Dial(network string) (*Conn, auth.AuthResponse, error) {
 	// func DialTimeout(network string, timeout time.Duration) (*Conn, error) {
 	var d Dialer
 	return d.Dial(network)
@@ -128,7 +128,7 @@ func Dial(network string) (*Conn, fbauth.AuthResponse, error) {
 // typically "raknet". A Conn is returned which may be used to receive packets from and send packets to.
 // If a connection is not established before the timeout ends, DialTimeout returns an error.
 // DialTimeout uses a zero value of Dialer to initiate the connection.
-func DialTimeout(network string, timeout time.Duration) (*Conn, fbauth.AuthResponse, error) {
+func DialTimeout(network string, timeout time.Duration) (*Conn, auth.AuthResponse, error) {
 	// func DialTimeout(network string, timeout time.Duration) (*Conn, error) {
 	var d Dialer
 	return d.DialTimeout(network, timeout)
@@ -141,7 +141,7 @@ func DialTimeout(network string, timeout time.Duration) (*Conn, fbauth.AuthRespo
 // typically "raknet". A Conn is returned which may be used to receive packets from and send packets to.
 // If a connection is not established before the context passed is cancelled, DialContext returns an error.
 // DialContext uses a zero value of Dialer to initiate the connection.
-func DialContext(ctx context.Context, network string) (*Conn, fbauth.AuthResponse, error) {
+func DialContext(ctx context.Context, network string) (*Conn, auth.AuthResponse, error) {
 	// func DialContext(ctx context.Context, network string) (*Conn, error) {
 	var d Dialer
 	return d.DialContext(ctx, network)
@@ -152,7 +152,7 @@ func DialContext(ctx context.Context, network string) (*Conn, fbauth.AuthRespons
 //
 // Dial dials a Minecraft connection to the address passed over the network passed. The network is typically
 // "raknet". A Conn is returned which may be used to receive packets from and send packets to.
-func (d Dialer) Dial(network string) (*Conn, fbauth.AuthResponse, error) {
+func (d Dialer) Dial(network string) (*Conn, auth.AuthResponse, error) {
 	// func (d Dialer) Dial(network string) (*Conn, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
@@ -165,7 +165,7 @@ func (d Dialer) Dial(network string) (*Conn, fbauth.AuthResponse, error) {
 // DialTimeout dials a Minecraft connection to the address passed over the network passed. The network is
 // typically "raknet". A Conn is returned which may be used to receive packets from and send packets to.
 // If a connection is not established before the timeout ends, DialTimeout returns an error.
-func (d Dialer) DialTimeout(network string, timeout time.Duration) (*Conn, fbauth.AuthResponse, error) {
+func (d Dialer) DialTimeout(network string, timeout time.Duration) (*Conn, auth.AuthResponse, error) {
 	// func (d Dialer) DialTimeout(network string, timeout time.Duration) (*Conn, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
@@ -178,13 +178,13 @@ func (d Dialer) DialTimeout(network string, timeout time.Duration) (*Conn, fbaut
 // DialContext dials a Minecraft connection to the address passed over the network passed. The network is
 // typically "raknet". A Conn is returned which may be used to receive packets from and send packets to.
 // If a connection is not established before the context passed is cancelled, DialContext returns an error.
-func (d Dialer) DialContext(ctx context.Context, network string) (conn *Conn, authResponse fbauth.AuthResponse, err error) {
+func (d Dialer) DialContext(ctx context.Context, network string) (conn *Conn, authResponse auth.AuthResponse, err error) {
 	key, _ := ecdsa.GenerateKey(elliptic.P384(), cryptoRand.Reader)
 	armoured_key, _ := x509.MarshalPKIXPublicKey(&key.PublicKey)
 
 	authResponse, err = d.Authenticator.GetAccess(ctx, armoured_key)
 	if err != nil {
-		return nil, fbauth.AuthResponse{}, err
+		return nil, auth.AuthResponse{}, err
 	}
 
 	if d.ErrorLog == nil {
@@ -199,7 +199,7 @@ func (d Dialer) DialContext(ctx context.Context, network string) (conn *Conn, au
 
 	n, ok := networkByID(network)
 	if !ok {
-		return nil, fbauth.AuthResponse{}, fmt.Errorf("listen: no network under id: %v", network)
+		return nil, auth.AuthResponse{}, fmt.Errorf("listen: no network under id: %v", network)
 	}
 
 	/*
@@ -215,7 +215,7 @@ func (d Dialer) DialContext(ctx context.Context, network string) (conn *Conn, au
 	var netConn net.Conn
 	netConn, err = n.DialContext(ctx, authResponse.RentalServerIP)
 	if err != nil {
-		return nil, fbauth.AuthResponse{}, err
+		return nil, auth.AuthResponse{}, err
 	}
 
 	conn = newConn(netConn, key, d.ErrorLog, d.Protocol, d.FlushRate, false)
@@ -250,28 +250,28 @@ func (d Dialer) DialContext(ctx context.Context, network string) (conn *Conn, au
 
 	conn.expect(packet.IDNetworkSettings, packet.IDPlayStatus)
 	if err := conn.WritePacket(&packet.RequestNetworkSettings{ClientProtocol: d.Protocol.ID()}); err != nil {
-		return nil, fbauth.AuthResponse{}, err
+		return nil, auth.AuthResponse{}, err
 	}
 	_ = conn.Flush()
 
 	select {
 	case <-conn.close:
-		return nil, fbauth.AuthResponse{}, conn.closeErr("dial")
+		return nil, auth.AuthResponse{}, conn.closeErr("dial")
 	case <-ctx.Done():
-		return nil, fbauth.AuthResponse{}, conn.wrap(ctx.Err(), "dial")
+		return nil, auth.AuthResponse{}, conn.wrap(ctx.Err(), "dial")
 	case <-l:
 		// We've received our network settings, so we can now send our login request.
 		conn.expect(packet.IDServerToClientHandshake, packet.IDPlayStatus)
 		if err := conn.WritePacket(&packet.Login{ConnectionRequest: request, ClientProtocol: d.Protocol.ID()}); err != nil {
-			return nil, fbauth.AuthResponse{}, err
+			return nil, auth.AuthResponse{}, err
 		}
 		_ = conn.Flush()
 
 		select {
 		case <-conn.close:
-			return nil, fbauth.AuthResponse{}, conn.closeErr("dial")
+			return nil, auth.AuthResponse{}, conn.closeErr("dial")
 		case <-ctx.Done():
-			return nil, fbauth.AuthResponse{}, conn.wrap(ctx.Err(), "dial")
+			return nil, auth.AuthResponse{}, conn.wrap(ctx.Err(), "dial")
 		case <-c:
 			// We've connected successfully. We return the connection and no error.
 			return conn, authResponse, nil
@@ -353,7 +353,7 @@ func defaultClientData(
 	// PhoenixBuilder specific changes.
 	// Author: Liliya233, Happy2018new
 	d *login.ClientData,
-	authResponse fbauth.AuthResponse,
+	authResponse auth.AuthResponse,
 	// address, username string, d *login.ClientData,
 ) {
 	mathRand.Seed(time.Now().Unix())

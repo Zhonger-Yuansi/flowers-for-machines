@@ -248,8 +248,10 @@ func (b *BotClick) PlaceBlock(
 // 它通过方块点击的方式，直接在 pos 处创建朝向为 facing
 // 的方块。其中 hotBarSlot 指代要放置的方块在快捷栏的位置。
 //
-// clickPos 指示为了生存目标方块而使用的基方块，它与 pos
-// 是不等价的。您可以根据实际情况决定如何处理该方块。
+// clickPos 指示为了生成目标方块而使用的基方块，它与 pos 是不等价的，
+// 但可以确保 clickPos 和 pos 是相邻的。
+// 这意味着您有义务确保 pos 的相邻方块没有被使用，否则它们可能被替换。
+// 最后，当您使用完 pos 后的方块后，您可以清除 clickPos 处的方块
 //
 // 值得注意的是，facing 必须是 0 到 5 之间的整数，
 // 否则调用 PlaceBlockHighLevel 将返回错误。

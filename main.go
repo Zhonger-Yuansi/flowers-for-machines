@@ -111,5 +111,22 @@ func main() {
 		fmt.Println(api.BotClick().PickBlock([3]int32{27, -60, -79}, 0, true))
 	}
 
+	{
+		err = api.Commands().SendSettingsCommand("replaceitem entity @s slot.hotbar 1 banner 1 10", true)
+		fmt.Println(err)
+
+		err = api.BotClick().ChangeSelectedHotbarSlot(1)
+		fmt.Println(err)
+		err = api.Commands().AwaitChangesGeneral()
+		fmt.Println(err)
+
+		_, err = api.BotClick().PlaceBlockHighLevel(
+			[3]int32{24, -57, -75},
+			1,
+			2,
+		)
+		fmt.Println(err)
+	}
+
 	api.Commands().SendChat("aaaa")
 }

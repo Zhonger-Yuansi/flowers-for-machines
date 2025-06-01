@@ -17,6 +17,7 @@ type GameInterface struct {
 	commands        *Commands
 	structureBackup *StructureBackup
 	querytarget     *Querytarget
+	setblock        *SetBlock
 	botClick        *BotClick
 }
 
@@ -36,7 +37,8 @@ func NewGameInterface(resources *resources_control.Resources) *GameInterface {
 	result.commands = NewCommands(result.wrapper)
 	result.structureBackup = NewStructureBackup(result.commands)
 	result.querytarget = NewQuerytarget(result.commands)
-	result.botClick = NewBotClick(result.wrapper, result.commands)
+	result.setblock = NewSetBlock(result.commands)
+	result.botClick = NewBotClick(result.wrapper, result.commands, result.setblock)
 
 	return result
 }
@@ -69,6 +71,11 @@ func (g *GameInterface) StructureBackup() *StructureBackup {
 // Querytarget 返回机器人在 querytarget 命令上的相关实现
 func (g *GameInterface) Querytarget() *Querytarget {
 	return g.querytarget
+}
+
+// SetBlock 返回机器人在方块放置 (MC 命令的方式) 上的相关实现
+func (g *GameInterface) SetBlock() *SetBlock {
+	return g.setblock
 }
 
 // BotClick 返回机器人在点击操作上的相关实现。

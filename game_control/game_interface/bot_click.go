@@ -15,9 +15,17 @@ const (
 	// 描述 Pick Block 请求的最长截止时间。
 	// 这与 packet.BlockPickRequest 相关。
 	// 当超过此时间后，将视为该请求未被接受
-	BlockPickRequestDeadLine = time.Second
+	DefaultTimeoutBlockPick = time.Second
 	// 描述 Pick Block 失败后要重试的最大次数
-	BlockPickRequestReTryMaximumCounts = 3
+	MaxRetryBlockPick = 3
+	// 用作放置方块时的依赖性方块。
+	//
+	// 部分方块需要客户端以点击方块的形式来放置，
+	// 例如告示牌和不同朝向的潜影盒。
+	// 这里则选择了绿宝石块作为被点击的方块。
+	//
+	// SuperScript 最喜欢绿宝石块了！
+	PlaceBlockBase string = "emerald_block"
 )
 
 // UseItemOnBlocks 是机器人在使用手
@@ -41,16 +49,17 @@ type UseItemOnBlocks struct {
 type BotClick struct {
 	r *ResourcesWrapper
 	c *Commands
+	s *SetBlock
 }
 
-// NewBotClick 基于 wrapper 和 commands 创建并返回一个新的 BotClick
-func NewBotClick(wrapper *ResourcesWrapper, commands *Commands) *BotClick {
-	return &BotClick{r: wrapper, c: commands}
+// NewBotClick 基于 wrapper、commands 和 setblock 创建并返回一个新的 BotClick
+func NewBotClick(wrapper *ResourcesWrapper, commands *Commands, setblock *SetBlock) *BotClick {
+	return &BotClick{r: wrapper, c: commands, s: setblock}
 }
 
 // 切换客户端的手持物品栏为 hotBarSlotID 。
 // 若提供的 hotBarSlotID 大于 8 ，则会重定向为 0
-func (b *BotClick) ChangeSelectedHotbarSlot(hotbarSlotID uint8) error {
+func (b *BotClick) ChangeSelectedHotbarSlot(hotbarSlotID resources_control.SlotID) error {
 	if hotbarSlotID > 8 {
 		hotbarSlotID = 0
 	}
@@ -234,6 +243,85 @@ func (b *BotClick) PlaceBlock(
 	return nil
 }
 
+// PlaceBlockHighLevel 是对 PlaceBlock 的进一步封装。
+//
+// 它通过方块点击的方式，直接在 pos 处创建朝向为 facing
+// 的方块。其中 hotBarSlot 指代要放置的方块在快捷栏的位置。
+//
+// clickPos 指示为了生存目标方块而使用的基方块，它与 pos
+// 是不等价的。您可以根据实际情况决定如何处理该方块。
+//
+// 值得注意的是，facing 必须是 0 到 5 之间的整数，
+// 否则调用 PlaceBlockHighLevel 将返回错误。
+//
+// 最后，您希望要创建的方块可以是潜影盒，亦可以是旗帜
+func (b *BotClick) PlaceBlockHighLevel(
+	pos protocol.BlockPos,
+	hotBarSlot resources_control.SlotID,
+	facing uint8,
+) (clickPos protocol.BlockPos, err error) {
+	if facing > 5 {
+		return clickPos, fmt.Errorf("PlaceBlockHighLevel: Given facing (%d) is not meet 0 <= facing <= 5", facing)
+	}
+
+	clickPos = pos
+	switch facing {
+	case 0:
+		clickPos[1] = clickPos[1] + 1
+	case 1:
+		clickPos[1] = clickPos[1] - 1
+	case 2:
+		clickPos[2] = clickPos[2] + 1
+	case 3:
+		clickPos[2] = clickPos[2] - 1
+	case 4:
+		clickPos[0] = clickPos[0] + 1
+	case 5:
+		clickPos[0] = clickPos[0] - 1
+	}
+
+	err = b.s.SetBlockAsync(pos, "air", "[]")
+	if err != nil {
+		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
+	}
+	err = b.s.SetBlockAsync(clickPos, PlaceBlockBase, "[]")
+	if err != nil {
+		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
+	}
+	err = b.c.SendSettingsCommand(fmt.Sprintf("tp %d %d %d", pos[0], pos[1], pos[2]), true)
+	if err != nil {
+		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
+	}
+	err = b.ChangeSelectedHotbarSlot(hotBarSlot)
+	if err != nil {
+		return clickPos, fmt.Errorf("PlaceBlockWithFacing: %v", err)
+	}
+
+	err = b.c.AwaitChangesGeneral()
+	if err != nil {
+		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
+	}
+
+	err = b.PlaceBlock(
+		UseItemOnBlocks{
+			HotbarSlotID: hotBarSlot,
+			BlockPos:     clickPos,
+			BlockName:    PlaceBlockBase,
+			BlockStates:  map[string]any{},
+		},
+		int32(facing),
+	)
+	if err != nil {
+		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
+	}
+	err = b.c.AwaitChangesGeneral()
+	if err != nil {
+		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
+	}
+
+	return clickPos, nil
+}
+
 // PickBlock 获取 pos 处的方块到 expectedHotbar 处的物品栏。
 // assignNBTData 指示是否需要携带该方块的 NBT 数据。
 //
@@ -251,7 +339,7 @@ func (b *BotClick) PickBlock(
 	channel := make(chan struct{})
 	packetListener := b.r.PacketListener()
 
-	for range BlockPickRequestReTryMaximumCounts {
+	for range MaxRetryBlockPick {
 		uniqueID := packetListener.ListenPacket(
 			[]uint32{packet.IDPlayerHotBar},
 			func(p packet.Packet) bool {
@@ -268,7 +356,7 @@ func (b *BotClick) PickBlock(
 			HotBarSlot:  byte(expectedHotbar),
 		})
 
-		timer := time.NewTimer(BlockPickRequestDeadLine)
+		timer := time.NewTimer(DefaultTimeoutBlockPick)
 		defer timer.Stop()
 		select {
 		case <-timer.C:

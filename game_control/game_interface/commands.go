@@ -12,8 +12,12 @@ import (
 
 // ------------------------- Define -------------------------
 
-// DefaultTimeoutCommandRequest 是默认的指令超时设置
-const DefaultTimeoutCommandRequest = time.Second * 5
+const (
+	// DefaultTimeoutCommandRequest 是默认的指令超时设置
+	DefaultTimeoutCommandRequest = time.Second * 5
+	// DefaultAwaitChangesCount 是 Await Chanegs 需要等待的游戏刻数
+	DefaultAwaitChangesCount = 2
+)
 
 // Commands 是基于 ResourcesWrapper
 // 实现的 MC 指令操作器，例如发送命令
@@ -229,9 +233,11 @@ func (c *Commands) SendWSCommandWithResp(command string) (resp *packet.CommandOu
 // AwaitChangesGeneral 通过发送空指令以等待租赁服更改。
 // 它曾被广泛使用而难以替代，但此处出于语义兼容性而保留
 func (c *Commands) AwaitChangesGeneral() error {
-	_, err := c.SendWSCommandWithResp("")
-	if err != nil {
-		return fmt.Errorf("AwaitChangesGeneral: %v", err)
+	for range DefaultAwaitChangesCount {
+		_, err := c.SendWSCommandWithResp("")
+		if err != nil {
+			return fmt.Errorf("AwaitChangesGeneral: %v", err)
+		}
 	}
 	return nil
 }

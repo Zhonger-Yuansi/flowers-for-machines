@@ -234,9 +234,11 @@ func (b *BotClick) PlaceBlock(
 	return nil
 }
 
-// PickBlock 获取 pos 处的方块到物品栏。
-// 返回的布尔值代表请求是否成功。
-// 返回的 uint8 代表该方块最终生成在快捷栏的位置
+// PickBlock 获取 pos 处的方块到 expectedHotbar 处的物品栏。
+// assignNBTData 指示是否需要携带该方块的 NBT 数据。
+//
+// 返回的 success 指示操作是否成功；
+// resultHotbar 指示物品最终所在的物品栏位置
 func (b *BotClick) PickBlock(
 	pos protocol.BlockPos,
 	expectedHotbar resources_control.SlotID,

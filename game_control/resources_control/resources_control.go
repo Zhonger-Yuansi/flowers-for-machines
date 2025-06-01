@@ -5,8 +5,8 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
 )
 
-// BotBasicInfo 记载机器人的基本信息
-type BotBasicInfo struct {
+// BotInfo 记载机器人的基本信息
+type BotInfo struct {
 	BotName         string // 机器人名称
 	XUID            string // 机器人 XUID
 	EntityUniqueID  int64  // 机器人唯一 ID
@@ -66,9 +66,9 @@ func (r *Resources) listenPacket() {
 	}
 }
 
-// ClientBasicInfo 返回机器人的基本信息
-func (r *Resources) ClientBasicInfo() BotBasicInfo {
-	return BotBasicInfo{
+// BotInfo 返回机器人的基本信息
+func (r *Resources) BotInfo() BotInfo {
+	return BotInfo{
 		BotName:         r.client.Conn().IdentityData().DisplayName,
 		XUID:            r.client.Conn().IdentityData().XUID,
 		EntityUniqueID:  r.client.Conn().GameData().EntityUniqueID,
@@ -76,9 +76,9 @@ func (r *Resources) ClientBasicInfo() BotBasicInfo {
 	}
 }
 
-// WritePacket 返回向租赁服发送数据包的函数
-func (r *Resources) WritePacket() func(p packet.Packet) error {
-	return r.client.Conn().WritePacket
+// WritePacket 用于向租赁服发送数据包 p
+func (r *Resources) WritePacket(p packet.Packet) error {
+	return r.client.Conn().WritePacket(p)
 }
 
 // Commands 返回命令请求的相关资源

@@ -9,8 +9,9 @@ import (
 	"github.com/google/uuid"
 )
 
-// Commands 是基于 GameInterface 实现的 MC
-// 指令操作器，例如发送命令并得到其响应体。
+// Commands 是基于 ResourcesWrapper
+// 实现的 MC 指令操作器，例如发送命令
+// 并得到其响应体。
 //
 // 另外，出于对旧时代的尊重和可能的兼容性，
 // 一些遗留实现也被同时迁移到此处

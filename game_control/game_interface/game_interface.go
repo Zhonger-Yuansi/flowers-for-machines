@@ -72,8 +72,13 @@ func (g *GameInterface) Querytarget() *Querytarget {
 }
 
 // BotClick 返回机器人在点击操作上的相关实现。
+//
 // 由于点击操作与机器人手持物品强相关，
-// BotClick 也集成了切换手持物品的实现
+// BotClick 也集成了切换手持物品的实现。
+//
+// 另外，考虑到 Pick Block 操作的语义也与
+// 点击方块 有关，因此其也被集成在此，尽管
+// 它使用了完全不同的数据包
 func (g *GameInterface) BotClick() *BotClick {
 	return g.botClick
 }

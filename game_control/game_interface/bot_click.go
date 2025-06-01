@@ -20,8 +20,8 @@ const (
 	BlockPickRequestReTryMaximumCounts = 3
 )
 
-// UseItemOnBlocks 是机器人在使
-// 用手持物品对方块进行操作时的通用结构体
+// UseItemOnBlocks 是机器人在使用手
+// 持物品对方块进行操作时的通用结构体
 type UseItemOnBlocks struct {
 	HotbarSlotID resources_control.SlotID // 指代机器人当前已选择的快捷栏编号
 	BlockPos     protocol.BlockPos        // 指代被操作方块的位置
@@ -33,7 +33,11 @@ type UseItemOnBlocks struct {
 // 和 Commands 实现的已简化的点击实现。
 //
 // 由于点击操作与机器人手持物品强相关，
-// 本处也集成了切换手持物品的实现
+// 本处也集成了切换手持物品的实现。
+//
+// 另外，考虑到 Pick Block 操作的语义
+// 也与 点击方块 有关，因此其也被集成在
+// 此，尽管它使用了完全不同的数据包
 type BotClick struct {
 	r *ResourcesWrapper
 	c *Commands

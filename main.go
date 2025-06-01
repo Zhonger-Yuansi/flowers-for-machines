@@ -43,5 +43,11 @@ func main() {
 	err = api.StructureBackup().DeleteStructure(uniqueID)
 	fmt.Println(err)
 
+	resp, err = api.Commands().SendWSCommandWithResp("querytarget @s")
+	fmt.Println(resp, err)
+
+	querytargetResult, err := api.Querytarget().DoQuerytarget("@s")
+	fmt.Println(querytargetResult, err)
+
 	api.Commands().SendChat("aaaa")
 }

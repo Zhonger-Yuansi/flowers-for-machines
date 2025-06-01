@@ -16,6 +16,7 @@ type GameInterface struct {
 	wrapper         *ResourcesWrapper
 	commands        *Commands
 	structureBackup *StructureBackup
+	querytarget     *Querytarget
 }
 
 // NewResourcesWrapper 基于 resources 创建一个新的游戏交互器
@@ -33,6 +34,7 @@ func NewGameInterface(resources *resources_control.Resources) *GameInterface {
 	result.wrapper = NewResourcesWrapper(resources)
 	result.commands = NewCommands(result.wrapper)
 	result.structureBackup = NewStructureBackup(result.commands)
+	result.querytarget = NewQuerytarget(result.commands)
 
 	return result
 }
@@ -50,4 +52,9 @@ func (g *GameInterface) Commands() *Commands {
 // StructureBackup 返回机器人在结构备份和恢复上的相关实现
 func (g *GameInterface) StructureBackup() *StructureBackup {
 	return g.structureBackup
+}
+
+// Querytarget 返回机器人在 querytarget 命令上的相关实现
+func (g *GameInterface) Querytarget() *Querytarget {
+	return g.querytarget
 }

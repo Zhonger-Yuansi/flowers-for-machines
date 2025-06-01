@@ -66,18 +66,16 @@ func (p *PacketListener) onPacket(pk packet.Packet) {
 			}
 		}
 
-		if !haveAtLeastOneCancel {
-			return
-		}
-
-		newCallback := make([]func(p packet.Packet) bool, 0)
-		for index, callbacks := range p.anyCallbacks {
-			if callbackCancel[index] {
-				continue
+		if haveAtLeastOneCancel {
+			newCallback := make([]func(p packet.Packet) bool, 0)
+			for index, callbacks := range p.anyCallbacks {
+				if callbackCancel[index] {
+					continue
+				}
+				newCallback = append(newCallback, callbacks)
 			}
-			newCallback = append(newCallback, callbacks)
+			p.anyCallbacks = newCallback
 		}
-		p.anyCallbacks = newCallback
 	}
 
 	// Specific packet
@@ -97,17 +95,21 @@ func (p *PacketListener) onPacket(pk packet.Packet) {
 			}
 		}
 
-		if !haveAtLeastOneCancel {
-			return
-		}
+		if haveAtLeastOneCancel {
+			newCallback := make([]func(p packet.Packet) bool, 0)
 
-		newCallback := make([]func(p packet.Packet) bool, 0)
-		for index, cb := range cbs {
-			if callbackCancel[index] {
-				continue
+			for index, cb := range cbs {
+				if callbackCancel[index] {
+					continue
+				}
+				newCallback = append(newCallback, cb)
 			}
-			newCallback = append(newCallback, cb)
+
+			if len(newCallback) == 0 {
+				delete(p.callbacks, packetID)
+			} else {
+				p.callbacks[packetID] = newCallback
+			}
 		}
-		p.callbacks[packetID] = newCallback
 	}
 }

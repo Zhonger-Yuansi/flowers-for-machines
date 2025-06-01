@@ -17,6 +17,7 @@ type GameInterface struct {
 	commands        *Commands
 	structureBackup *StructureBackup
 	querytarget     *Querytarget
+	botClick        *BotClick
 }
 
 // NewResourcesWrapper 基于 resources 创建一个新的游戏交互器
@@ -35,6 +36,7 @@ func NewGameInterface(resources *resources_control.Resources) *GameInterface {
 	result.commands = NewCommands(result.wrapper)
 	result.structureBackup = NewStructureBackup(result.commands)
 	result.querytarget = NewQuerytarget(result.commands)
+	result.botClick = NewBotClick(result.wrapper, result.commands)
 
 	return result
 }
@@ -42,6 +44,16 @@ func NewGameInterface(resources *resources_control.Resources) *GameInterface {
 // GetBotInfo 返回机器人的基本信息
 func (g *GameInterface) GetBotInfo() resources_control.BotInfo {
 	return g.wrapper.BotInfo
+}
+
+// PacketListener 返回一个可撤销的数据包监听实现
+func (g *GameInterface) PacketListener() *resources_control.PacketListener {
+	return g.wrapper.PacketListener()
+}
+
+// Resources 返回底层的资源管理器
+func (g *GameInterface) Resources() *resources_control.Resources {
+	return g.wrapper.Resources
 }
 
 // Commands 返回机器人在 MC 命令在收发上的相关实现
@@ -57,4 +69,11 @@ func (g *GameInterface) StructureBackup() *StructureBackup {
 // Querytarget 返回机器人在 querytarget 命令上的相关实现
 func (g *GameInterface) Querytarget() *Querytarget {
 	return g.querytarget
+}
+
+// BotClick 返回机器人在点击操作上的相关实现。
+// 由于点击操作与机器人手持物品强相关，
+// BotClick 也集成了切换手持物品的实现
+func (g *GameInterface) BotClick() *BotClick {
+	return g.botClick
 }

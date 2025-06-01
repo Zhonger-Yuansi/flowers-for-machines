@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/client"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
 )
@@ -43,11 +44,61 @@ func main() {
 	err = api.StructureBackup().DeleteStructure(uniqueID)
 	fmt.Println(err)
 
-	resp, err = api.Commands().SendWSCommandWithResp("querytarget @s")
-	fmt.Println(resp, err)
-
 	querytargetResult, err := api.Querytarget().DoQuerytarget("@s")
 	fmt.Println(querytargetResult, err)
+
+	err = api.Commands().SendSettingsCommand(`setblock 0 0 0 anvil ["minecraft:cardinal_direction"="north","damage"="undamaged"]`, true)
+	fmt.Println(err)
+	err = api.Commands().AwaitChangesGeneral()
+	fmt.Println(err)
+
+	{
+		channel := make(chan struct{})
+		api.Resources().PacketListener().ListenPacket(
+			[]uint32{packet.IDContainerOpen},
+			func(p packet.Packet) bool {
+				close(channel)
+				fmt.Println("Container opened")
+				return true
+			},
+		)
+
+		err = api.BotClick().ChangeSelectedHotbarSlot(0)
+		fmt.Println(err)
+		err = api.BotClick().ClickBlock(game_interface.UseItemOnBlocks{
+			HotbarSlotID: 0,
+			BlockPos:     [3]int32{0, 0, 0},
+			BlockName:    "anvil",
+			BlockStates: map[string]any{
+				"minecraft:cardinal_direction": "north",
+				"damage":                       "undamaged",
+			},
+		})
+		fmt.Println(err)
+
+		<-channel
+		fmt.Println(api.Resources().Container().ContainerData())
+	}
+
+	{
+		channel := make(chan struct{})
+		api.Resources().Container().SetContainerCloseCallback(
+			func(isServerSide bool) {
+				close(channel)
+				fmt.Println("Container closed")
+			},
+		)
+
+		containerData, existed := api.Resources().Container().ContainerData()
+		fmt.Println(existed)
+		err = api.Resources().WritePacket(&packet.ContainerClose{
+			WindowID: containerData.WindowID,
+		})
+		fmt.Println(err)
+
+		<-channel
+		fmt.Println(api.Resources().Container().ContainerData())
+	}
 
 	api.Commands().SendChat("aaaa")
 }

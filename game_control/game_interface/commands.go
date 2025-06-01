@@ -3,11 +3,17 @@ package game_interface
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
 	"github.com/google/uuid"
 )
+
+// ------------------------- Define -------------------------
+
+// DefaultTimeoutCommandRequest 是默认的指令超时设置
+const DefaultTimeoutCommandRequest = time.Second * 5
 
 // Commands 是基于 ResourcesWrapper
 // 实现的 MC 指令操作器，例如发送命令
@@ -18,6 +24,8 @@ import (
 type Commands struct {
 	api *ResourcesWrapper
 }
+
+// ------------------------- Basic function -------------------------
 
 // NewCommands 基于 api 创建并返回一个新的 Commands
 func NewCommands(api *ResourcesWrapper) *Commands {
@@ -39,6 +47,8 @@ func packCommandRequest(command string, origin uint32, requestID uuid.UUID) *pac
 		Version:   0x24,
 	}
 }
+
+// ------------------------- Send settings command -------------------------
 
 // 向租赁服发送 Sizukana 命令且无视返回值。
 // 当 dimensional 为真时，
@@ -64,6 +74,8 @@ func (c *Commands) SendSettingsCommand(command string, dimensional bool) error {
 
 	return nil
 }
+
+// ------------------------- Send command with no response -------------------------
 
 // sendCommand 以 origin 的身份向租赁服发送命令 command 并无视返回值
 func (c *Commands) sendCommand(command string, origin uint32) error {
@@ -96,8 +108,15 @@ func (c *Commands) SendWSCommand(command string) error {
 	return nil
 }
 
-// sendCommandWithResp 以 origin 的身份向租赁服发送命令 command 并获取响应体
-func (c *Commands) sendCommandWithResp(command string, origin uint32) (resp *packet.CommandOutput, err error) {
+// ------------------------- Send command with response and timeout -------------------------
+
+// sendCommandWithResp 以 origin 的身份向租赁服发送命令 command 并获取响应体。
+// timeout 指示超时处理；如果为负数则不考虑超时因素；如果为 0 则使用默认超时设置
+func (c *Commands) sendCommandWithResp(command string, origin uint32, timeout time.Duration) (
+	resp *packet.CommandOutput,
+	isTimeOut bool,
+	err error,
+) {
 	api := c.api
 	requestID := uuid.New()
 	channel := make(chan struct{})
@@ -116,30 +135,93 @@ func (c *Commands) sendCommandWithResp(command string, origin uint32) (resp *pac
 		),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("sendCommandWithResp: %v", err)
+		return nil, false, fmt.Errorf("sendCommandWithResp: %v", err)
+	}
+
+	if timeout == 0 {
+		timeout = DefaultTimeoutCommandRequest
+	}
+
+	if timeout > 0 {
+		timer := time.NewTimer(timeout)
+		defer timer.Stop()
+		select {
+		case <-channel:
+		case <-timer.C:
+			return nil, true, fmt.Errorf(
+				"sendCommandWithResp: Command request %#v (origin = %d) is time out (timeout = %v seconds)",
+				command, origin, float64(timeout)/float64(time.Second),
+			)
+		}
 	}
 
 	<-channel
+	return resp, false, nil
+}
+
+// SendPlayerCommandWithTimeout 以玩家的身份向租赁服发送命令 command 并获取响应体。
+// timeout 指示当请求发出后，若时间超过 timeout 是否应当返回错误。
+// 如果 timeout 为负数或 0，则使用默认超时设置
+func (c *Commands) SendPlayerCommandWithTimeout(command string, timeout time.Duration) (
+	resp *packet.CommandOutput,
+	isTimeOut bool,
+	err error,
+) {
+	resp, isTimeOut, err = c.sendCommandWithResp(command, protocol.CommandOriginPlayer, max(0, timeout))
+	if err != nil {
+		return nil, isTimeOut, fmt.Errorf("SendPlayerCommandWithTimeout: %v", err)
+	}
 	return
 }
 
-// SendPlayerCommandWithResp 以玩家的身份向租赁服发送命令 command 并获取响应体
+// SendWSCommandWithTimeout 以 Websocket 的身份向租赁服发送命令 command 并获取响应体。
+// timeout 指示当请求发出后，若时间超过 timeout 是否应当返回错误。
+// 如果 timeout 为负数或 0，则使用默认超时设置
+func (c *Commands) SendWSCommandWithTimeout(command string, timeout time.Duration) (
+	resp *packet.CommandOutput,
+	isTimeOut bool,
+	err error,
+) {
+	resp, isTimeOut, err = c.sendCommandWithResp(command, protocol.CommandOriginAutomationPlayer, max(0, timeout))
+	if err != nil {
+		return nil, isTimeOut, fmt.Errorf("SendWSCommandWithTimeout: %v", err)
+	}
+	return
+}
+
+// ------------------------- Send command with response and no timeout -------------------------
+
+// sendCommandWithRespNoTimeout 以 origin 的身份向租赁服发送命令 command 并获取响应体。
+// 区别于 sendCommandWithResp，此函数不考虑超时因素
+func (c *Commands) sendCommandWithRespNoTimeout(command string, origin uint32) (resp *packet.CommandOutput, err error) {
+	resp, _, err = c.sendCommandWithResp(command, origin, -1)
+	if err != nil {
+		return nil, fmt.Errorf("sendCommandWithRespNoTimeout: %v", err)
+	}
+	return
+}
+
+// SendPlayerCommandWithResp 以玩家的身份向租赁服发送命令 command 并获取响应体。
+// 值得说明的是，此过程中不考虑超时因素
 func (c *Commands) SendPlayerCommandWithResp(command string) (resp *packet.CommandOutput, err error) {
-	resp, err = c.sendCommandWithResp(command, protocol.CommandOriginPlayer)
+	resp, err = c.sendCommandWithRespNoTimeout(command, protocol.CommandOriginPlayer)
 	if err != nil {
 		return nil, fmt.Errorf("SendPlayerCommandWithResp: %v", err)
 	}
 	return
 }
 
-// SendWSCommandWithResp 以 Websocket 的身份向租赁服发送命令 command 并获取响应体
+// SendWSCommandWithResp 以 Websocket 的身份向租赁服发送命令 command 并获取响应体。
+// 值得说明的是，此过程中不考虑超时因素
 func (c *Commands) SendWSCommandWithResp(command string) (resp *packet.CommandOutput, err error) {
-	resp, err = c.sendCommandWithResp(command, protocol.CommandOriginAutomationPlayer)
+	resp, err = c.sendCommandWithRespNoTimeout(command, protocol.CommandOriginAutomationPlayer)
 	if err != nil {
 		return nil, fmt.Errorf("SendWSCommandWithResp: %v", err)
 	}
 	return
 }
+
+// ------------------------- Other legacy function -------------------------
 
 // AwaitChangesGeneral 通过发送空指令以等待租赁服更改。
 // 它曾被广泛使用而难以替代，但此处出于语义兼容性而保留
@@ -191,3 +273,5 @@ func (c *Commands) Title(message string) error {
 
 	return nil
 }
+
+// ------------------------- End -------------------------

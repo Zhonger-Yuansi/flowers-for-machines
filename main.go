@@ -32,5 +32,8 @@ func main() {
 	resp, err := api.Commands().SendWSCommandWithResp("say 123")
 	fmt.Println(resp, err)
 
+	resp, isTimeout, err := api.Commands().SendPlayerCommandWithTimeout("say 123", time.Second*5)
+	fmt.Println(resp, isTimeout, err)
+
 	api.Commands().SendChat("aaaa")
 }

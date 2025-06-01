@@ -25,6 +25,13 @@ func (c *CommandRequestCallback) SetCommandRequestCallback(
 	c.callback.Store(requestID, f)
 }
 
+// DeleteCommandRequestCallback 清除请求
+// ID 为 requestID 的命令请求的回调函数。
+// 此函数应当只在命令请求超时的时候被调用
+func (c *CommandRequestCallback) DeleteCommandRequestCallback(requestID uuid.UUID) {
+	c.callback.Delete(requestID)
+}
+
 // onCommandOutput ..
 func (c *CommandRequestCallback) onCommandOutput(p *packet.CommandOutput) {
 	cb, ok := c.callback.LoadAndDelete(p.CommandOrigin.UUID)

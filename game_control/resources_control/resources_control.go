@@ -2,6 +2,7 @@ package resources_control
 
 import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/client"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 	"github.com/google/uuid"
@@ -17,7 +18,7 @@ type Resources struct {
 	// inventory 持有机器人已经拥有或打开的库存
 	inventory Inventories
 	// inventoryCallback 存放所有物品更改的回调函数
-	inventoryCallback utils.SyncMap[SlotLocation, utils.MultipleCallback]
+	inventoryCallback utils.SyncMap[SlotLocation, utils.MultipleCallback[*protocol.ItemInstance]]
 
 	// itemStackMapping 存放每个物品堆栈操作请求中的 ItemStackResponseMapping
 	itemStackMapping utils.SyncMap[ItemStackRequestID, ItemStackResponseMapping]

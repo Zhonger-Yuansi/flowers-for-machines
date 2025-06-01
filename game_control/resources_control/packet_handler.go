@@ -49,7 +49,7 @@ func (r *Resources) handleInventoryContent(p *packet.InventoryContent) {
 		r.inventory.setItemStack(windowID, SlotID(key), &value)
 		callbacks, ok := r.inventoryCallback.LoadAndDelete(SlotLocation{WindowID: windowID, SlotID: SlotID(key)})
 		if ok {
-			callbacks.FinishAll()
+			callbacks.FinishAll(&value)
 		}
 	}
 }
@@ -66,7 +66,7 @@ func (r *Resources) handleInventoryTransaction(p *packet.InventoryTransaction) {
 
 		callbacks, ok := r.inventoryCallback.LoadAndDelete(SlotLocation{WindowID: windowID, SlotID: slotID})
 		if ok {
-			callbacks.FinishAll()
+			callbacks.FinishAll(&value.NewItem)
 		}
 	}
 }
@@ -77,7 +77,7 @@ func (r *Resources) handleInventorySlot(p *packet.InventorySlot) {
 	r.inventory.setItemStack(windowID, slotID, &p.NewItem)
 	callbacks, ok := r.inventoryCallback.LoadAndDelete(SlotLocation{WindowID: windowID, SlotID: slotID})
 	if ok {
-		callbacks.FinishAll()
+		callbacks.FinishAll(&p.NewItem)
 	}
 }
 

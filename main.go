@@ -30,19 +30,14 @@ func main() {
 	resources := resources_control.NewResourcesControl(c)
 	api := game_interface.NewGameInterface(resources)
 
+	err = api.Commands().SendPlayerCommand("tp 0 0 0")
+	fmt.Println(err)
+
 	resp, err := api.Commands().SendWSCommandWithResp("say 123")
 	fmt.Println(resp, err)
 
 	resp, isTimeout, err := api.Commands().SendPlayerCommandWithTimeout("say 123", time.Second*5)
 	fmt.Println(resp, isTimeout, err)
-
-	uniqueID, err := api.StructureBackup().BackupStructure([3]int32{0, 0, 0})
-	fmt.Println(uniqueID, err)
-
-	err = api.StructureBackup().RevertStructure(uniqueID, [3]int32{0, 1, 0})
-	fmt.Println(err)
-	err = api.StructureBackup().DeleteStructure(uniqueID)
-	fmt.Println(err)
 
 	querytargetResult, err := api.Querytarget().DoQuerytarget("@s")
 	fmt.Println(querytargetResult, err)
@@ -54,7 +49,7 @@ func main() {
 
 	{
 		channel := make(chan struct{})
-		api.Resources().PacketListener().ListenPacket(
+		_ = api.Resources().PacketListener().ListenPacket(
 			[]uint32{packet.IDContainerOpen},
 			func(p packet.Packet) bool {
 				close(channel)
@@ -98,6 +93,22 @@ func main() {
 
 		<-channel
 		fmt.Println(api.Resources().Container().ContainerData())
+	}
+
+	{
+		uniqueID, err := api.StructureBackup().BackupStructure([3]int32{0, 0, 0})
+		fmt.Println(uniqueID, err)
+
+		err = api.StructureBackup().RevertStructure(uniqueID, [3]int32{0, 1, 0})
+		fmt.Println(err)
+		err = api.StructureBackup().DeleteStructure(uniqueID)
+		fmt.Println(err)
+	}
+
+	{
+		_, err = api.Commands().SendPlayerCommandWithResp("tp 27 -60 -79")
+		fmt.Println(err)
+		fmt.Println(api.BotClick().PickBlock([3]int32{27, -60, -79}, 0, true))
 	}
 
 	api.Commands().SendChat("aaaa")

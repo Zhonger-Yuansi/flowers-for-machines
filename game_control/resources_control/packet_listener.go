@@ -4,22 +4,29 @@ import (
 	"sync"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
+	"github.com/google/uuid"
 )
+
+// singleListener 是单个数据包的监听器
+type singleListener struct {
+	uniqueID string                     // 该监听器的唯一标识符
+	callback func(p packet.Packet) bool // 该监听器的回调函数
+}
 
 // PacketListener 实现了一个可撤销监听的，
 // 相对基础的数据包监听器
 type PacketListener struct {
-	mu           *sync.Mutex
-	anyCallbacks []func(p packet.Packet) bool
-	callbacks    map[uint32][]func(p packet.Packet) bool
+	mu                      *sync.Mutex
+	anyPacketListeners      []singleListener
+	specificPacketListeners map[uint32][]singleListener
 }
 
 // NewPacketListener 创建并返回一个新的 NewPacketListener
 func NewPacketListener() *PacketListener {
 	return &PacketListener{
-		mu:           new(sync.Mutex),
-		anyCallbacks: nil,
-		callbacks:    make(map[uint32][]func(p packet.Packet) bool),
+		mu:                      new(sync.Mutex),
+		anyPacketListeners:      nil,
+		specificPacketListeners: make(map[uint32][]singleListener),
 	}
 }
 
@@ -27,26 +34,103 @@ func NewPacketListener() *PacketListener {
 // 并在收到这些数据包后执行回调函数 callback。
 //
 // 如果 callback 返回真，则此监听器将会被撤销，
-// 否则将会继续保留。
+// 否则将会继续保留；
+// 如果 packetID 置空，则监听所有数据包。
 //
-// 如果 packetID 置空，则监听所有数据包
+// 返回的 uniqueID 用于标识该监听器，以便于后续
+// 调用 DestroyListener 以便于手动销毁监听器
 func (p *PacketListener) ListenPacket(
 	packetID []uint32,
 	callback func(p packet.Packet) bool,
-) {
+) (uniqueID string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
+	uniqueID = uuid.New().String()
+	listener := singleListener{
+		uniqueID: uniqueID,
+		callback: callback,
+	}
+
 	if len(packetID) == 0 {
-		p.anyCallbacks = append(p.anyCallbacks, callback)
+		p.anyPacketListeners = append(p.anyPacketListeners, listener)
 		return
 	}
 
 	for _, pkID := range packetID {
-		if p.callbacks[pkID] == nil {
-			p.callbacks[pkID] = make([]func(p packet.Packet) bool, 0)
+		if p.specificPacketListeners[pkID] == nil {
+			p.specificPacketListeners[pkID] = make([]singleListener, 0)
 		}
-		p.callbacks[pkID] = append(p.callbacks[pkID], callback)
+		p.specificPacketListeners[pkID] = append(p.specificPacketListeners[pkID], listener)
+	}
+	return
+}
+
+// DestroyListener 销毁唯一标识为 uniqueID 的数据包监听器。
+// 如果这样的监听器不存在，则不会执行任何操作
+func (p *PacketListener) DestroyListener(uniqueID string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	// Any packet listener
+	{
+		found := false
+		listenerIndex := 0
+
+		for index, listener := range p.anyPacketListeners {
+			if listener.uniqueID == uniqueID {
+				found = true
+				listenerIndex = index
+				break
+			}
+		}
+
+		if found {
+			newListeners := make([]singleListener, 0)
+
+			for index, listener := range p.anyPacketListeners {
+				if index == listenerIndex {
+					continue
+				}
+				newListeners = append(newListeners, listener)
+			}
+
+			p.anyPacketListeners = newListeners
+			return
+		}
+	}
+
+	// Specific packet listener
+	for packetID, listeners := range p.specificPacketListeners {
+		found := false
+		listenerIndex := 0
+
+		for index, listener := range listeners {
+			if listener.uniqueID == uniqueID {
+				found = true
+				listenerIndex = index
+				break
+			}
+		}
+
+		if found {
+			newListeners := make([]singleListener, 0)
+
+			for index, listener := range listeners {
+				if index == listenerIndex {
+					continue
+				}
+				newListeners = append(newListeners, listener)
+			}
+
+			if len(newListeners) == 0 {
+				delete(p.specificPacketListeners, packetID)
+			} else {
+				p.specificPacketListeners[packetID] = newListeners
+			}
+
+			return
+		}
 	}
 }
 
@@ -55,60 +139,60 @@ func (p *PacketListener) onPacket(pk packet.Packet) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	// Any callback
+	// Any packet listener
 	{
-		callbackCancel := make([]bool, len(p.anyCallbacks))
+		callbackCancel := make([]bool, len(p.anyPacketListeners))
 		haveAtLeastOneCancel := false
-		for index, callbacks := range p.anyCallbacks {
-			if callbacks(pk) {
+		for index, listeners := range p.anyPacketListeners {
+			if listeners.callback(pk) {
 				callbackCancel[index] = true
 				haveAtLeastOneCancel = true
 			}
 		}
 
 		if haveAtLeastOneCancel {
-			newCallback := make([]func(p packet.Packet) bool, 0)
-			for index, callbacks := range p.anyCallbacks {
+			newListeners := make([]singleListener, 0)
+			for index, listeners := range p.anyPacketListeners {
 				if callbackCancel[index] {
 					continue
 				}
-				newCallback = append(newCallback, callbacks)
+				newListeners = append(newListeners, listeners)
 			}
-			p.anyCallbacks = newCallback
+			p.anyPacketListeners = newListeners
 		}
 	}
 
-	// Specific packet
+	// Specific packet listener
 	{
 		packetID := pk.ID()
-		cbs := p.callbacks[packetID]
-		if cbs == nil {
+		listeners := p.specificPacketListeners[packetID]
+		if listeners == nil {
 			return
 		}
 
-		callbackCancel := make([]bool, len(cbs))
+		callbackCancel := make([]bool, len(listeners))
 		haveAtLeastOneCancel := false
-		for index, cb := range cbs {
-			if cb(pk) {
+		for index, listener := range listeners {
+			if listener.callback(pk) {
 				callbackCancel[index] = true
 				haveAtLeastOneCancel = true
 			}
 		}
 
 		if haveAtLeastOneCancel {
-			newCallback := make([]func(p packet.Packet) bool, 0)
+			newListeners := make([]singleListener, 0)
 
-			for index, cb := range cbs {
+			for index, listener := range listeners {
 				if callbackCancel[index] {
 					continue
 				}
-				newCallback = append(newCallback, cb)
+				newListeners = append(newListeners, listener)
 			}
 
-			if len(newCallback) == 0 {
-				delete(p.callbacks, packetID)
+			if len(newListeners) == 0 {
+				delete(p.specificPacketListeners, packetID)
 			} else {
-				p.callbacks[packetID] = newCallback
+				p.specificPacketListeners[packetID] = newListeners
 			}
 		}
 	}

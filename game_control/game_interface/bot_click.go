@@ -2,12 +2,22 @@ package game_interface
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
 	"github.com/TriM-Organization/bedrock-world-operator/block"
 	"github.com/go-gl/mathgl/mgl32"
+)
+
+const (
+	// 描述 Pick Block 请求的最长截止时间。
+	// 这与 packet.BlockPickRequest 相关。
+	// 当超过此时间后，将视为该请求未被接受
+	BlockPickRequestDeadLine = time.Second
+	// 描述 Pick Block 失败后要重试的最大次数
+	BlockPickRequestReTryMaximumCounts = 3
 )
 
 // UseItemOnBlocks 是机器人在使
@@ -166,9 +176,9 @@ func (b *BotClick) ClickBlock(request UseItemOnBlocks) error {
 
 // 使用快捷栏 hotbarSlotID 进行一次空点击操作。
 // 此函数不会自动切换物品栏，也不会等待租赁服响应更改
-func (b *BotClick) ClickAir(hotbarSlotID resources_control.SlotID) error {
+func (b *BotClick) ClickAir(hotbarSlot resources_control.SlotID) error {
 	// Step 1: 获取手持物品栏物品数据信息
-	item, inventoryExisted := b.r.Inventories().GetItemStack(0, hotbarSlotID)
+	item, inventoryExisted := b.r.Inventories().GetItemStack(0, hotbarSlot)
 	if !inventoryExisted {
 		return fmt.Errorf("ClickAir: Should never happened")
 	}
@@ -178,7 +188,7 @@ func (b *BotClick) ClickAir(hotbarSlotID resources_control.SlotID) error {
 		&packet.InventoryTransaction{
 			TransactionData: &protocol.UseItemTransactionData{
 				ActionType: protocol.UseItemActionClickAir,
-				HotBarSlot: int32(hotbarSlotID),
+				HotBarSlot: int32(hotbarSlot),
 				HeldItem:   *item,
 			},
 		},
@@ -218,4 +228,52 @@ func (b *BotClick) PlaceBlock(
 		return fmt.Errorf("PlaceBlock: %v", err)
 	}
 	return nil
+}
+
+// PickBlock 获取 pos 处的方块到物品栏。
+// 返回的布尔值代表请求是否成功。
+// 返回的 uint8 代表该方块最终生成在快捷栏的位置
+func (b *BotClick) PickBlock(
+	pos protocol.BlockPos,
+	expectedHotbar resources_control.SlotID,
+	assignNBTData bool,
+) (
+	success bool,
+	resultHotbar resources_control.SlotID,
+	err error,
+) {
+	channel := make(chan struct{})
+	packetListener := b.r.PacketListener()
+
+	for range BlockPickRequestReTryMaximumCounts {
+		uniqueID := packetListener.ListenPacket(
+			[]uint32{packet.IDPlayerHotBar},
+			func(p packet.Packet) bool {
+				resultHotbar = resources_control.SlotID(p.(*packet.PlayerHotBar).SelectedHotBarSlot)
+				success = true
+				close(channel)
+				return true
+			},
+		)
+
+		b.r.WritePacket(&packet.BlockPickRequest{
+			Position:    pos,
+			AddBlockNBT: assignNBTData,
+			HotBarSlot:  byte(expectedHotbar),
+		})
+
+		timer := time.NewTimer(BlockPickRequestDeadLine)
+		defer timer.Stop()
+		select {
+		case <-timer.C:
+			packetListener.DestroyListener(uniqueID)
+		case <-channel:
+		}
+
+		if success {
+			break
+		}
+	}
+
+	return success, resultHotbar, nil
 }

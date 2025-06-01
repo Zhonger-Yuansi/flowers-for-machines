@@ -9,6 +9,38 @@ import (
 	"github.com/pterm/pterm"
 )
 
+// Block interaction actions were require bot to send
+// packet.PlayerAuthInput since nemc 1.20.50.
+//
+// However, for command teleport, we should handle
+// this by send packet.PlayerAuthInput with flag
+// packet.InputFlagHandledTeleport, or the server will
+// ignore the packet.PlayerAuthInput after bot was
+// teleported.
+func (r *Resources) handleMovePlayer(p *packet.MovePlayer) {
+	if p.EntityRuntimeID == r.BotInfo().EntityRuntimeID && p.Mode == packet.MoveModeTeleport {
+		_ = r.WritePacket(&packet.PlayerAuthInput{InputData: packet.InputFlagHandledTeleport})
+	}
+}
+
+// respawn process
+func (r *Resources) handleRespawn(p *packet.Respawn) {
+	if p.State == packet.RespawnStateSearchingForSpawn {
+		entityRuntimeID := r.BotInfo().EntityRuntimeID
+		_ = r.WritePacket(&packet.Respawn{
+			State:           packet.RespawnStateClientReadyToSpawn,
+			EntityRuntimeID: entityRuntimeID,
+		})
+		_ = r.WritePacket(&packet.PlayerAction{
+			EntityRuntimeID: entityRuntimeID,
+			ActionType:      protocol.PlayerActionRespawn,
+			BlockFace:       -1,
+		})
+		_ = r.WritePacket(&packet.PlayerAuthInput{InputData: packet.InputFlagStartFlying})
+		_ = r.WritePacket(&packet.PlayerAuthInput{InputData: packet.InputFlagStartFlying})
+	}
+}
+
 // command request callback
 func (r *Resources) handleCommandOutput(p *packet.CommandOutput) {
 	r.commands.onCommandOutput(p)
@@ -145,6 +177,10 @@ func (r *Resources) handleContainerClose(p *packet.ContainerClose) {
 func (r *Resources) handlePacket(pk packet.Packet) {
 	// internal
 	switch p := pk.(type) {
+	case *packet.MovePlayer:
+		r.handleMovePlayer(p)
+	case *packet.Respawn:
+		r.handleRespawn(p)
 	case *packet.CommandOutput:
 		r.handleCommandOutput(p)
 	case *packet.PyRpc:

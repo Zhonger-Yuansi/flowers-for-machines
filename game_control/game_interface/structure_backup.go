@@ -58,22 +58,6 @@ func (s *StructureBackup) BackupStructure(pos protocol.BlockPos) (result uuid.UU
 	return uniqueId, nil
 }
 
-// DeleteStructure 删除标识符为 uniqueID 的结构。
-// 即便目标结构不存在，此函数在通常情况下也仍然会返回空错误
-func (s *StructureBackup) DeleteStructure(uniqueID uuid.UUID) error {
-	err := s.api.SendSettingsCommand(
-		fmt.Sprintf(
-			`structure delete "%v"`,
-			utils.MakeUUIDSafeString(uniqueID),
-		),
-		false,
-	)
-	if err != nil {
-		return fmt.Errorf("DeleteStructure: %v", err)
-	}
-	return nil
-}
-
 // RevertAndDeleteStructure 在 pos 处恢复先前备份的结构，
 // 其中，uniqueID 是该结构的唯一标识符
 func (s *StructureBackup) RevertStructure(uniqueID uuid.UUID, pos protocol.BlockPos) error {
@@ -110,5 +94,21 @@ func (s *StructureBackup) RevertStructure(uniqueID uuid.UUID, pos protocol.Block
 		)
 	}
 
+	return nil
+}
+
+// DeleteStructure 删除标识符为 uniqueID 的结构。
+// 即便目标结构不存在，此函数在通常情况下也仍然会返回空错误
+func (s *StructureBackup) DeleteStructure(uniqueID uuid.UUID) error {
+	err := s.api.SendSettingsCommand(
+		fmt.Sprintf(
+			`structure delete "%v"`,
+			utils.MakeUUIDSafeString(uniqueID),
+		),
+		false,
+	)
+	if err != nil {
+		return fmt.Errorf("DeleteStructure: %v", err)
+	}
 	return nil
 }

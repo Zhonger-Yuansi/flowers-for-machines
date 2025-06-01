@@ -3,8 +3,13 @@ package resources_control
 import (
 	"sync"
 
+	"maps"
+
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 )
+
+// ------------------------- Type define -------------------------
 
 type (
 	// SlotID 是单个物品栏槽位的索引，它是从 0 开始索引的
@@ -20,8 +25,9 @@ type (
 	// Inventories 描述机器人已打开(或持有)的所有库存，
 	// 例如背包、副手和胸甲
 	Inventories struct {
-		mu      *sync.RWMutex
-		mapping map[WindowID]*Inventory
+		mu       *sync.RWMutex
+		mapping  map[WindowID]*Inventory
+		callback utils.SyncMap[SlotLocation, *utils.MultipleCallback[*protocol.ItemInstance]]
 	}
 
 	// SlotLocation 描述一个物品的所在的位置
@@ -30,6 +36,8 @@ type (
 		SlotID   SlotID   // SlotID 指示该物品所在库存的槽位索引
 	}
 )
+
+// ------------------------- Public functions -------------------------
 
 // NewInventory 返回一个新的 Inventory
 func NewInventory() *Inventory {
@@ -65,6 +73,8 @@ func NewAirItem() *protocol.ItemInstance {
 		},
 	}
 }
+
+// ------------------------- Inventory -------------------------
 
 // GetItemStack 返回当前库存中物品栏编号为 slotID 的物品堆栈信息。
 // 如果不存在，确保返回一个新的空气物品的堆栈实例表示，而非空指针
@@ -104,6 +114,8 @@ func (i *Inventory) setItemStack(slotID SlotID, item *protocol.ItemInstance) {
 	i.mapping[slotID] = item
 }
 
+// ------------------------- Inventories & Item Stack Get or Set -------------------------
+
 // GetInventory 返回窗口 ID 为 windowID 的库存。
 // 如果目标库存不存在，则返回的 existed 为假
 func (i *Inventories) GetInventory(windowID WindowID) (inventory *Inventory, existed bool) {
@@ -137,9 +149,7 @@ func (i *Inventories) deleteInventory(windowID WindowID) {
 	if _, ok := i.mapping[windowID]; ok {
 		delete(i.mapping, windowID)
 		newMapping := make(map[WindowID]*Inventory)
-		for key, value := range i.mapping {
-			newMapping[key] = value
-		}
+		maps.Copy(newMapping, i.mapping)
 		i.mapping = newMapping
 	}
 }
@@ -174,3 +184,33 @@ func (i *Inventories) setItemStack(windowID WindowID, slotID SlotID, item *proto
 		break
 	}
 }
+
+// ------------------------- Inventories & Callback -------------------------
+
+// SetCallback 设置当位于窗口 ID 为 windowID 且槽位索引为 slotID 的发生变化时，
+// 应当执行的回调函数 f。item 是变化后得到的新物品。
+// 值得说明的是，SetCallback 与物品堆栈操作请求是无关的，它们使用另外的回调实现
+func (i *Inventories) SetCallback(windowID WindowID, slotID SlotID, f func(item *protocol.ItemInstance)) {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+	multipleCallback, _ := i.callback.LoadOrStore(
+		SlotLocation{WindowID: windowID, SlotID: slotID},
+		utils.NewMultipleCallback[*protocol.ItemInstance](),
+	)
+	multipleCallback.Append(f)
+}
+
+// onItemChange ..
+func (i *Inventories) onItemChange(windowID WindowID, slotID SlotID, item *protocol.ItemInstance) {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+
+	multipleCallback, existed := i.callback.Load(SlotLocation{WindowID: windowID, SlotID: slotID})
+	if !existed {
+		return
+	}
+
+	multipleCallback.FinishAll(item)
+}
+
+// ------------------------- End -------------------------

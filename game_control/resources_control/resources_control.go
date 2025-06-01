@@ -2,42 +2,102 @@ package resources_control
 
 import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/client"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
-	"github.com/google/uuid"
 )
+
+// BotBasicInfo 记载机器人的基本信息
+type BotBasicInfo struct {
+	BotName         string // 机器人名称
+	XUID            string // 机器人 XUID
+	EntityUniqueID  int64  // 机器人唯一 ID
+	EntityRuntimeID uint64 // 机器人运行时 ID
+}
 
 type Resources struct {
 	// client 是连接到租赁服的基本客户端
 	client *client.Client
-
-	// commandCallback 存放所有命令请求的回调函数
-	commandCallback utils.SyncMap[uuid.UUID, func(pk *packet.CommandOutput)]
-
+	// commands 存放所有命令请求的回调函数
+	commands *CommandRequestCallback
 	// inventory 持有机器人已经拥有或打开的库存
-	inventory Inventories
-	// inventoryCallback 存放所有物品更改的回调函数
-	inventoryCallback utils.SyncMap[SlotLocation, utils.MultipleCallback[*protocol.ItemInstance]]
+	inventory *Inventories
+	// itemStack 管理物品堆栈操作请求
+	itemStack *ItemStackOperationManager
+	// container 维护机器人的容器资源，
+	// 处理其占用和释放，以及一些持久化数据
+	container *ContainerManager
+	// listener 是一个可撤销的简单数据包监听器实现
+	listener *PacketListener
+}
 
-	// itemStackMapping 存放每个物品堆栈操作请求中的 ItemStackResponseMapping
-	itemStackMapping utils.SyncMap[ItemStackRequestID, ItemStackResponseMapping]
-	// itemStackUpdater 存放每个物品堆栈操作请求中所涉及的特定物品的更新方式。
-	// 需要说明的是，它不必为单个物品堆栈请求中所涉及的所有物品都设置 ExpectedNewItem。
-	// 就目前而言，只有 NBT 会因物品堆栈操作而发生变化的物品需要这么操作
-	itemStackUpdater utils.SyncMap[ItemStackRequestID, map[SlotLocation]ExpectedNewItem]
-	// itemStackCallback 存放所有物品堆栈操作请求的回调函数
-	itemStackCallback utils.SyncMap[ItemStackRequestID, func()]
+// NewResourcesControl 基于 client 创建一个新的资源中心。
+// 它应当在机器人连接到租赁服后立即被调用，且最多调用一次
+func NewResourcesControl(client *client.Client) *Resources {
+	resourcesControl := &Resources{
+		client:    client,
+		commands:  NewCommandRequestCallback(),
+		inventory: NewInventories(),
+		itemStack: NewItemStackOperationManager(),
+		container: NewContainerManager(),
+		listener:  NewPacketListener(),
+	}
+	go resourcesControl.listenPacket()
+	return resourcesControl
+}
 
-	// // 管理物品操作请求及结果
-	// ItemStackOperation item_stack_request_with_response
-	// // 管理容器资源的占用状态，同时存储容器操作的结果
-	// Container container
-	// // 管理结构资源并保存结构请求的回应
-	// Structure mcstructure
-	// // 数据包监听器
-	// Listener packet_listener
-	// // 管理和保存其他小型的资源，
-	// // 例如游戏刻相关
-	// Others others
+// listenPacket ..
+func (r *Resources) listenPacket() {
+	for {
+		pk := <-r.client.CachedPacket()
+		if pk == nil {
+			break
+		}
+		r.handlePacket(pk)
+	}
+	for {
+		pk, err := r.client.Conn().ReadPacket()
+		if err != nil {
+			return
+		}
+		r.handlePacket(pk)
+	}
+}
+
+// ClientBasicInfo 返回机器人的基本信息
+func (r *Resources) ClientBasicInfo() BotBasicInfo {
+	return BotBasicInfo{
+		BotName:         r.client.Conn().IdentityData().DisplayName,
+		XUID:            r.client.Conn().IdentityData().XUID,
+		EntityUniqueID:  r.client.Conn().GameData().EntityUniqueID,
+		EntityRuntimeID: r.client.Conn().GameData().EntityRuntimeID,
+	}
+}
+
+// WritePacket 返回向租赁服发送数据包的函数
+func (r *Resources) WritePacket() func(p packet.Packet) error {
+	return r.client.Conn().WritePacket
+}
+
+// Commands 返回命令请求的相关资源
+func (r *Resources) Commands() *CommandRequestCallback {
+	return r.commands
+}
+
+// Inventories 返回库存的相关资源
+func (r *Resources) Inventories() *Inventories {
+	return r.inventory
+}
+
+// ItemStackOperation 返回物品堆栈操作请求的相关资源
+func (r *Resources) ItemStackOperation() *ItemStackOperationManager {
+	return r.itemStack
+}
+
+// Container 返回容器的相关资源
+func (r *Resources) Container() *ContainerManager {
+	return r.container
+}
+
+// PacketListener 返回数据包监听的有关实现
+func (r *Resources) PacketListener() *PacketListener {
+	return r.listener
 }

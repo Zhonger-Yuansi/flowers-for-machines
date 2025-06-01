@@ -2,14 +2,13 @@ package main
 
 import (
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/client"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
 	"github.com/google/uuid"
-	"github.com/pterm/pterm"
 )
 
 func main() {
@@ -29,46 +28,32 @@ func main() {
 		time.Sleep(time.Second)
 	}()
 
-	for {
-		pk := <-c.CachedPacket()
-		if pk == nil {
-			break
-		}
-		fmt.Println(pk.ID())
-	}
+	resources := resources_control.NewResourcesControl(c)
 
-	wg := new(sync.WaitGroup)
-	wg.Add(1)
-	go func() {
-		for {
-			pk, err := c.Conn().ReadPacket()
-			if err != nil {
-				panic(err)
-			}
-			if p, ok := pk.(*packet.CommandOutput); ok {
-				fmt.Printf("%#v\n", p)
-				wg.Done()
-				return
-			} else {
-				pterm.Info.Println(pk)
-			}
-		}
-	}()
+	requestID := uuid.New()
 
-	time.Sleep(time.Second)
-	fmt.Println("SEND")
+	var resp *packet.CommandOutput
+	channel := make(chan struct{})
 
-	c.Conn().WritePacket(&packet.CommandRequest{
+	resources.Commands().SetCommandRequestCallback(
+		requestID,
+		func(p *packet.CommandOutput) {
+			resp = p
+			close(channel)
+		},
+	)
+
+	resources.WritePacket()(&packet.CommandRequest{
 		CommandLine: "System Testing",
 		CommandOrigin: protocol.CommandOrigin{
 			Origin:    protocol.CommandOriginAutomationPlayer,
-			UUID:      uuid.New(),
+			UUID:      requestID,
 			RequestID: "96045347-a6a3-4114-94c0-1bc4cc561694",
 		},
 		Internal:  false,
 		UnLimited: false,
 		Version:   0x24,
 	})
-
-	wg.Wait()
+	<-channel
+	fmt.Printf("%#v\n", resp)
 }

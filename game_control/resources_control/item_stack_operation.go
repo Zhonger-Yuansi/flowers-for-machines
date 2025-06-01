@@ -1,6 +1,11 @@
 package resources_control
 
-import "github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+import (
+	"sync/atomic"
+
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
+)
 
 type (
 	// ItemStackRequestID 指示每个物品堆栈操作请求的唯一 ID，
@@ -8,21 +13,67 @@ type (
 	ItemStackRequestID int32
 	// ContainerID 是容器的 ID
 	ContainerID uint8
+
+	// ExpectedNewItem 描述单个物品堆栈在经历一次物品堆栈操作后，
+	// 其最终应当拥有的一些数据信息。应当说明的是，这些数据信息不
+	// 会由服务器告知，它应当是客户端内部处理的
+	ExpectedNewItem struct {
+		// NBTData 指示经过相应的物品堆栈操作后，其 NBT 字段的最终状态。
+		// 需要说明的是，物品名称的 NBT 字段无需在此处更改，它会被自动维护
+		NBTData map[string]any
+	}
+
+	// ItemStackResponseMapping 是一个由容器 ID 到库存窗口 ID 的映射。
+	// 由于服务器返回的物品堆栈响应按 ContainerID 来返回更改的物品堆栈，
+	// 因此本处的资源处理器定义了下面的运行时映射，以便于操作
+	ItemStackResponseMapping map[ContainerID]WindowID
 )
 
-// ExpectedNewItem 描述单个物品堆栈在经历一次物品堆栈操作后，
-// 其最终应当拥有的一些数据信息。应当说明的是，这些数据信息不
-// 会由服务器告知，它应当是客户端内部处理的
-type ExpectedNewItem struct {
-	// NBTData 指示经过相应的物品堆栈操作后，其 NBT 字段的最终状态。
-	// 需要说明的是，物品名称的 NBT 字段无需在此处更改，它会被自动维护
-	NBTData map[string]any
+// ItemStackOperationManager 是所有物品堆栈操作的管理者
+type ItemStackOperationManager struct {
+	// currentItemStackRequestID 是目前物品堆栈请求的累计 RequestID 计数
+	currentItemStackRequestID int32
+	// itemStackMapping 存放每个物品堆栈操作请求中的 ItemStackResponseMapping
+	itemStackMapping utils.SyncMap[ItemStackRequestID, ItemStackResponseMapping]
+	// itemStackUpdater 存放每个物品堆栈操作请求中相关物品的更新函数
+	itemStackUpdater utils.SyncMap[ItemStackRequestID, map[SlotLocation]ExpectedNewItem]
+	// itemStackCallback 存放所有物品堆栈操作请求的回调函数
+	itemStackCallback utils.SyncMap[ItemStackRequestID, func(status uint8)]
 }
 
-// ItemStackResponseMapping 是一个由容器 ID 到库存窗口 ID 的映射。
-// 由于服务器返回的物品堆栈响应按 ContainerID 来返回更改的物品堆栈，
-// 因此本处的资源处理器定义了下面的运行时映射，以便于操作
-type ItemStackResponseMapping map[ContainerID]WindowID
+// NewItemStackOperationManager 创建并返回一个新的 ItemStackOperationManager
+func NewItemStackOperationManager() *ItemStackOperationManager {
+	return &ItemStackOperationManager{
+		currentItemStackRequestID: 1,
+	}
+}
+
+// NewRequestID 返回一个可以独立使用的新 RequestID
+func (i *ItemStackOperationManager) NewRequestID() ItemStackRequestID {
+	return ItemStackRequestID(atomic.AddInt32(&i.currentItemStackRequestID, -2))
+}
+
+// AddNewRequest 设置一个即将发送的物品堆栈操作请求的钩子函数。
+// mapping 是由容器 ID 到库存窗口 ID 的映射；
+//
+// updater 存放每个物品堆栈操作请求中所涉及的特定物品的更新方式。
+// 需要说明的是，它不必为单个物品堆栈请求中所涉及的所有物品都设置 ExpectedNewItem。
+// 就目前而言，只有 NBT 会因物品堆栈操作而发生变化的物品需要这么操作。
+//
+// callback 是收到服务器响应后应该执行的回调函数，
+// status 指示操作的结果，相应常量请见 core/minecraft/protocol/item_stack.go#L140
+func (i *ItemStackOperationManager) AddNewRequest(
+	requestID ItemStackRequestID,
+	mapping ItemStackResponseMapping,
+	updater map[SlotLocation]ExpectedNewItem,
+	callback func(status uint8),
+) {
+	i.itemStackMapping.Store(requestID, mapping)
+	i.itemStackCallback.Store(requestID, callback)
+	if len(updater) > 0 {
+		i.itemStackUpdater.Store(requestID, updater)
+	}
+}
 
 // UpdateItem 通过 serverResponse 和 clientExpected 共同评估 item 的新值。
 // slotLocation 指示该物品的位置。应当说明的是，相关修改将直接在 item 上进行

@@ -11,10 +11,7 @@ import (
 
 // command request callback
 func (r *Resources) handleCommandOutput(p *packet.CommandOutput) {
-	callback, ok := r.commandCallback.LoadAndDelete(p.CommandOrigin.UUID)
-	if ok {
-		callback(p)
-	}
+	r.commands.onCommandOutput(p)
 }
 
 // heart beat response (netease pyrpc)
@@ -46,11 +43,9 @@ func (r *Resources) handlePyRpc(p *packet.PyRpc) {
 func (r *Resources) handleInventoryContent(p *packet.InventoryContent) {
 	windowID := WindowID(p.WindowID)
 	for key, value := range p.Content {
-		r.inventory.setItemStack(windowID, SlotID(key), &value)
-		callbacks, ok := r.inventoryCallback.LoadAndDelete(SlotLocation{WindowID: windowID, SlotID: SlotID(key)})
-		if ok {
-			callbacks.FinishAll(&value)
-		}
+		slotID := SlotID(key)
+		r.inventory.setItemStack(windowID, slotID, &value)
+		r.inventory.onItemChange(windowID, slotID, &value)
 	}
 }
 
@@ -60,14 +55,9 @@ func (r *Resources) handleInventoryTransaction(p *packet.InventoryTransaction) {
 		if value.SourceType == protocol.InventoryActionSourceCreative {
 			continue
 		}
-
 		windowID, slotID := WindowID(value.WindowID), SlotID(value.InventorySlot)
 		r.inventory.setItemStack(windowID, slotID, &value.NewItem)
-
-		callbacks, ok := r.inventoryCallback.LoadAndDelete(SlotLocation{WindowID: windowID, SlotID: slotID})
-		if ok {
-			callbacks.FinishAll(&value.NewItem)
-		}
+		r.inventory.onItemChange(windowID, slotID, &value.NewItem)
 	}
 }
 
@@ -75,10 +65,7 @@ func (r *Resources) handleInventoryTransaction(p *packet.InventoryTransaction) {
 func (r *Resources) handleInventorySlot(p *packet.InventorySlot) {
 	windowID, slotID := WindowID(p.WindowID), SlotID(p.Slot)
 	r.inventory.setItemStack(windowID, slotID, &p.NewItem)
-	callbacks, ok := r.inventoryCallback.LoadAndDelete(SlotLocation{WindowID: windowID, SlotID: slotID})
-	if ok {
-		callbacks.FinishAll(&p.NewItem)
-	}
+	r.inventory.onItemChange(windowID, slotID, &p.NewItem)
 }
 
 // item stack request
@@ -86,18 +73,18 @@ func (r *Resources) handleItemStackResponse(p *packet.ItemStackResponse) {
 	for _, response := range p.Responses {
 		requestID := ItemStackRequestID(response.RequestID)
 
-		callback, ok := r.itemStackCallback.LoadAndDelete(requestID)
+		callback, ok := r.itemStack.itemStackCallback.LoadAndDelete(requestID)
 		if !ok {
 			panic(fmt.Sprintf("handleItemStackResponse: Item stack request with id %d set no callback", response.RequestID))
 		}
-		containerIDToWindowID, ok := r.itemStackMapping.LoadAndDelete(requestID)
+		containerIDToWindowID, ok := r.itemStack.itemStackMapping.LoadAndDelete(requestID)
 		if !ok {
 			panic(fmt.Sprintf("handleItemStackResponse: Item stack request with id %d set no container ID to Window ID mapping", response.RequestID))
 		}
-		itemUpdater, _ := r.itemStackUpdater.LoadAndDelete(requestID)
+		itemUpdater, _ := r.itemStack.itemStackUpdater.LoadAndDelete(requestID)
 
 		if response.Status != protocol.ItemStackResponseStatusOK {
-			callback()
+			callback(response.Status)
 			continue
 		}
 
@@ -133,13 +120,31 @@ func (r *Resources) handleItemStackResponse(p *packet.ItemStackResponse) {
 			}
 		}
 
-		callback()
+		callback(response.Status)
 	}
 }
 
+// when a container is opened
+func (r *Resources) handleContainerOpen(p *packet.ContainerOpen) {
+	r.inventory.createInventory(WindowID(p.WindowID))
+	r.container.onContainerOpen(p)
+}
+
+// when a container has been closed
+func (r *Resources) handleContainerClose(p *packet.ContainerClose) {
+	switch p.WindowID {
+	case protocol.WindowIDInventory, protocol.WindowIDOffHand:
+	case protocol.WindowIDArmour, protocol.WindowIDUI:
+	default:
+		r.inventory.deleteInventory(WindowID(p.WindowID))
+	}
+	r.container.onContainerClose(p)
+}
+
 // 根据收到的数据包更新客户端的资源数据
-func (r *Resources) handlePacket(pk *packet.Packet) {
-	switch p := (*pk).(type) {
+func (r *Resources) handlePacket(pk packet.Packet) {
+	// internal
+	switch p := pk.(type) {
 	case *packet.CommandOutput:
 		r.handleCommandOutput(p)
 	case *packet.PyRpc:
@@ -152,37 +157,11 @@ func (r *Resources) handlePacket(pk *packet.Packet) {
 		r.handleInventorySlot(p)
 	case *packet.ItemStackResponse:
 		r.handleItemStackResponse(p)
-		// case *packet.ContainerOpen:
-		// 	if !r.Container.GetOccupyStates() {
-		// 		panic("handlePacket: Attempt to send packet.ContainerOpen without using ResourcesControlCenter")
-		// 	}
-		// 	r.Container.write_container_closing_data(nil)
-		// 	r.Container.write_container_opening_data(p)
-		// 	r.Inventory.create_new_inventory(uint32(p.WindowID))
-		// 	r.Container.respond_to_container_operation()
-		// 	// when a container is opened
-		// case *packet.ContainerClose:
-		// 	if p.WindowID != 0 && p.WindowID != 119 && p.WindowID != 120 && p.WindowID != 124 {
-		// 		err := r.Inventory.delete_inventory(uint32(p.WindowID))
-		// 		if err != nil {
-		// 			panic(fmt.Sprintf("handlePacket: Try to removed an inventory which not existed; p.WindowID = %v", p.WindowID))
-		// 		}
-		// 	}
-		// 	if !p.ServerSide && !r.Container.GetOccupyStates() {
-		// 		panic("handlePacket: Attempt to send packet.ContainerClose without using ResourcesControlCenter")
-		// 	}
-		// 	r.Container.write_container_opening_data(nil)
-		// 	r.Container.write_container_closing_data(p)
-		// 	r.Container.respond_to_container_operation()
-		// 	// when a container has been closed
-		// case *packet.StructureTemplateDataResponse:
-		// 	if !r.Structure.GetOccupyStates() {
-		// 		panic("handlePacket: Attempt to send packet.StructureTemplateDataRequest without using ResourcesControlCenter")
-		// 	}
-		// 	r.Structure.writeResponse(*p)
-		// 	// used to request mcstructure data
+	case *packet.ContainerOpen:
+		r.handleContainerOpen(p)
+	case *packet.ContainerClose:
+		r.handleContainerClose(p)
 	}
-	// // process packet
-	// r.Listener.distribute_packet(*pk)
-	// // distribute packet(for packet listener)
+	// for other implements
+	r.listener.onPacket(pk)
 }

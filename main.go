@@ -35,5 +35,13 @@ func main() {
 	resp, isTimeout, err := api.Commands().SendPlayerCommandWithTimeout("say 123", time.Second*5)
 	fmt.Println(resp, isTimeout, err)
 
+	uniqueID, err := api.StructureBackup().BackupStructure([3]int32{0, 0, 0})
+	fmt.Println(uniqueID, err)
+
+	err = api.StructureBackup().RevertStructure(uniqueID, [3]int32{0, 1, 0})
+	fmt.Println(err)
+	err = api.StructureBackup().DeleteStructure(uniqueID)
+	fmt.Println(err)
+
 	api.Commands().SendChat("aaaa")
 }

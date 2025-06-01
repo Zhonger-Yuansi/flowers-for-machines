@@ -34,6 +34,25 @@ func NewBotClick(wrapper *ResourcesWrapper, commands *Commands) *BotClick {
 	return &BotClick{r: wrapper, c: commands}
 }
 
+// 切换客户端的手持物品栏为 hotBarSlotID 。
+// 若提供的 hotBarSlotID 大于 8 ，则会重定向为 0
+func (b *BotClick) ChangeSelectedHotbarSlot(hotbarSlotID uint8) error {
+	if hotbarSlotID > 8 {
+		hotbarSlotID = 0
+	}
+
+	err := b.r.WritePacket(&packet.PlayerHotBar{
+		SelectedHotBarSlot: uint32(hotbarSlotID),
+		WindowID:           0,
+		SelectHotBarSlot:   true,
+	})
+	if err != nil {
+		return fmt.Errorf("ChangeSelectedHotbarSlot: %v", err)
+	}
+
+	return nil
+}
+
 // clickBlock ..
 func (b *BotClick) clickBlock(
 	request UseItemOnBlocks,
@@ -145,26 +164,6 @@ func (b *BotClick) ClickBlock(request UseItemOnBlocks) error {
 	return nil
 }
 
-/*
-PlaceBlock 使客户端创建一个新方块。
-
-request 指代实际被点击的方块，但这并不代表新方块被创建的位置。
-我们通过点击 request 处的方块，并指定点击的面为 blockFace ，
-然后租赁服根据这些信息，在另外相应的位置创建这些新的方块。
-
-此函数不会自动切换物品栏，也不会等待租赁服响应更改
-*/
-func (b *BotClick) PlaceBlock(
-	request UseItemOnBlocks,
-	blockFace int32,
-) error {
-	err := b.clickBlock(request, blockFace, mgl32.Vec3{})
-	if err != nil {
-		return fmt.Errorf("PlaceBlock: %v", err)
-	}
-	return nil
-}
-
 // 使用快捷栏 hotbarSlotID 进行一次空点击操作。
 // 此函数不会自动切换物品栏，也不会等待租赁服响应更改
 func (b *BotClick) ClickAir(hotbarSlotID resources_control.SlotID) error {
@@ -201,21 +200,22 @@ func (b *BotClick) ClickAir(hotbarSlotID resources_control.SlotID) error {
 	return nil
 }
 
-// 切换客户端的手持物品栏为 hotBarSlotID 。
-// 若提供的 hotBarSlotID 大于 8 ，则会重定向为 0
-func (b *BotClick) ChangeSelectedHotbarSlot(hotbarSlotID uint8) error {
-	if hotbarSlotID > 8 {
-		hotbarSlotID = 0
-	}
+/*
+PlaceBlock 使客户端创建一个新方块。
 
-	err := b.r.WritePacket(&packet.PlayerHotBar{
-		SelectedHotBarSlot: uint32(hotbarSlotID),
-		WindowID:           0,
-		SelectHotBarSlot:   true,
-	})
+request 指代实际被点击的方块，但这并不代表新方块被创建的位置。
+我们通过点击 request 处的方块，并指定点击的面为 blockFace ，
+然后租赁服根据这些信息，在另外相应的位置创建这些新的方块。
+
+此函数不会自动切换物品栏，也不会等待租赁服响应更改
+*/
+func (b *BotClick) PlaceBlock(
+	request UseItemOnBlocks,
+	blockFace int32,
+) error {
+	err := b.clickBlock(request, blockFace, mgl32.Vec3{})
 	if err != nil {
-		return fmt.Errorf("ChangeSelectedHotbarSlot: %v", err)
+		return fmt.Errorf("PlaceBlock: %v", err)
 	}
-
 	return nil
 }

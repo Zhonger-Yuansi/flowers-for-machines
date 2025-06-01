@@ -111,7 +111,8 @@ func (c *Commands) SendWSCommand(command string) error {
 // ------------------------- Send command with response and timeout -------------------------
 
 // sendCommandWithResp 以 origin 的身份向租赁服发送命令 command 并获取响应体。
-// timeout 指示超时处理；如果为负数则不考虑超时因素；如果为 0 则使用默认超时设置
+// timeout 指示超时处理；如果为负数则不考虑超时因素；如果为 0 则使用默认超时设置。
+// 需要注意的是，如果命令请求超时，则返回的 err 不为空
 func (c *Commands) sendCommandWithResp(command string, origin uint32, timeout time.Duration) (
 	resp *packet.CommandOutput,
 	isTimeOut bool,
@@ -161,7 +162,8 @@ func (c *Commands) sendCommandWithResp(command string, origin uint32, timeout ti
 
 // SendPlayerCommandWithTimeout 以玩家的身份向租赁服发送命令 command 并获取响应体。
 // timeout 指示当请求发出后，若时间超过 timeout 是否应当返回错误。
-// 如果 timeout 为负数或 0，则使用默认超时设置
+// 如果 timeout 为负数或 0，则使用默认超时设置。
+// 需要注意的是，如果命令请求超时，则返回的 err 不为空
 func (c *Commands) SendPlayerCommandWithTimeout(command string, timeout time.Duration) (
 	resp *packet.CommandOutput,
 	isTimeOut bool,
@@ -176,7 +178,8 @@ func (c *Commands) SendPlayerCommandWithTimeout(command string, timeout time.Dur
 
 // SendWSCommandWithTimeout 以 Websocket 的身份向租赁服发送命令 command 并获取响应体。
 // timeout 指示当请求发出后，若时间超过 timeout 是否应当返回错误。
-// 如果 timeout 为负数或 0，则使用默认超时设置
+// 如果 timeout 为负数或 0，则使用默认超时设置。
+// 需要注意的是，如果命令请求超时，则返回的 err 不为空
 func (c *Commands) SendWSCommandWithTimeout(command string, timeout time.Duration) (
 	resp *packet.CommandOutput,
 	isTimeOut bool,

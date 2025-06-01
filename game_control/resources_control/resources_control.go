@@ -30,7 +30,11 @@ type Resources struct {
 }
 
 // NewResourcesControl 基于 client 创建一个新的资源中心。
-// 它应当在机器人连接到租赁服后立即被调用，且最多调用一次
+// 它应当在机器人连接到租赁服后立即被调用，且最多调用一次。
+//
+// 需要注意的是，client.Conn().ReadPacket 不应继续被使用，
+// 否则可能会出现未知的竞态条件问题，因为资源管理器本身也会
+// 不断的读取数据包并依此更新其自身的资源数据
 func NewResourcesControl(client *client.Client) *Resources {
 	resourcesControl := &Resources{
 		client:    client,

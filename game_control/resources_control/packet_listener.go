@@ -37,8 +37,8 @@ func NewPacketListener() *PacketListener {
 // 否则将会继续保留；
 // 如果 packetID 置空，则监听所有数据包。
 //
-// 返回的 uniqueID 用于标识该监听器，以便于后续
-// 调用 DestroyListener 以便于手动销毁监听器
+// 返回的 uniqueID 用于标识该监听器，以便于
+// 后续调用 DestroyListener 以手动销毁监听器
 func (p *PacketListener) ListenPacket(
 	packetID []uint32,
 	callback func(p packet.Packet) bool,

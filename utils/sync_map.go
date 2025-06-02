@@ -88,7 +88,7 @@ func (m *SyncMap[K, V]) LoadAndDelete(key K) (value V, loaded bool) {
 func (m *SyncMap[K, V]) LoadOrStore(key K, value V) (actual V, loaded bool) {
 	act, loaded := m.mapping.LoadOrStore(key, value)
 	if !loaded {
-		return actual, false
+		return act.(V), false
 	}
 	return act.(V), true
 }

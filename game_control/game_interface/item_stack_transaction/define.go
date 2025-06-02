@@ -240,7 +240,6 @@ func (i *ItemStackTransaction) Commit() (
 	for _, responses := range serverResponse {
 		for _, response := range responses {
 			if response.Status != protocol.ItemStackResponseStatusOK {
-				i.Discord()
 				return false, pks, serverResponse, nil
 			}
 		}

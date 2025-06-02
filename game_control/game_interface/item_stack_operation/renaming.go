@@ -43,7 +43,11 @@ func (r Renaming) Make(runtimeData MakingRuntime) []protocol.StackRequestAction 
 		Slot:           0x32,
 		StackNetworkID: data.RequestID,
 	}
-	moveBack.Destination = move.Source
+	moveBack.Destination = protocol.StackRequestSlotInfo{
+		ContainerID:    data.ContainerID,
+		Slot:           byte(r.Path.SlotID),
+		StackNetworkID: data.RequestID,
+	}
 
 	return []protocol.StackRequestAction{
 		&move,

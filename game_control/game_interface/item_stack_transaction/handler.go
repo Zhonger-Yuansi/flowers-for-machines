@@ -177,6 +177,13 @@ func (i *itemStackOperationHandler) handleRenaming(
 	if !found {
 		return nil, fmt.Errorf("handleRenaming: Can not find the container ID of given item whose at %#v", op.Path)
 	}
+
+	containerData, existed := i.api.ContainerData()
+	if !existed {
+		return nil, fmt.Errorf("handleRenaming: Anvil is not opened")
+	}
+
+	i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerAnvilInput)
 	i.responseMapping.bind(op.Path.WindowID, srcCID)
 
 	runtimeData := item_stack_operation.RenamingRuntime{
@@ -197,6 +204,11 @@ func (i *itemStackOperationHandler) handleLooming(
 		RequestID: int32(requestID),
 	}
 
+	containerData, existed := i.api.ContainerData()
+	if !existed {
+		return nil, fmt.Errorf("handleLooming: Loom is not opened")
+	}
+
 	if op.UsePattern {
 		rid, err := i.virtualInventories.loadAndSetStackNetworkID(op.PatternPath, requestID)
 		if err != nil {
@@ -207,7 +219,9 @@ func (i *itemStackOperationHandler) handleLooming(
 		if !found {
 			return nil, fmt.Errorf("handleLooming: Can not find the container ID of given item whose at %#v", op.PatternPath)
 		}
+
 		i.responseMapping.bind(op.PatternPath.WindowID, cid)
+		i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerLoomMaterial)
 
 		runtimeData.MovePatternSrcContainerID = byte(cid)
 		runtimeData.MovePatternSrcStackNetworkID = rid
@@ -224,7 +238,9 @@ func (i *itemStackOperationHandler) handleLooming(
 		if !found {
 			return nil, fmt.Errorf("handleLooming: Can not find the container ID of given item whose at %#v", op.BannerPath)
 		}
+
 		i.responseMapping.bind(op.BannerPath.WindowID, cid)
+		i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerLoomInput)
 
 		runtimeData.MoveBannerSrcContainerID = byte(cid)
 		runtimeData.MoveBannerSrcStackNetworkID = rid
@@ -241,7 +257,9 @@ func (i *itemStackOperationHandler) handleLooming(
 		if !found {
 			return nil, fmt.Errorf("handleLooming: Can not find the container ID of given item whose at %#v", op.DyePath)
 		}
+
 		i.responseMapping.bind(op.DyePath.WindowID, cid)
+		i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerLoomDye)
 
 		runtimeData.MoveDyeSrcContainerID = byte(cid)
 		runtimeData.MoveDyeSrcStackNetworkID = rid

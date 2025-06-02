@@ -107,6 +107,23 @@ func (i *ItemStackTransaction) RenameItem(slot resources_control.SlotLocation, n
 	})
 }
 
+// RenameInventoryItem 将背包中 slot 处的物品全部重命名为 newName。
+//
+// 重命名操作是通过铁砧完成的，这意味着您需要确保铁砧已被打开，
+// 且铁砧内没有放置任何物品。如果操作成功，则物品将回到原位。
+//
+// 与 RenameItem 的不同之处在于，它只能操作背包中的物品，
+// 因此您需要确保背包已被打开
+func (i *ItemStackTransaction) RenameInventoryItem(slot resources_control.SlotID, newName string) {
+	i.operations = append(i.operations, item_stack_operation.Renaming{
+		Path: resources_control.SlotLocation{
+			WindowID: protocol.WindowIDInventory,
+			SlotID:   slot,
+		},
+		NewName: newName,
+	})
+}
+
 // Looming 将 patternSlot 处的旗帜放入织布机中，
 // 并通过使用 dyeSlot 处的染料合成新旗帜。
 //

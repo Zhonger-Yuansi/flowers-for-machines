@@ -7,7 +7,10 @@ import (
 )
 
 // MoveItem 将 source 处的物品移动到 destination 处，
-// 且只移动 count 个物品
+// 且只移动 count 个物品。
+//
+// 该操作是支持内联的，它会与所有支持内联的操作一起被
+// 内联到单个物品堆栈操作请求中
 func (i *ItemStackTransaction) MoveItem(
 	source resources_control.SlotLocation,
 	destination resources_control.SlotLocation,
@@ -22,7 +25,11 @@ func (i *ItemStackTransaction) MoveItem(
 
 // MoveInventoryItem 将背包中 source 处的物品移动到 destination 处，
 // 且只移动 count 个物品。
-// 此操作需要保证背包已被打开，或者已打开的容器中可以在背包中移动物品
+//
+// 此操作需要保证背包已被打开，或者已打开的容器中可以在背包中移动物品。
+//
+// 该操作是支持内联的，它会与所有支持内联的操作一起被
+// 内联到单个物品堆栈操作请求中
 func (i *ItemStackTransaction) MoveInventoryItem(
 	source resources_control.SlotID,
 	destination resources_control.SlotID,
@@ -41,7 +48,10 @@ func (i *ItemStackTransaction) MoveInventoryItem(
 	})
 }
 
-// SwapItem 交换 source 处和 destination 处的物品
+// SwapItem 交换 source 处和 destination 处的物品。
+//
+// 该操作是支持内联的，它会与所有支持内联的操作一起被
+// 内联到单个物品堆栈操作请求中
 func (i *ItemStackTransaction) SwapItem(source resources_control.SlotLocation, destination resources_control.SlotLocation) {
 	i.operations = append(i.operations, item_stack_operation.Swap{
 		Source:      source,
@@ -49,7 +59,10 @@ func (i *ItemStackTransaction) SwapItem(source resources_control.SlotLocation, d
 	})
 }
 
-// DropItem 将 slot 处的物品丢出，且只丢出 count 个
+// DropItem 将 slot 处的物品丢出，且只丢出 count 个。
+//
+// 该操作是支持内联的，它会与所有支持内联的操作一起被
+// 内联到单个物品堆栈操作请求中
 func (i *ItemStackTransaction) DropItem(slot resources_control.SlotLocation, count uint8) {
 	i.operations = append(i.operations, item_stack_operation.Drop{
 		Path:  slot,
@@ -57,8 +70,14 @@ func (i *ItemStackTransaction) DropItem(slot resources_control.SlotLocation, cou
 	})
 }
 
-// DropItem 将背包中 slot 处的物品丢出，且只丢出 count 个。
-// 此操作需要保证背包已被打开，或者已打开的容器中可以在背包中移动物品
+// DropItem 将背包中 slot 处的物品丢出，
+// 且只丢出 count 个。
+//
+// 此操作需要保证背包已被打开，
+// 或者已打开的容器中可以在背包中移动物品。
+//
+// 该操作是支持内联的，它会与所有支持内联
+// 的操作一起被内联到单个物品堆栈操作请求中
 func (i *ItemStackTransaction) DropInventoryItem(slot resources_control.SlotID, count uint8) {
 	i.operations = append(i.operations, item_stack_operation.Drop{
 		Path: resources_control.SlotLocation{
@@ -70,8 +89,10 @@ func (i *ItemStackTransaction) DropInventoryItem(slot resources_control.SlotID, 
 }
 
 // DropItem 将背包中 slot 处的物品丢出，且只丢出 count 个。
-// 不同于 DropInventoryItem，DropHotbarItem 可以在未打开背包时使用
-// TODO: 需要验证
+// 不同于 DropInventoryItem，DropHotbarItem 可以在未打开背包时使用。
+//
+// 该操作是支持内联的，它会与所有支持内联的操作一起被
+// 内联到单个物品堆栈操作请求中
 func (i *ItemStackTransaction) DropHotbarItem(slot resources_control.SlotID, count uint8) {
 	i.operations = append(i.operations, item_stack_operation.DropHotbar{
 		SlotID: slot,
@@ -81,7 +102,14 @@ func (i *ItemStackTransaction) DropHotbarItem(slot resources_control.SlotID, cou
 
 // GetCreativeItem 从创造物品栏获取 创造物品网络 ID 为
 // creativeItemNetworkID 的物品到背包中的 slot 处，
-// 且只移动 count 个物品
+// 且只移动 count 个物品。
+//
+// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
+// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
+// 但最终可以被紧缩在一个数据包中。
+//
+// 请确保不要将此操作与内联操作混用，否则将会发送多个
+// 数据包从而降低事务的效率
 func (i *ItemStackTransaction) GetCreativeItem(
 	creativeItemNetworkID uint32,
 	slot resources_control.SlotLocation,
@@ -99,7 +127,18 @@ func (i *ItemStackTransaction) GetCreativeItem(
 // 重命名操作是通过铁砧完成的，这意味着您需要确保铁砧已被打开，
 // 且铁砧内没有放置任何物品。
 //
-// 如果操作成功，则物品将回到原位
+// 如果操作成功，则物品将回到原位。
+//
+// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
+// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
+// 但最终可以被紧缩在一个数据包中。
+//
+// 请确保不要将此操作与内联操作混用，否则将会发送多个
+// 数据包从而降低事务的效率。
+//
+// 除此外，基于非内联操作的并发组织，你无法在同一个物品
+// 栏处重用非内联操作 (重命名操作或织布机操作)，除非您在
+// 操作前引入了至少一个内联操作，否则整个事务将会失败
 func (i *ItemStackTransaction) RenameItem(slot resources_control.SlotLocation, newName string) {
 	i.operations = append(i.operations, item_stack_operation.Renaming{
 		Path:    slot,
@@ -113,7 +152,19 @@ func (i *ItemStackTransaction) RenameItem(slot resources_control.SlotLocation, n
 // 且铁砧内没有放置任何物品。如果操作成功，则物品将回到原位。
 //
 // 与 RenameItem 的不同之处在于，它只能操作背包中的物品，
-// 因此您需要确保背包已被打开
+// 因此您需要确保背包已被打开。
+//
+// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
+// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
+// 但最终可以被紧缩在一个数据包中。
+//
+// 请确保不要将此操作与内联操作交替使用，而是应该尽可能
+// 连续的使用多个非内联操作。如果不这么做，提交事务时将
+// 会发送多个数据包从而降低事务的效率。
+//
+// 除此外，基于非内联操作的并发组织，你无法在同一个物品
+// 栏处重用非内联操作 (重命名操作或织布机操作)，除非您在
+// 操作前引入了至少一个内联操作，否则整个事务将会失败
 func (i *ItemStackTransaction) RenameInventoryItem(slot resources_control.SlotID, newName string) {
 	i.operations = append(i.operations, item_stack_operation.Renaming{
 		Path: resources_control.SlotLocation{
@@ -133,7 +184,19 @@ func (i *ItemStackTransaction) RenameInventoryItem(slot resources_control.SlotID
 // 零值。
 //
 // resultItem 指示期望得到的旗帜的部分数据。
-// 如果操作成功，则新旗帜将回到原位
+// 如果操作成功，则新旗帜将回到原位。
+//
+// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
+// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
+// 但最终可以被紧缩在一个数据包中。
+//
+// 请确保不要将此操作与内联操作交替使用，而是应该尽可能
+// 连续的使用多个非内联操作。如果不这么做，提交事务时将
+// 会发送多个数据包从而降低事务的效率。
+//
+// 除此外，基于非内联操作的并发组织，你无法在同一个物品
+// 栏处重用非内联操作 (重命名操作或织布机操作)，除非您在
+// 操作前引入了至少一个内联操作，否则整个事务将会失败
 func (i *ItemStackTransaction) Looming(
 	patternName string,
 	patternSlot resources_control.SlotLocation,

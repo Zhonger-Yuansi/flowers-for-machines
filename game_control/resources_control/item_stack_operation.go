@@ -18,6 +18,10 @@ type (
 	// 其最终应当拥有的一些数据信息。应当说明的是，这些数据信息不
 	// 会由服务器告知，它应当是客户端内部处理的
 	ExpectedNewItem struct {
+		// NetworkID 是该物品的数值网络 ID，它在单个 MC 版本中不会变化。
+		// 它可正亦可负，具体取决于其所关注的物品堆栈实例。
+		// 另外，为 NetworkID 填写 -1 的值可以保持其不变
+		NetworkID int32
 		// NBTData 指示经过相应的物品堆栈操作后，其 NBT 字段的最终状态。
 		// 需要说明的是，物品名称的 NBT 字段无需在此处更改，它会被自动维护
 		NBTData map[string]any
@@ -90,6 +94,9 @@ func UpdateItem(
 		newData, ok := clientExpected[slotLocation]
 		if ok {
 			item.Stack.NBTData = newData.NBTData
+			if newData.NetworkID != -1 {
+				item.Stack.ItemType.NetworkID = newData.NetworkID
+			}
 		}
 	}
 

@@ -53,13 +53,6 @@ func (v *virtualInventories) setStackNetworkID(
 	v.mapping[slotLocation] = int32(requestID)
 }
 
-// updateAll ..
-func (v *virtualInventories) updateAll(requestID resources_control.ItemStackRequestID) {
-	for index := range v.mapping {
-		v.mapping[index] = int32(requestID)
-	}
-}
-
 // loadAndSetStackNetworkID 加载 slotLocation 处的物品堆栈网络 ID，
 // 并将 slotLocation 处的物品堆栈网络 ID 更新为 requestID
 func (v *virtualInventories) loadAndSetStackNetworkID(

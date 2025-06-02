@@ -12,8 +12,9 @@ import (
 
 // Discord 丢弃曾经执行的更改。
 // 从本质上说，它将清空底层操作序列
-func (i *ItemStackTransaction) Discord() {
+func (i *ItemStackTransaction) Discord() *ItemStackTransaction {
 	i.operations = nil
+	return i
 }
 
 // Commit 将底层操作序列内联并使用尽可能少的物品堆栈请求的数据包执行物品堆栈操作事务。

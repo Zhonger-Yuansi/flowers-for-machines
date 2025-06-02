@@ -50,12 +50,26 @@ func main() {
 	})
 	<-channel
 
-	tran := api.ItemStackOperation().OpenTransaction()
-	tran.RenameInventoryItem(1, "haha Testing")
-	tran.RenameInventoryItem(0, "System Testing")
-	tran.MoveInventoryItem(0, 2, 1)
-	tran.MoveInventoryItem(1, 3, 1)
-	fmt.Println(tran.Commit())
+	t1 := time.Now()
+	api.ItemStackOperation().OpenTransaction().
+		RenameInventoryItem(1, "haha Testing").
+		RenameInventoryItem(0, "System Testing").
+		MoveInventoryItem(0, 2, 1).
+		MoveInventoryItem(1, 3, 1).
+		MoveInventoryItem(0, 2, 1).
+		MoveInventoryItem(0, 2, 1).
+		MoveInventoryItem(0, 2, 1).
+		MoveInventoryItem(0, 2, 1).
+		MoveInventoryItem(0, 2, 1).
+		MoveInventoryItem(0, 2, 1).
+		MoveInventoryItem(0, 2, 1).
+		MoveInventoryItem(0, 2, 2).
+		RenameInventoryItem(2, "666").
+		RenameInventoryItem(3, "999").
+		DropHotbarItem(2, 10).
+		DropHotbarItem(3, 1).
+		Commit()
+	fmt.Println(time.Since(t1))
 }
 
 // func legacy() {

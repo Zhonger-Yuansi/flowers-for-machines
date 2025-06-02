@@ -13,12 +13,13 @@ type ResourcesWrapper struct {
 // GameInterface 实现了机器人与租赁服的高级交互，
 // 例如基本的命令收发或高级的容器操作
 type GameInterface struct {
-	wrapper         *ResourcesWrapper
-	commands        *Commands
-	structureBackup *StructureBackup
-	querytarget     *Querytarget
-	setblock        *SetBlock
-	botClick        *BotClick
+	wrapper            *ResourcesWrapper
+	commands           *Commands
+	structureBackup    *StructureBackup
+	querytarget        *Querytarget
+	setblock           *SetBlock
+	botClick           *BotClick
+	itemStackOperation *ItemStackOperation
 }
 
 // NewResourcesWrapper 基于 resources 创建一个新的游戏交互器
@@ -39,6 +40,7 @@ func NewGameInterface(resources *resources_control.Resources) *GameInterface {
 	result.querytarget = NewQuerytarget(result.commands)
 	result.setblock = NewSetBlock(result.commands)
 	result.botClick = NewBotClick(result.wrapper, result.commands, result.setblock)
+	result.itemStackOperation = NewItemStackOperation(result.wrapper)
 
 	return result
 }
@@ -88,4 +90,9 @@ func (g *GameInterface) SetBlock() *SetBlock {
 // 它使用了完全不同的数据包
 func (g *GameInterface) BotClick() *BotClick {
 	return g.botClick
+}
+
+// ItemStackOperation 返回机器人在物品堆栈操作请求上的相关实现
+func (g *GameInterface) ItemStackOperation() *ItemStackOperation {
+	return g.itemStackOperation
 }

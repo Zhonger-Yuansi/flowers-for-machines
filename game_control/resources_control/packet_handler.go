@@ -116,7 +116,7 @@ func (r *Resources) handleItemStackResponse(p *packet.ItemStackResponse) {
 		itemUpdater, _ := r.itemStack.itemStackUpdater.LoadAndDelete(requestID)
 
 		if response.Status != protocol.ItemStackResponseStatusOK {
-			callback(response.Status)
+			callback(&response)
 			continue
 		}
 
@@ -152,7 +152,7 @@ func (r *Resources) handleItemStackResponse(p *packet.ItemStackResponse) {
 			}
 		}
 
-		callback(response.Status)
+		callback(&response)
 	}
 }
 

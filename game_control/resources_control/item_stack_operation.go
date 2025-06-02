@@ -42,7 +42,7 @@ type ItemStackOperationManager struct {
 	// itemStackUpdater 存放每个物品堆栈操作请求中相关物品的更新函数
 	itemStackUpdater utils.SyncMap[ItemStackRequestID, map[SlotLocation]ExpectedNewItem]
 	// itemStackCallback 存放所有物品堆栈操作请求的回调函数
-	itemStackCallback utils.SyncMap[ItemStackRequestID, func(status uint8)]
+	itemStackCallback utils.SyncMap[ItemStackRequestID, func(response *protocol.ItemStackResponse)]
 }
 
 // NewItemStackOperationManager 创建并返回一个新的 ItemStackOperationManager
@@ -64,13 +64,12 @@ func (i *ItemStackOperationManager) NewRequestID() ItemStackRequestID {
 // 需要说明的是，它不必为单个物品堆栈请求中所涉及的所有物品都设置 ExpectedNewItem。
 // 就目前而言，只有 NBT 会因物品堆栈操作而发生变化的物品需要这么操作。
 //
-// callback 是收到服务器响应后应该执行的回调函数，
-// status 指示操作的结果，相应常量请见 core/minecraft/protocol/item_stack.go#L140
+// callback 是收到服务器响应后应该执行的回调函数
 func (i *ItemStackOperationManager) AddNewRequest(
 	requestID ItemStackRequestID,
 	mapping ItemStackResponseMapping,
 	updater map[SlotLocation]ExpectedNewItem,
-	callback func(status uint8),
+	callback func(response *protocol.ItemStackResponse),
 ) {
 	i.itemStackMapping.Store(requestID, mapping)
 	i.itemStackCallback.Store(requestID, callback)

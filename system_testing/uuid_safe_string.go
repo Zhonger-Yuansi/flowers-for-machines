@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sync"
 	"time"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
@@ -23,11 +24,12 @@ func SystemTestingUUIDSafeString() {
 			panic("SystemTestingUUIDSafeString: UUID Safe String not equal")
 		}
 
+		doOnce := new(sync.Once)
 		uniqueID := api.PacketListener().ListenPacket(
 			[]uint32{packet.IDText},
 			func(p packet.Packet) {
 				if p.(*packet.Text).Message == chatContent {
-					close(channel)
+					doOnce.Do(func() { close(channel) })
 				}
 			},
 		)

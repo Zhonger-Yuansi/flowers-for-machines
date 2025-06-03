@@ -2,6 +2,7 @@ package game_interface
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
@@ -335,6 +336,7 @@ func (b *BotClick) PickBlock(
 	slot resources_control.SlotID,
 	err error,
 ) {
+	doOnce := new(sync.Once)
 	channel := make(chan struct{})
 	packetListener := b.r.PacketListener()
 
@@ -342,9 +344,11 @@ func (b *BotClick) PickBlock(
 		uniqueID := packetListener.ListenPacket(
 			[]uint32{packet.IDPlayerHotBar},
 			func(p packet.Packet) {
-				slot = resources_control.SlotID(p.(*packet.PlayerHotBar).SelectedHotBarSlot)
-				success = true
-				close(channel)
+				doOnce.Do(func() {
+					slot = resources_control.SlotID(p.(*packet.PlayerHotBar).SelectedHotBarSlot)
+					success = true
+					close(channel)
+				})
 			},
 		)
 

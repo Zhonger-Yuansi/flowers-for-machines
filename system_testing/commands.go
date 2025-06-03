@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
@@ -16,11 +17,12 @@ func SystemTestingCommands() {
 	{
 		channel := make(chan struct{})
 
+		doOnce := new(sync.Once)
 		uniqueID := api.PacketListener().ListenPacket(
 			[]uint32{packet.IDText},
 			func(p packet.Packet) {
 				if p.(*packet.Text).Message == "System Testing" {
-					close(channel)
+					doOnce.Do(func() { close(channel) })
 				}
 			},
 		)
@@ -58,10 +60,11 @@ func SystemTestingCommands() {
 	{
 		channel := make(chan struct{})
 
+		doOnce := new(sync.Once)
 		uniqueID := api.PacketListener().ListenPacket(
 			[]uint32{packet.IDGameRulesChanged},
 			func(p packet.Packet) {
-				close(channel)
+				doOnce.Do(func() { close(channel) })
 			},
 		)
 
@@ -83,11 +86,12 @@ func SystemTestingCommands() {
 	{
 		channel := make(chan struct{})
 
+		doOnce := new(sync.Once)
 		uniqueID := api.PacketListener().ListenPacket(
 			[]uint32{packet.IDText},
 			func(p packet.Packet) {
 				if p.(*packet.Text).Message == "System Testing" {
-					close(channel)
+					doOnce.Do(func() { close(channel) })
 				}
 			},
 		)
@@ -107,11 +111,12 @@ func SystemTestingCommands() {
 	{
 		channel := make(chan struct{})
 
+		doOnce := new(sync.Once)
 		uniqueID := api.PacketListener().ListenPacket(
 			[]uint32{packet.IDText},
 			func(p packet.Packet) {
 				if p.(*packet.Text).Message == "System Testing" {
-					close(channel)
+					doOnce.Do(func() { close(channel) })
 				}
 			},
 		)
@@ -151,11 +156,12 @@ func SystemTestingCommands() {
 	{
 		channel := make(chan struct{})
 
+		doOnce := new(sync.Once)
 		uniqueID := api.PacketListener().ListenPacket(
 			[]uint32{packet.IDSetTitle},
 			func(p packet.Packet) {
 				if strings.Contains(p.(*packet.SetTitle).Text, "System Testing") {
-					close(channel)
+					doOnce.Do(func() { close(channel) })
 				}
 			},
 		)

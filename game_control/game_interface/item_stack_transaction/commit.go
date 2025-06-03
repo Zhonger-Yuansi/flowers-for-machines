@@ -19,6 +19,7 @@ func (i *ItemStackTransaction) Discord() *ItemStackTransaction {
 
 // Commit 将底层操作序列内联到单个物品堆栈操作请求数据包中执行物品堆栈操作事务。
 // 如果没有返回错误，Commit 在完成后将使用 Discord 清空底层操作序列。
+// 应当说明的是，如果事务没有全部成功，则若没有返回错误，则 Discord 仍然会执行。
 //
 // Commit 在设计上考虑并预期事务的所有都会成功，因此内联将尽可能紧凑，而这依赖于“成功”的预期前提。
 // 这意味着，一旦某个步骤失败，那么整个物品堆栈操作都可能失败，并且最终的结果将是未定义的。
@@ -205,6 +206,7 @@ func (i *ItemStackTransaction) Commit() (
 	// Setp 5.1: Return unsuccess
 	for _, response := range serverResponse {
 		if response.Status != protocol.ItemStackResponseStatusOK {
+			i.Discord()
 			return false, pk, serverResponse, nil
 		}
 	}

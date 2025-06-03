@@ -27,7 +27,7 @@ func (i *ItemStackTransaction) Discord() *ItemStackTransaction {
 // 作为一种特殊情况，如果底层操作序列为空，则 success 总是真。
 //
 // pks 指示最终编译得到的多个数据包，它可以用于调试，但不应重新用于发送；
-// serverResponse 则指示租赁服针对 pks 中每个物品堆栈请求的结果
+// serverResponse 则指示租赁服针对 pks 中每个 packet.ItemStackRequest 的结果
 func (i *ItemStackTransaction) Commit() (
 	success bool,
 	pks []*packet.ItemStackRequest,
@@ -81,9 +81,9 @@ func (i *ItemStackTransaction) Commit() (
 		serverResponse = make([][]*protocol.ItemStackResponse, len(requests))
 	}
 
-	// Step 3: Commit
+	// Step 2: Commit
 	for index, request := range requests {
-		// Step 3.1: Prepare
+		// Step 2.1: Prepare
 		pk := new(packet.ItemStackRequest)
 		pks = append(pks, pk)
 
@@ -99,7 +99,7 @@ func (i *ItemStackTransaction) Commit() (
 			continue
 		}
 
-		// Step 3.2: If can inline
+		// Step 2.2: If can inline
 		if request[0].CanInline() {
 			requestID := api.ItemStackOperation().NewRequestID()
 			actions := make([]protocol.StackRequestAction, 0)
@@ -151,7 +151,7 @@ func (i *ItemStackTransaction) Commit() (
 			)
 		}
 
-		// Step 3.2: If can not inline
+		// Step 2.2: If can not inline
 		if !request[0].CanInline() {
 			for _, operation := range request {
 				var (
@@ -214,19 +214,19 @@ func (i *ItemStackTransaction) Commit() (
 			}
 		}
 
-		// Step 3.3: Send packet
+		// Step 2.3: Send packet
 		err = api.WritePacket(pk)
 		if err != nil {
 			return false, nil, nil, fmt.Errorf("Commit: %v", err)
 		}
 
-		// Step 3.4: Wait changes
+		// Step 2.4: Wait changes
 		for _, waiter := range waiters {
 			<-waiter
 		}
 	}
 
-	// Setp 4: Return unsuccess
+	// Setp 3.1: Return unsuccess
 	for _, responses := range serverResponse {
 		for _, response := range responses {
 			if response.Status != protocol.ItemStackResponseStatusOK {
@@ -235,7 +235,7 @@ func (i *ItemStackTransaction) Commit() (
 		}
 	}
 
-	// Step 5: Return success
+	// Step 3.2: Return success
 	i.Discord()
 	return true, pks, serverResponse, nil
 }

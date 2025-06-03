@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/client"
@@ -28,6 +29,35 @@ func main() {
 
 	resources := resources_control.NewResourcesControl(c)
 	api := game_interface.NewGameInterface(resources)
+
+	api.BotClick().ChangeSelectedHotbarSlot(0)
+	api.Commands().AwaitChangesGeneral()
+
+	wg := sync.WaitGroup{}
+	wg.Add(100)
+	for range 100 {
+		go func() {
+			api.ContainerOpenAndClose().OpenContainer(
+				game_interface.UseItemOnBlocks{
+					HotbarSlotID: 0,
+					BlockPos:     [3]int32{0, 0, 0},
+					BlockName:    "chest",
+					BlockStates: map[string]any{
+						"minecraft:cardinal_direction": "east",
+					},
+				},
+				false,
+			)
+			// time.Sleep(time.Second)
+			err := api.ContainerOpenAndClose().CloseContainer()
+			wg.Done()
+			go fmt.Println(err, time.Now())
+		}()
+	}
+	wg.Wait()
+	fmt.Println(api.ContainerOpenAndClose().OpenInventory())
+	fmt.Println(api.ContainerOpenAndClose().CloseContainer())
+	return
 
 	api.Commands().SendSettingsCommand("clear", true)
 	api.Commands().SendSettingsCommand("give @s apple 10", true)

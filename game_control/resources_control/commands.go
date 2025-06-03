@@ -36,6 +36,6 @@ func (c *CommandRequestCallback) DeleteCommandRequestCallback(requestID uuid.UUI
 func (c *CommandRequestCallback) onCommandOutput(p *packet.CommandOutput) {
 	cb, ok := c.callback.LoadAndDelete(p.CommandOrigin.UUID)
 	if ok {
-		cb(p)
+		go cb(p)
 	}
 }

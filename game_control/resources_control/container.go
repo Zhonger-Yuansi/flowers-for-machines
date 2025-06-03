@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
-	"github.com/pterm/pterm"
 )
 
 const (
@@ -17,7 +16,6 @@ const (
 // 它用于追踪和监控目前已打开容器的状态
 type ContainerManager struct {
 	mu     *sync.Mutex
-	occupy *sync.Mutex
 	states uint8
 
 	openingData  *packet.ContainerOpen
@@ -31,27 +29,11 @@ type ContainerManager struct {
 func NewContainerManager() *ContainerManager {
 	return &ContainerManager{
 		mu:            new(sync.Mutex),
-		occupy:        new(sync.Mutex),
 		openingData:   nil,
 		openCallback:  nil,
 		closingData:   nil,
 		closeCallback: nil,
 	}
-}
-
-// Occupy 试图占用容器资源。
-// 如果已存在其他线程占用了容器资源，则在它们释放前，本函数将始终阻塞
-func (c *ContainerManager) Occupy() {
-	if !c.occupy.TryLock() {
-		pterm.Warning.Printf("(c *Container) Occupy: Dead lock maybe happened!")
-		c.occupy.Lock()
-	}
-}
-
-// Release 释放所占用的容器资源，它不会检查调用者是否是 Occupy 的调用者。
-// 如果调用 Release 前没有使用 Occupy 占用容器资源，则程序将会惊慌
-func (c *ContainerManager) Release() {
-	c.occupy.Unlock()
 }
 
 // States 返回已打开容器的状态。
@@ -101,7 +83,7 @@ func (c *ContainerManager) onContainerOpen(p *packet.ContainerOpen) {
 	c.states = ContainerStatesOpening
 
 	if c.openCallback != nil {
-		c.openCallback()
+		go c.openCallback()
 		c.openCallback = nil
 	}
 }
@@ -116,7 +98,7 @@ func (c *ContainerManager) onContainerClose(p *packet.ContainerClose) {
 	c.states = ContainerStatesClosed
 
 	if c.closeCallback != nil {
-		c.closeCallback(p.ServerSide)
+		go c.closeCallback(p.ServerSide)
 		c.closeCallback = nil
 	}
 }

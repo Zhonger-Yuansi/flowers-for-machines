@@ -256,7 +256,8 @@ func (b *BotClick) PlaceBlock(
 // 值得注意的是，facing 必须是 0 到 5 之间的整数，
 // 否则调用 PlaceBlockHighLevel 将返回错误。
 //
-// 最后，您希望要创建的方块可以是潜影盒，亦可以是旗帜
+// 最后，您希望要创建的方块可以是潜影盒，亦可以是旗帜。
+// 另外，此函数不会自动切换物品栏，也不会等待租赁服响应更改
 func (b *BotClick) PlaceBlockHighLevel(
 	pos protocol.BlockPos,
 	hotBarSlot resources_control.SlotID,
@@ -294,11 +295,6 @@ func (b *BotClick) PlaceBlockHighLevel(
 	if err != nil {
 		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
 	}
-	err = b.ChangeSelectedHotbarSlot(hotBarSlot)
-	if err != nil {
-		return clickPos, fmt.Errorf("PlaceBlockWithFacing: %v", err)
-	}
-
 	err = b.c.AwaitChangesGeneral()
 	if err != nil {
 		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
@@ -328,7 +324,9 @@ func (b *BotClick) PlaceBlockHighLevel(
 // assignNBTData 指示是否需要携带该方块的 NBT 数据。
 //
 // 返回的 success 指示操作是否成功；
-// resultHotbar 指示物品最终所在的物品栏位置
+// resultHotbar 指示物品最终所在的物品栏位置。
+//
+// 此函数不会自动切换物品栏，也不会等待租赁服响应更改
 func (b *BotClick) PickBlock(
 	pos protocol.BlockPos,
 	expectedHotbar resources_control.SlotID,
@@ -344,11 +342,10 @@ func (b *BotClick) PickBlock(
 	for range MaxRetryBlockPick {
 		uniqueID := packetListener.ListenPacket(
 			[]uint32{packet.IDPlayerHotBar},
-			func(p packet.Packet) bool {
+			func(p packet.Packet) {
 				resultHotbar = resources_control.SlotID(p.(*packet.PlayerHotBar).SelectedHotBarSlot)
 				success = true
 				close(channel)
-				return true
 			},
 		)
 
@@ -362,9 +359,9 @@ func (b *BotClick) PickBlock(
 		defer timer.Stop()
 		select {
 		case <-timer.C:
-			packetListener.DestroyListener(uniqueID)
 		case <-channel:
 		}
+		packetListener.DestroyListener(uniqueID)
 
 		if success {
 			break

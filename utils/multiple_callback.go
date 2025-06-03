@@ -28,7 +28,7 @@ func (m *MultipleCallback[T]) FinishAll(data T) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	for _, f := range m.callbacks {
-		f(data)
+		go f(data)
 	}
 	m.callbacks = nil
 }

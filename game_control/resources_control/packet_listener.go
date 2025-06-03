@@ -9,8 +9,8 @@ import (
 
 // singleListener 是单个数据包的监听器
 type singleListener struct {
-	uniqueID string                     // 该监听器的唯一标识符
-	callback func(p packet.Packet) bool // 该监听器的回调函数
+	uniqueID string                // 该监听器的唯一标识符
+	callback func(p packet.Packet) // 该监听器的回调函数
 }
 
 // PacketListener 实现了一个可撤销监听的，
@@ -33,15 +33,13 @@ func NewPacketListener() *PacketListener {
 // ListenPacket 监听数据包 ID 在 packetID 中的数据包，
 // 并在收到这些数据包后执行回调函数 callback。
 //
-// 如果 callback 返回真，则此监听器将会被撤销，
-// 否则将会继续保留；
 // 如果 packetID 置空，则监听所有数据包。
 //
 // 返回的 uniqueID 用于标识该监听器，以便于
 // 后续调用 DestroyListener 以手动销毁监听器
 func (p *PacketListener) ListenPacket(
 	packetID []uint32,
-	callback func(p packet.Packet) bool,
+	callback func(p packet.Packet),
 ) (uniqueID string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
@@ -140,60 +138,12 @@ func (p *PacketListener) onPacket(pk packet.Packet) {
 	defer p.mu.Unlock()
 
 	// Any packet listener
-	{
-		callbackCancel := make([]bool, len(p.anyPacketListeners))
-		haveAtLeastOneCancel := false
-		for index, listeners := range p.anyPacketListeners {
-			if listeners.callback(pk) {
-				callbackCancel[index] = true
-				haveAtLeastOneCancel = true
-			}
-		}
-
-		if haveAtLeastOneCancel {
-			newListeners := make([]singleListener, 0)
-			for index, listeners := range p.anyPacketListeners {
-				if callbackCancel[index] {
-					continue
-				}
-				newListeners = append(newListeners, listeners)
-			}
-			p.anyPacketListeners = newListeners
-		}
+	for _, listeners := range p.anyPacketListeners {
+		go listeners.callback(pk)
 	}
 
 	// Specific packet listener
-	{
-		packetID := pk.ID()
-		listeners := p.specificPacketListeners[packetID]
-		if listeners == nil {
-			return
-		}
-
-		callbackCancel := make([]bool, len(listeners))
-		haveAtLeastOneCancel := false
-		for index, listener := range listeners {
-			if listener.callback(pk) {
-				callbackCancel[index] = true
-				haveAtLeastOneCancel = true
-			}
-		}
-
-		if haveAtLeastOneCancel {
-			newListeners := make([]singleListener, 0)
-
-			for index, listener := range listeners {
-				if callbackCancel[index] {
-					continue
-				}
-				newListeners = append(newListeners, listener)
-			}
-
-			if len(newListeners) == 0 {
-				delete(p.specificPacketListeners, packetID)
-			} else {
-				p.specificPacketListeners[packetID] = newListeners
-			}
-		}
+	for _, listener := range p.specificPacketListeners[pk.ID()] {
+		go listener.callback(pk)
 	}
 }

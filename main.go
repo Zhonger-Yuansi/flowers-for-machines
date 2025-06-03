@@ -32,7 +32,9 @@ func main() {
 	api.Commands().SendSettingsCommand("clear", true)
 	api.Commands().SendSettingsCommand("give @s apple 10", true)
 	api.Commands().SendSettingsCommand("give @s diamond_sword 1", true)
-	api.Commands().SendSettingsCommand(`setblock 0 0 0 anvil ["minecraft:cardinal_direction"="north","damage"="undamaged"]`, true)
+	api.Commands().SendSettingsCommand(`setblock 0 0 0 air`, true)
+	api.Commands().AwaitChangesGeneral()
+	api.Commands().SendSettingsCommand(`setblock 0 0 0 chest ["minecraft:cardinal_direction"="north"]`, true)
 	// api.Commands().SendSettingsCommand("tp 0 0 0", true)
 	api.BotClick().ChangeSelectedHotbarSlot(0)
 	api.Commands().AwaitChangesGeneral()
@@ -42,33 +44,23 @@ func main() {
 	api.BotClick().ClickBlock(game_interface.UseItemOnBlocks{
 		HotbarSlotID: 0,
 		BlockPos:     [3]int32{0, 0, 0},
-		BlockName:    "anvil",
+		BlockName:    "chest",
 		BlockStates: map[string]any{
 			`minecraft:cardinal_direction`: "north",
-			"damage":                       "undamaged",
 		},
 	})
 	<-channel
 
 	t1 := time.Now()
-	api.ItemStackOperation().OpenTransaction().
-		RenameInventoryItem(1, "haha Testing").
-		RenameInventoryItem(0, "System Testing").
-		MoveInventoryItem(0, 2, 1).
-		MoveInventoryItem(1, 3, 1).
-		MoveInventoryItem(0, 2, 1).
-		MoveInventoryItem(0, 2, 1).
-		MoveInventoryItem(0, 2, 1).
-		MoveInventoryItem(0, 2, 1).
-		MoveInventoryItem(0, 2, 1).
-		MoveInventoryItem(0, 2, 1).
-		MoveInventoryItem(0, 2, 1).
-		MoveInventoryItem(0, 2, 2).
-		RenameInventoryItem(2, "666").
-		RenameInventoryItem(3, "999").
-		DropHotbarItem(2, 10).
-		DropHotbarItem(3, 1).
-		Commit()
+	fmt.Println(
+		api.ItemStackOperation().OpenTransaction().
+			MoveInventoryItem(0, 2, 10).
+			MoveInventoryItem(1, 3, 1).
+			MoveToContainer(2, 0, 9).
+			MoveToContainer(3, 1, 1).
+			DropContainerItem(1, 1).
+			Commit(),
+	)
 	fmt.Println(time.Since(t1))
 }
 

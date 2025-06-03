@@ -50,6 +50,62 @@ func (i *ItemStackTransaction) MoveInventoryItem(
 	return i
 }
 
+// MoveToContainer 将背包中 source 处的物品移动到已打开容器的
+// destination 处，且只移动 count 个物品。
+//
+// 此操作需要保证目前已经打开了一个容器，否则效果将会与
+// MoveInventoryItem 等同。
+//
+// 该操作是支持内联的，它会与所有相邻的支持内联的操作一起被内联
+// 到单个物品堆栈操作请求中
+func (i *ItemStackTransaction) MoveToContainer(
+	source resources_control.SlotID,
+	destination resources_control.SlotID,
+	count uint8,
+) *ItemStackTransaction {
+	data, _ := i.api.Container().ContainerData()
+	i.operations = append(i.operations, item_stack_operation.Move{
+		Source: resources_control.SlotLocation{
+			WindowID: protocol.WindowIDInventory,
+			SlotID:   source,
+		},
+		Destination: resources_control.SlotLocation{
+			WindowID: resources_control.WindowID(data.WindowID),
+			SlotID:   destination,
+		},
+		Count: int32(count),
+	})
+	return i
+}
+
+// MoveToInventory 将已打开容器中 source 处的物品移动到
+// 背包的 destination 处，且只移动 count 个物品。
+//
+// 此操作需要保证目前已经打开了一个容器，否则效果将会与
+// MoveInventoryItem 等同。
+//
+// 该操作是支持内联的，它会与所有相邻的支持内联的操作一起
+// 被内联到单个物品堆栈操作请求中
+func (i *ItemStackTransaction) MoveToInventory(
+	source resources_control.SlotID,
+	destination resources_control.SlotID,
+	count uint8,
+) *ItemStackTransaction {
+	data, _ := i.api.Container().ContainerData()
+	i.operations = append(i.operations, item_stack_operation.Move{
+		Source: resources_control.SlotLocation{
+			WindowID: resources_control.WindowID(data.WindowID),
+			SlotID:   source,
+		},
+		Destination: resources_control.SlotLocation{
+			WindowID: protocol.WindowIDInventory,
+			SlotID:   destination,
+		},
+		Count: int32(count),
+	})
+	return i
+}
+
 // SwapItem 交换 source 处和 destination 处的物品。
 //
 // 该操作是支持内联的，它会与所有相邻的支持内联的操作
@@ -61,6 +117,56 @@ func (i *ItemStackTransaction) SwapItem(
 	i.operations = append(i.operations, item_stack_operation.Swap{
 		Source:      source,
 		Destination: destination,
+	})
+	return i
+}
+
+// SwapInventoryItem 交换背包中 source
+// 处和背包中 destination 处的物品。
+//
+// 此操作需要保证背包已被打开，或者已打开
+// 的容器中可以在背包中移动物品。
+//
+// 该操作是支持内联的，它会与所有相邻的支
+// 持内联的操作一起被内联到单个物品堆栈操
+// 作请求中
+func (i *ItemStackTransaction) SwapInventoryItem(
+	source resources_control.SlotID,
+	destination resources_control.SlotID,
+) *ItemStackTransaction {
+	i.operations = append(i.operations, item_stack_operation.Swap{
+		Source: resources_control.SlotLocation{
+			WindowID: protocol.WindowIDInventory,
+			SlotID:   source,
+		},
+		Destination: resources_control.SlotLocation{
+			WindowID: protocol.WindowIDInventory,
+			SlotID:   destination,
+		},
+	})
+	return i
+}
+
+// SwapInventoryAndContainer 交换背包中 source 处和已
+// 打开容器 destination 处的物品。
+//
+// 此操作需要保证目前已经打开了一个容器，否则效果将会与
+// SwapInventoryItem 等同。
+//
+// 该操作是支持内联的，它会与所有相邻的支持内联的操作一起
+// 被内联到单个物品堆栈操作请求中
+func (i *ItemStackTransaction) SwapInventoryAndContainer(
+	source resources_control.SlotID,
+	destination resources_control.SlotID,
+) *ItemStackTransaction {
+	data, _ := i.api.Container().ContainerData()
+	i.operations = append(i.operations, item_stack_operation.Swap{
+		Source: resources_control.SlotLocation{
+			WindowID: protocol.WindowIDInventory,
+		},
+		Destination: resources_control.SlotLocation{
+			WindowID: resources_control.WindowID(data.WindowID),
+		},
 	})
 	return i
 }
@@ -97,15 +203,36 @@ func (i *ItemStackTransaction) DropInventoryItem(slot resources_control.SlotID, 
 	return i
 }
 
-// DropItem 将背包中 slot 处的物品丢出，且只丢出 count 个。
-// 不同于 DropInventoryItem，DropHotbarItem 可以在未打开背包时使用。
+// DropItem 将快捷栏 slot 处的物品丢出，且只丢出 count 个。
 //
-// 该操作是支持内联的，它会与所有相邻的支持内联的操作一起被内联到单个
-// 物品堆栈操作请求中
+// DropHotbarItem 与 DropInventoryItem 不同之处在于其可以
+// 在未打开背包时使用。
+//
+// 该操作是支持内联的，它会与所有相邻的支持内联的操作一起被
+// 内联到单个物品堆栈操作请求中
 func (i *ItemStackTransaction) DropHotbarItem(slot resources_control.SlotID, count uint8) *ItemStackTransaction {
 	i.operations = append(i.operations, item_stack_operation.DropHotbar{
 		SlotID: slot,
 		Count:  count,
+	})
+	return i
+}
+
+// DropItem 将已打开容器 slot 处的物品丢出，且只丢出 count 个。
+//
+// 此操作需要保证目前已经打开了一个容器，否则效果将会与
+// DropInventoryItem 等同。
+//
+// 该操作是支持内联的，它会与所有相邻的支持内联的操作一起被内联
+// 到单个物品堆栈操作请求中
+func (i *ItemStackTransaction) DropContainerItem(slot resources_control.SlotID, count uint8) *ItemStackTransaction {
+	data, _ := i.api.Container().ContainerData()
+	i.operations = append(i.operations, item_stack_operation.Drop{
+		Path: resources_control.SlotLocation{
+			WindowID: resources_control.WindowID(data.WindowID),
+			SlotID:   slot,
+		},
+		Count: count,
 	})
 	return i
 }

@@ -29,7 +29,7 @@ func (i *ItemStackTransaction) MoveItem(
 //
 // 此操作需要保证背包已被打开，或者已打开的容器中可以在背包中移动物品。
 //
-// 该操作是支持内联的，它会与所有相邻的支持内联的操作一 起被内联到单个
+// 该操作是支持内联的，它会与所有相邻的支持内联的操作一起被内联到单个
 // 物品堆栈操作请求中
 func (i *ItemStackTransaction) MoveBetweenInventory(
 	source resources_control.SlotID,
@@ -199,21 +199,6 @@ func (i *ItemStackTransaction) DropInventoryItem(slot resources_control.SlotID, 
 	)
 }
 
-// DropItem 将快捷栏 slot 处的物品丢出，且只丢出 count 个。
-//
-// DropHotbarItem 与 DropInventoryItem 不同之处在于其可以
-// 在未打开背包时使用。
-//
-// 该操作是支持内联的，它会与所有相邻的支持内联的操作一起被
-// 内联到单个物品堆栈操作请求中
-func (i *ItemStackTransaction) DropHotbarItem(slot resources_control.SlotID, count uint8) *ItemStackTransaction {
-	i.operations = append(i.operations, item_stack_operation.DropHotbar{
-		SlotID: slot,
-		Count:  count,
-	})
-	return i
-}
-
 // DropItem 将已打开容器 slot 处的物品丢出，且只丢出 count 个。
 //
 // 此操作需要保证目前已经打开了一个容器，否则效果将会与
@@ -236,12 +221,8 @@ func (i *ItemStackTransaction) DropContainerItem(slot resources_control.SlotID, 
 // creativeItemNetworkID 的物品到 slot 处，
 // 且只移动 count 个物品。
 //
-// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
-// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
-// 但最终可以被紧缩在一个数据包中。
-//
-// 请确保不要将此操作与内联操作混用，否则将会发送多个
-// 数据包从而降低事务的效率
+// 该操作不支持内联，但它仍然可以被紧缩在单个的物品堆栈操
+// 作请求的数据包中
 func (i *ItemStackTransaction) GetCreativeItem(
 	creativeItemNetworkID uint32,
 	slot resources_control.SlotLocation,
@@ -258,16 +239,12 @@ func (i *ItemStackTransaction) GetCreativeItem(
 	return i
 }
 
-// GetCreativeItemToInventory 从创造物品栏获取 创造物品网络 ID 为
-// creativeItemNetworkID 的物品到背包中的 slot 处，
+// GetCreativeItemToInventory 从创造物品栏获取创造物品网络
+// ID 为 creativeItemNetworkID 的物品到背包中的 slot 处，
 // 且只移动 count 个物品。
 //
-// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
-// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
-// 但最终可以被紧缩在一个数据包中。
-//
-// 请确保不要将此操作与内联操作混用，否则将会发送多个
-// 数据包从而降低事务的效率
+// 该操作不支持内联，但它仍然可以被紧缩在单个的物品堆栈操作请
+// 求的数据包中
 func (i *ItemStackTransaction) GetCreativeItemToInventory(
 	creativeItemNetworkID uint32,
 	slot resources_control.SlotID,
@@ -287,12 +264,8 @@ func (i *ItemStackTransaction) GetCreativeItemToInventory(
 // 网络数字 ID 为 networkID 的物品到 slot 处，
 // 且只移动 count 个物品。
 //
-// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
-// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
-// 但最终可以被紧缩在一个数据包中。
-//
-// 请确保不要将此操作与内联操作混用，否则将会发送多个
-// 数据包从而降低事务的效率
+// 该操作不支持内联，但它仍然可以被紧缩在单个的物
+// 品堆栈操作请求的数据包中
 func (i *ItemStackTransaction) GetCreativeItemByNetworkID(
 	networkID int32,
 	slot resources_control.SlotLocation,
@@ -309,16 +282,13 @@ func (i *ItemStackTransaction) GetCreativeItemByNetworkID(
 	return i
 }
 
-// GetCreativeItemToInventoryByNetworkID 从创造物品栏获取
-// 网络数字 ID 为 networkID 的物品到背包中的 slot 处，且只移
-// 动 count 个物品。
+// GetCreativeItemToInventoryByNetworkID
+// 从创造物品栏获取网络数字 ID 为 networkID
+// 的物品到背包中的 slot 处，且只移动 count
+// 个物品。
 //
-// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
-// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
-// 但最终可以被紧缩在一个数据包中。
-//
-// 请确保不要将此操作与内联操作混用，否则将会发送多个
-// 数据包从而降低事务的效率
+// 该操作不支持内联，但它仍然可以被紧缩在单个
+// 的物品堆栈操作请求的数据包中
 func (i *ItemStackTransaction) GetCreativeItemToInventoryByNetworkID(
 	networkID int32,
 	slot resources_control.SlotID,
@@ -341,20 +311,16 @@ func (i *ItemStackTransaction) GetCreativeItemToInventoryByNetworkID(
 //
 // 如果操作成功，则物品将回到原位。
 //
-// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
-// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
-// 但最终可以被紧缩在一个数据包中。
-//
-// 请确保不要将此操作与内联操作交替使用，而是应该尽可能
-// 连续的使用多个非内联操作。如果不这么做，提交事务时将
-// 会发送多个数据包从而降低事务的效率。
-//
-// 除此外，基于非内联操作的并发组织，你无法在同一个物品
-// 栏处重用非内联操作 (重命名操作或织布机操作)，除非您在
-// 操作前引入了至少一个内联操作，否则整个事务将会失败
-func (i *ItemStackTransaction) RenameItem(slot resources_control.SlotLocation, newName string) *ItemStackTransaction {
+// 该操作不支持内联，但它仍然可以被紧缩在单个的物品堆栈操作请
+// 求的数据包中
+func (i *ItemStackTransaction) RenameItem(
+	slot resources_control.SlotLocation,
+	count uint8,
+	newName string,
+) *ItemStackTransaction {
 	i.operations = append(i.operations, item_stack_operation.Renaming{
 		Path:    slot,
+		Count:   count,
 		NewName: newName,
 	})
 	return i
@@ -368,19 +334,10 @@ func (i *ItemStackTransaction) RenameItem(slot resources_control.SlotLocation, n
 // 与 RenameItem 的不同之处在于，它只能操作背包中的物品，
 // 因此您需要确保背包已被打开。
 //
-// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
-// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
-// 但最终可以被紧缩在一个数据包中。
-//
-// 请确保不要将此操作与内联操作交替使用，而是应该尽可能
-// 连续的使用多个非内联操作。如果不这么做，提交事务时将
-// 会发送多个数据包从而降低事务的效率。
-//
-// 除此外，基于非内联操作的并发组织，你无法在同一个物品
-// 栏处重用非内联操作 (重命名操作或织布机操作)，除非您在
-// 操作前引入了至少一个内联操作，否则整个事务将会失败
+// 该操作不支持内联，但它仍然可以被紧缩在单个的物品堆栈操作请求的数据包中
 func (i *ItemStackTransaction) RenameInventoryItem(
 	slot resources_control.SlotID,
+	count uint8,
 	newName string,
 ) *ItemStackTransaction {
 	return i.RenameItem(
@@ -388,6 +345,7 @@ func (i *ItemStackTransaction) RenameInventoryItem(
 			WindowID: protocol.WindowIDInventory,
 			SlotID:   slot,
 		},
+		count,
 		newName,
 	)
 }
@@ -403,17 +361,8 @@ func (i *ItemStackTransaction) RenameInventoryItem(
 // resultItem 指示期望得到的旗帜的部分数据。
 // 如果操作成功，则新旗帜将回到原位。
 //
-// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
-// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
-// 但最终可以被紧缩在一个数据包中。
-//
-// 请确保不要将此操作与内联操作交替使用，而是应该尽可能
-// 连续的使用多个非内联操作。如果不这么做，提交事务时将
-// 会发送多个数据包从而降低事务的效率。
-//
-// 除此外，基于非内联操作的并发组织，你无法在同一个物品
-// 栏处重用非内联操作 (重命名操作或织布机操作)，除非您在
-// 操作前引入了至少一个内联操作，否则整个事务将会失败
+// 该操作不支持内联，但它仍然可以被紧缩在单个的物品
+// 堆栈操作请求的数据包中
 func (i *ItemStackTransaction) Looming(
 	patternName string,
 	patternSlot resources_control.SlotLocation,
@@ -421,6 +370,9 @@ func (i *ItemStackTransaction) Looming(
 	dyeSlot resources_control.SlotLocation,
 	resultItem resources_control.ExpectedNewItem,
 ) *ItemStackTransaction {
+	if patternName == "bo" {
+		patternName = ""
+	}
 	i.operations = append(i.operations, item_stack_operation.Looming{
 		UsePattern:  len(patternName) > 0,
 		PatternName: patternName,
@@ -442,17 +394,7 @@ func (i *ItemStackTransaction) Looming(
 // resultItem 指示期望得到的旗帜的部分数据。
 // 如果操作成功，则新旗帜将回到原位。
 //
-// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
-// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
-// 但最终可以被紧缩在一个数据包中。
-//
-// 请确保不要将此操作与内联操作交替使用，而是应该尽可能
-// 连续的使用多个非内联操作。如果不这么做，提交事务时将
-// 会发送多个数据包从而降低事务的效率。
-//
-// 除此外，基于非内联操作的并发组织，你无法在同一个物品
-// 栏处重用非内联操作 (重命名操作或织布机操作)，除非您在
-// 操作前引入了至少一个内联操作，否则整个事务将会失败
+// 该操作不支持内联，但它仍然可以被紧缩在单个的物品堆栈操作请求的数据包中
 func (i *ItemStackTransaction) LoomingFromInventory(
 	patternName string,
 	patternSlot resources_control.SlotID,

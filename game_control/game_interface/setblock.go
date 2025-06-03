@@ -6,6 +6,9 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 )
 
+// 用作铁砧的承重方块
+const BaseAnvil string = "minecraft:polished_andesite"
+
 // SetBlock 是基于 Commands 实现的，
 // 通过发送 MC 命令实现方块放置的若干实现
 type SetBlock struct {
@@ -42,6 +45,27 @@ func (s *SetBlock) SetBlock(pos protocol.BlockPos, name string, states string) e
 	}
 
 	return nil
+}
+
+// SetAnvil 在 pos 处放置铁砧，并返回所放置铁砧的方块状态 states。
+// placeBaseBlock 指示是否需要在 pos 下一格处放置铁砧的承重方块
+func (s *SetBlock) SetAnvil(pos protocol.BlockPos, placeBaseBlock bool) (states map[string]any, err error) {
+	if placeBaseBlock {
+		err = s.SetBlock(protocol.BlockPos{pos[0], pos[1] - 1, pos[2]}, BaseAnvil, "[]")
+		if err != nil {
+			return nil, fmt.Errorf("SetAnvil: %v", err)
+		}
+	}
+
+	err = s.SetBlock(pos, "minecraft:anvil", `["damage"="undamaged","minecraft:cardinal_direction"="east"]`)
+	if err != nil {
+		return nil, fmt.Errorf("SetAnvil: %v", err)
+	}
+
+	return map[string]any{
+		"damage":                       "undamaged",
+		"minecraft:cardinal_direction": "east",
+	}, nil
 }
 
 // SetBlockAsync 在 pos 处以 setblock 命令

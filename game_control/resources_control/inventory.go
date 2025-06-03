@@ -90,7 +90,19 @@ func (i *Inventory) GetItemStack(slotID SlotID) *protocol.ItemInstance {
 	return result
 }
 
+// GetAllItemStack 列出当前库存的全部物品堆栈实例
+func (i *Inventory) GetAllItemStack() map[SlotID]*protocol.ItemInstance {
+	i.mu.RLock()
+	defer i.mu.RUnlock()
+
+	newMapping := make(map[SlotID]*protocol.ItemInstance)
+	maps.Copy(newMapping, i.mapping)
+
+	return newMapping
+}
+
 // setItemStack 将 item 所指示的物品堆栈实例储存到当前库存的 slotID 处。
+//
 // 如果 item 为空指针，则储存为空气；
 // 如果 item 未更改且 slotID 处已存在物品，则不作额外操作。
 //
@@ -164,6 +176,25 @@ func (i *Inventories) GetItemStack(windowID WindowID, slotID SlotID) (item *prot
 	return inventory.GetItemStack(slotID), true
 }
 
+// GetAllItemStack 列出窗口 ID 为 windowID 的库存中的所有物品堆栈实例
+func (i *Inventories) GetAllItemStack(windowID WindowID) (mapping map[SlotID]*protocol.ItemInstance, inventoryExisted bool) {
+	inventory, existed := i.GetInventory(windowID)
+	if !existed {
+		return nil, false
+	}
+	return inventory.GetAllItemStack(), true
+}
+
+// GetAllWindowID 列出当前所有库存的窗口 ID
+func (i *Inventories) GetAllWindowID() (result []WindowID) {
+	i.mu.RLock()
+	defer i.mu.RUnlock()
+	for windowID := range i.mapping {
+		result = append(result, windowID)
+	}
+	return
+}
+
 // setItemStack 设置位于 windowsID 库存中索引为 slotID 的物品的数据为 item。
 //
 // 如果窗口 ID 为 windowID 的库存不存在，则尝试创建其；
@@ -189,21 +220,51 @@ func (i *Inventories) setItemStack(windowID WindowID, slotID SlotID, item *proto
 
 // SetCallback 设置当位于窗口 ID 为 windowID 且槽位索引为 slotID 的发生变化时，
 // 应当执行的回调函数 f。item 是变化后得到的新物品。
+//
+// uniqueID 指示回调函数获得的唯一标识，稍后可以使用 CancelCallback 撤销。
+// 应当说明的是，如果 f 被回调，那么内部实现将会进行撤销。
+//
 // 值得说明的是，SetCallback 与物品堆栈操作请求是无关的，它们使用另外的回调实现
-func (i *Inventories) SetCallback(windowID WindowID, slotID SlotID, f func(item *protocol.ItemInstance)) {
+func (i *Inventories) SetCallback(windowID WindowID, slotID SlotID, f func(item *protocol.ItemInstance)) (uniqueID string) {
 	i.mu.Lock()
 	defer i.mu.Unlock()
 	multipleCallback, _ := i.callback.LoadOrStore(
 		SlotLocation{WindowID: windowID, SlotID: slotID},
 		utils.NewMultipleCallback[*protocol.ItemInstance](),
 	)
-	multipleCallback.Append(f)
+	return multipleCallback.Append(f)
+}
+
+// CancelCallback 将已经设置在窗口 ID 为 windowID 且槽位索引为 slotID 的回调函数撤销，
+// uniqueID 指示该函数的唯一标识。如果未能找到，则不执行任何操作
+func (i *Inventories) CancelCallback(windowID WindowID, slotID SlotID, uniqueID string) {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+
+	multipleCallback, ok := i.callback.Load(SlotLocation{WindowID: windowID, SlotID: slotID})
+	if !ok {
+		return
+	}
+
+	multipleCallback.Destory(uniqueID)
 }
 
 // onItemChange ..
 func (i *Inventories) onItemChange(windowID WindowID, slotID SlotID, item *protocol.ItemInstance) {
 	i.mu.Lock()
 	defer i.mu.Unlock()
+
+	if item.Stack.NetworkID == -1 {
+		_, ok := i.mapping[windowID]
+		if !ok {
+			return
+		}
+		_, ok = i.mapping[windowID].mapping[slotID]
+		if !ok {
+			return
+		}
+		item = i.mapping[windowID].mapping[slotID]
+	}
 
 	multipleCallback, existed := i.callback.Load(SlotLocation{WindowID: windowID, SlotID: slotID})
 	if !existed {

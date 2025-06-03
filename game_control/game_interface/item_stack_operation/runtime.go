@@ -37,27 +37,31 @@ type DropHotbarRuntime struct {
 type CreativeItemRuntime struct {
 	RequestID             int32
 	DstContainerID        byte
+	DstItemStackID        int32
 	CreativeItemNetworkID uint32
 }
 
 // RenamingRuntime 是将铁砧重命名操作内联为物品堆栈操作请求的运行时结构体
 type RenamingRuntime struct {
-	RequestID      int32
-	ItemCount      uint8
-	ContainerID    byte
-	StackNetworkID int32
+	RequestID               int32
+	ContainerID             byte
+	StackNetworkID          int32
+	AnvilSlotStackNetworkID int32
 }
 
 // LoomingRuntime 是将织布机操作内联为物品堆栈操作请求的运行时结构体
 type LoomingRuntime struct {
 	RequestID int32
 
+	LoomPatternStackNetworkID    int32
 	MovePatternSrcContainerID    byte
 	MovePatternSrcStackNetworkID int32
 
+	LoomBannerStackNetworkID    int32
 	MoveBannerSrcContainerID    byte
 	MoveBannerSrcStackNetworkID int32
 
+	LoomDyeStackNetworkID    int32
 	MoveDyeSrcContainerID    byte
 	MoveDyeSrcStackNetworkID int32
 }

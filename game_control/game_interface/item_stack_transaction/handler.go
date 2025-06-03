@@ -125,35 +125,17 @@ func (i *itemStackOperationHandler) handleDrop(
 	return op.Make(runtimeData), nil
 }
 
-// handleDropHotbar ..
-func (i *itemStackOperationHandler) handleDropHotbar(
-	op item_stack_operation.DropHotbar,
-	requestID resources_control.ItemStackRequestID,
-) (result []protocol.StackRequestAction, err error) {
-	slot := resources_control.SlotLocation{
-		WindowID: protocol.WindowIDInventory,
-		SlotID:   op.SlotID,
-	}
-
-	srcRID, err := i.virtualInventories.loadAndSetStackNetworkID(slot, requestID)
-	if err != nil {
-		return nil, fmt.Errorf("handleDropHotbar: %v", err)
-	}
-	i.responseMapping.bind(protocol.WindowIDInventory, protocol.ContainerHotBar)
-
-	runtimeData := item_stack_operation.DropHotbarRuntime{
-		DropSrcStackNetworkID: srcRID,
-		Randomly:              false,
-	}
-	return op.Make(runtimeData), nil
-}
-
 // handleCreativeItem ..
 func (i *itemStackOperationHandler) handleCreativeItem(
 	op item_stack_operation.CreativeItem,
 	requestID resources_control.ItemStackRequestID,
 ) (result []protocol.StackRequestAction, err error) {
 	var creativeItemNetworkID uint32
+
+	rid, err := i.virtualInventories.loadAndSetStackNetworkID(op.Path, requestID)
+	if err != nil {
+		return nil, fmt.Errorf("handleCreativeItem: %v", err)
+	}
 
 	cid, found := slotLocationToContainerID(i.api, op.Path)
 	if !found {
@@ -172,6 +154,7 @@ func (i *itemStackOperationHandler) handleCreativeItem(
 		item_stack_operation.CreativeItemRuntime{
 			RequestID:             int32(requestID),
 			DstContainerID:        byte(cid),
+			DstItemStackID:        rid,
 			CreativeItemNetworkID: creativeItemNetworkID,
 		},
 	), nil
@@ -182,12 +165,22 @@ func (i *itemStackOperationHandler) handleRenaming(
 	op item_stack_operation.Renaming,
 	requestID resources_control.ItemStackRequestID,
 ) (result []protocol.StackRequestAction, err error) {
-	itemCount, err := i.virtualInventories.loadItemCount(op.Path)
-	if err != nil {
-		return nil, fmt.Errorf("handleRenaming: %v", err)
+	containerData, existed := i.api.ContainerData()
+	if !existed {
+		return nil, fmt.Errorf("handleRenaming: Anvil is not opened")
 	}
 
 	srcRID, err := i.virtualInventories.loadAndSetStackNetworkID(op.Path, requestID)
+	if err != nil {
+		return nil, fmt.Errorf("handleRenaming: %v", err)
+	}
+	anvilRID, err := i.virtualInventories.loadAndSetStackNetworkID(
+		resources_control.SlotLocation{
+			WindowID: resources_control.WindowID(containerData.WindowID),
+			SlotID:   1,
+		},
+		requestID,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("handleRenaming: %v", err)
 	}
@@ -197,19 +190,14 @@ func (i *itemStackOperationHandler) handleRenaming(
 		return nil, fmt.Errorf("handleRenaming: Can not find the container ID of given item whose at %#v", op.Path)
 	}
 
-	containerData, existed := i.api.ContainerData()
-	if !existed {
-		return nil, fmt.Errorf("handleRenaming: Anvil is not opened")
-	}
-
 	i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerAnvilInput)
 	i.responseMapping.bind(op.Path.WindowID, srcCID)
 
 	runtimeData := item_stack_operation.RenamingRuntime{
-		RequestID:      int32(requestID),
-		ItemCount:      uint8(itemCount),
-		ContainerID:    byte(srcCID),
-		StackNetworkID: srcRID,
+		RequestID:               int32(requestID),
+		ContainerID:             byte(srcCID),
+		StackNetworkID:          srcRID,
+		AnvilSlotStackNetworkID: anvilRID,
 	}
 	return op.Make(runtimeData), nil
 }
@@ -229,7 +217,16 @@ func (i *itemStackOperationHandler) handleLooming(
 	}
 
 	if op.UsePattern {
+		loomSlot := resources_control.SlotLocation{
+			WindowID: resources_control.WindowID(containerData.WindowID),
+			SlotID:   11,
+		}
+
 		rid, err := i.virtualInventories.loadAndSetStackNetworkID(op.PatternPath, requestID)
+		if err != nil {
+			return nil, fmt.Errorf("handleLooming: %v", err)
+		}
+		loomRID, err := i.virtualInventories.loadAndSetStackNetworkID(loomSlot, requestID)
 		if err != nil {
 			return nil, fmt.Errorf("handleLooming: %v", err)
 		}
@@ -242,13 +239,23 @@ func (i *itemStackOperationHandler) handleLooming(
 		i.responseMapping.bind(op.PatternPath.WindowID, cid)
 		i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerLoomMaterial)
 
+		runtimeData.LoomPatternStackNetworkID = loomRID
 		runtimeData.MovePatternSrcContainerID = byte(cid)
 		runtimeData.MovePatternSrcStackNetworkID = rid
 	}
 
 	// Banner
 	{
+		loomSlot := resources_control.SlotLocation{
+			WindowID: resources_control.WindowID(containerData.WindowID),
+			SlotID:   9,
+		}
+
 		rid, err := i.virtualInventories.loadAndSetStackNetworkID(op.BannerPath, requestID)
+		if err != nil {
+			return nil, fmt.Errorf("handleLooming: %v", err)
+		}
+		loomRID, err := i.virtualInventories.loadAndSetStackNetworkID(loomSlot, requestID)
 		if err != nil {
 			return nil, fmt.Errorf("handleLooming: %v", err)
 		}
@@ -261,13 +268,23 @@ func (i *itemStackOperationHandler) handleLooming(
 		i.responseMapping.bind(op.BannerPath.WindowID, cid)
 		i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerLoomInput)
 
+		runtimeData.LoomBannerStackNetworkID = loomRID
 		runtimeData.MoveBannerSrcContainerID = byte(cid)
 		runtimeData.MoveBannerSrcStackNetworkID = rid
 	}
 
 	// Dye
 	{
+		loomSlot := resources_control.SlotLocation{
+			WindowID: resources_control.WindowID(containerData.WindowID),
+			SlotID:   10,
+		}
+
 		rid, err := i.virtualInventories.loadAndSetStackNetworkID(op.DyePath, requestID)
+		if err != nil {
+			return nil, fmt.Errorf("handleLooming: %v", err)
+		}
+		loomRID, err := i.virtualInventories.loadAndSetStackNetworkID(loomSlot, requestID)
 		if err != nil {
 			return nil, fmt.Errorf("handleLooming: %v", err)
 		}
@@ -280,6 +297,7 @@ func (i *itemStackOperationHandler) handleLooming(
 		i.responseMapping.bind(op.DyePath.WindowID, cid)
 		i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerLoomDye)
 
+		runtimeData.LoomDyeStackNetworkID = loomRID
 		runtimeData.MoveDyeSrcContainerID = byte(cid)
 		runtimeData.MoveDyeSrcStackNetworkID = rid
 	}

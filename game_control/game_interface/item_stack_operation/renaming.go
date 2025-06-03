@@ -9,6 +9,7 @@ import (
 type Renaming struct {
 	Default
 	Path    resources_control.SlotLocation
+	Count   uint8
 	NewName string
 }
 
@@ -24,7 +25,7 @@ func (r Renaming) Make(runtimeData MakingRuntime) []protocol.StackRequestAction 
 	data := runtimeData.(RenamingRuntime)
 
 	move := protocol.TakeStackRequestAction{}
-	move.Count = data.ItemCount
+	move.Count = r.Count
 	move.Source = protocol.StackRequestSlotInfo{
 		ContainerID:    data.ContainerID,
 		Slot:           byte(r.Path.SlotID),
@@ -33,11 +34,11 @@ func (r Renaming) Make(runtimeData MakingRuntime) []protocol.StackRequestAction 
 	move.Destination = protocol.StackRequestSlotInfo{
 		ContainerID:    0,
 		Slot:           1,
-		StackNetworkID: 0,
+		StackNetworkID: data.AnvilSlotStackNetworkID,
 	}
 
 	moveBack := protocol.PlaceStackRequestAction{}
-	moveBack.Count = data.ItemCount
+	moveBack.Count = r.Count
 	moveBack.Source = protocol.StackRequestSlotInfo{
 		ContainerID:    protocol.ContainerCreatedOutput,
 		Slot:           0x32,
@@ -57,7 +58,7 @@ func (r Renaming) Make(runtimeData MakingRuntime) []protocol.StackRequestAction 
 		},
 		&protocol.ConsumeStackRequestAction{
 			DestroyStackRequestAction: protocol.DestroyStackRequestAction{
-				Count: data.ItemCount,
+				Count: r.Count,
 				Source: protocol.StackRequestSlotInfo{
 					ContainerID:    0,
 					Slot:           1,

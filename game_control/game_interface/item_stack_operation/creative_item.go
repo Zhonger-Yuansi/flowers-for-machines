@@ -38,9 +38,9 @@ func (d CreativeItem) Make(runtimeData MakingRuntime) []protocol.StackRequestAct
 		StackNetworkID: data.RequestID,
 	}
 	move.Destination = protocol.StackRequestSlotInfo{
-		ContainerID:    protocol.ContainerCombinedHotBarAndInventory,
-		Slot:           data.DstContainerID,
-		StackNetworkID: 0,
+		ContainerID:    data.DstContainerID,
+		Slot:           byte(d.Path.SlotID),
+		StackNetworkID: data.DstItemStackID,
 	}
 
 	return []protocol.StackRequestAction{

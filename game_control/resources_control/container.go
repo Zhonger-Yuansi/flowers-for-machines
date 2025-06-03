@@ -58,7 +58,8 @@ func (c ContainerManager) ContainerData() (data packet.ContainerOpen, existed bo
 	return *c.openingData, true
 }
 
-// SetContainerOpenCallback 设置容器打开时应该执行的回调函数
+// SetContainerOpenCallback 设置容器打开时应该执行的回调函数。
+// 另外，设置的回调函数会在其被执行后被移除
 func (c *ContainerManager) SetContainerOpenCallback(f func()) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -66,7 +67,8 @@ func (c *ContainerManager) SetContainerOpenCallback(f func()) {
 }
 
 // SetContainerCloseCallback 设置容器关闭时应该执行的回调函数。
-// isServerSide 指示容器是否是由服务器强制关闭的
+// isServerSide 指示容器是否是由服务器强制关闭的。
+// 另外，设置的回调函数会在其被执行后被移除
 func (c *ContainerManager) SetContainerCloseCallback(f func(isServerSide bool)) {
 	c.mu.Lock()
 	defer c.mu.Unlock()

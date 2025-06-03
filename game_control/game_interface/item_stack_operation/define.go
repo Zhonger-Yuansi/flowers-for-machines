@@ -7,7 +7,6 @@ const (
 	IDItemStackOperationMove
 	IDItemStackOperationSwap
 	IDItemStackOperationDrop
-	IDItemStackOperationDropHotbar
 	IDItemStackOperationCreativeItem
 	IDItemStackOperationHighLevelRenaming
 	IDItemStackOperationHighLevelLooming

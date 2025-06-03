@@ -44,19 +44,25 @@ func (l Looming) Make(runtiemData MakingRuntime) []protocol.StackRequestAction {
 			Slot:           byte(l.PatternPath.SlotID),
 			StackNetworkID: data.MovePatternSrcStackNetworkID,
 		}
-		moveBanner.Destination = protocol.StackRequestSlotInfo{
+		movePattern.Destination = protocol.StackRequestSlotInfo{
 			ContainerID:    protocol.ContainerLoomMaterial,
 			Slot:           11,
-			StackNetworkID: 0,
+			StackNetworkID: data.LoomPatternStackNetworkID,
 		}
 
 		moveBackPattern.Count = 1
-		moveBackPattern.Source = moveBanner.Destination
+		moveBackPattern.Source = protocol.StackRequestSlotInfo{
+			ContainerID:    protocol.ContainerLoomMaterial,
+			Slot:           11,
+			StackNetworkID: data.RequestID,
+		}
 		moveBackPattern.Destination = protocol.StackRequestSlotInfo{
 			ContainerID:    data.MovePatternSrcContainerID,
 			Slot:           byte(l.PatternPath.SlotID),
 			StackNetworkID: data.RequestID,
 		}
+	} else {
+		l.PatternName = "bo"
 	}
 
 	{
@@ -69,7 +75,7 @@ func (l Looming) Make(runtiemData MakingRuntime) []protocol.StackRequestAction {
 		moveBanner.Destination = protocol.StackRequestSlotInfo{
 			ContainerID:    protocol.ContainerLoomInput,
 			Slot:           9,
-			StackNetworkID: 0,
+			StackNetworkID: data.LoomBannerStackNetworkID,
 		}
 
 		moveDye.Count = 1
@@ -81,7 +87,7 @@ func (l Looming) Make(runtiemData MakingRuntime) []protocol.StackRequestAction {
 		moveDye.Destination = protocol.StackRequestSlotInfo{
 			ContainerID:    protocol.ContainerLoomDye,
 			Slot:           10,
-			StackNetworkID: 0,
+			StackNetworkID: data.LoomDyeStackNetworkID,
 		}
 
 		moveResult.Count = 1

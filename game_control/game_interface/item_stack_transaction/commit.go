@@ -17,7 +17,7 @@ func (i *ItemStackTransaction) Discord() *ItemStackTransaction {
 	return i
 }
 
-// Commit 将底层操作序列内联并使用尽可能少的物品堆栈请求的数据包执行物品堆栈操作事务。
+// Commit 将底层操作序列内联到单个物品堆栈操作请求数据包中执行物品堆栈操作事务。
 // 如果没有返回错误，Commit 在完成后将使用 Discord 清空底层操作序列。
 //
 // Commit 在设计上考虑并预期事务的所有都会成功，因此内联将尽可能紧凑，而这依赖于“成功”的预期前提。
@@ -26,80 +26,58 @@ func (i *ItemStackTransaction) Discord() *ItemStackTransaction {
 // success 为真指示该事务的全部操作完全成功，若为否则可能部分失败。
 // 作为一种特殊情况，如果底层操作序列为空，则 success 总是真。
 //
-// pks 指示最终编译得到的多个数据包，它可以用于调试，但不应重新用于发送；
-// serverResponse 则指示租赁服针对 pks 中每个 packet.ItemStackRequest 的结果
+// pk 指示最终编译得到的数据包，它可以用于调试，但不应重新用于发送；
+// serverResponse 则指示租赁服针对 pk 中每个物品堆栈操作的结果
 func (i *ItemStackTransaction) Commit() (
 	success bool,
-	pks []*packet.ItemStackRequest,
-	serverResponse [][]*protocol.ItemStackResponse,
+	pk *packet.ItemStackRequest,
+	serverResponse []*protocol.ItemStackResponse,
 	err error,
 ) {
 	if len(i.operations) == 0 {
-		return true, nil, make([][]*protocol.ItemStackResponse, 0), nil
+		return true, nil, make([]*protocol.ItemStackResponse, 0), nil
 	}
 
 	api := i.api
 	mu := new(sync.Mutex)
+
+	pk = new(packet.ItemStackRequest)
 	requests := make([][]item_stack_operation.ItemStackOperation, 0)
+	waiters := make([]chan struct{}, 0)
 
-	// Step 1: Split inline and can't inline
-	// e.g.
-	//		[
-	// 			[inline, inline, ...],
-	// 			[can't inline, can't inline, ...],
-	// 			...
-	//		]
-	{
-		canInlineRequests := make([]item_stack_operation.ItemStackOperation, 0)
-		canNotInlineRequests := make([]item_stack_operation.ItemStackOperation, 0)
+	handler := newItemStackOperationHandler(
+		api.Container(),
+		api.ConstantPacket(),
+		newVirtualInventories(api.Inventories()),
+		newResponseMapping(),
+	)
 
-		for _, operation := range i.operations {
-			if !operation.CanInline() {
-				if len(canInlineRequests) > 0 {
-					requests = append(requests, canInlineRequests)
-					canInlineRequests = nil
-				}
-				canNotInlineRequests = append(canNotInlineRequests, operation)
-				continue
+	// Step 1: Split by operations that can't inline
+	currentRequest := make([]item_stack_operation.ItemStackOperation, 0)
+	for _, operation := range i.operations {
+		if !operation.CanInline() {
+			if len(currentRequest) != 0 {
+				requests = append(requests, currentRequest)
 			}
-			if len(canNotInlineRequests) > 0 {
-				requests = append(requests, canNotInlineRequests)
-				canNotInlineRequests = nil
-			}
-			canInlineRequests = append(canInlineRequests, operation)
+			requests = append(requests, []item_stack_operation.ItemStackOperation{operation})
+			currentRequest = nil
+			continue
 		}
-
-		if len(canInlineRequests) != 0 {
-			requests = append(requests, canInlineRequests)
-			canInlineRequests = nil
-		}
-		if len(canNotInlineRequests) != 0 {
-			requests = append(requests, canNotInlineRequests)
-			canNotInlineRequests = nil
-		}
-
-		serverResponse = make([][]*protocol.ItemStackResponse, len(requests))
+		currentRequest = append(currentRequest, operation)
 	}
+	if len(currentRequest) != 0 {
+		requests = append(requests, currentRequest)
+		currentRequest = nil
+	}
+	serverResponse = make([]*protocol.ItemStackResponse, len(requests))
 
-	// Step 2: Commit
+	// Step 2: Construct actions
 	for index, request := range requests {
-		// Step 2.1: Prepare
-		pk := new(packet.ItemStackRequest)
-		pks = append(pks, pk)
-
-		waiters := make([]chan struct{}, 0)
-		handler := newItemStackOperationHandler(
-			api.Container(),
-			api.ConstantPacket(),
-			newVirtualInventories(api.Inventories()),
-			newResponseMapping(),
-		)
-
 		if len(request) == 0 {
 			continue
 		}
 
-		// Step 2.2: If can inline
+		// Step 2.1: If can inline
 		if request[0].CanInline() {
 			requestID := api.ItemStackOperation().NewRequestID()
 			actions := make([]protocol.StackRequestAction, 0)
@@ -115,8 +93,6 @@ func (i *ItemStackTransaction) Commit() (
 					result, err = handler.handleSwap(op, requestID)
 				case item_stack_operation.Drop:
 					result, err = handler.handleDrop(op, requestID)
-				case item_stack_operation.DropHotbar:
-					result, err = handler.handleDropHotbar(op, requestID)
 				}
 
 				if err != nil {
@@ -145,7 +121,7 @@ func (i *ItemStackTransaction) Commit() (
 				func(response *protocol.ItemStackResponse) {
 					mu.Lock()
 					defer mu.Unlock()
-					serverResponse[idx] = append(serverResponse[idx], response)
+					serverResponse[idx] = response
 					close(channel)
 				},
 			)
@@ -207,35 +183,33 @@ func (i *ItemStackTransaction) Commit() (
 					func(response *protocol.ItemStackResponse) {
 						mu.Lock()
 						defer mu.Unlock()
-						serverResponse[idx] = append(serverResponse[idx], response)
+						serverResponse[idx] = response
 						close(channel)
 					},
 				)
 			}
 		}
+	}
 
-		// Step 2.3: Send packet
-		err = api.WritePacket(pk)
-		if err != nil {
-			return false, nil, nil, fmt.Errorf("Commit: %v", err)
-		}
+	// Step 3: Send packet
+	err = api.WritePacket(pk)
+	if err != nil {
+		return false, nil, nil, fmt.Errorf("Commit: %v", err)
+	}
 
-		// Step 2.4: Wait changes
-		for _, waiter := range waiters {
-			<-waiter
+	// Step 4: Wait changes
+	for _, waiter := range waiters {
+		<-waiter
+	}
+
+	// Setp 5.1: Return unsuccess
+	for _, response := range serverResponse {
+		if response.Status != protocol.ItemStackResponseStatusOK {
+			return false, pk, serverResponse, nil
 		}
 	}
 
-	// Setp 3.1: Return unsuccess
-	for _, responses := range serverResponse {
-		for _, response := range responses {
-			if response.Status != protocol.ItemStackResponseStatusOK {
-				return false, pks, serverResponse, nil
-			}
-		}
-	}
-
-	// Step 3.2: Return success
+	// Step 5.2: Return success
 	i.Discord()
-	return true, pks, serverResponse, nil
+	return true, pk, serverResponse, nil
 }

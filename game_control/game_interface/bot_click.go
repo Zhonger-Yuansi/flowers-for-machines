@@ -25,7 +25,7 @@ const (
 	// 这里则选择了绿宝石块作为被点击的方块。
 	//
 	// SuperScript 最喜欢绿宝石块了！
-	PlaceBlockBase string = "emerald_block"
+	BasePlaceBlock string = "emerald_block"
 )
 
 // UseItemOnBlocks 是机器人在使用手
@@ -287,7 +287,7 @@ func (b *BotClick) PlaceBlockHighLevel(
 	if err != nil {
 		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
 	}
-	err = b.s.SetBlockAsync(clickPos, PlaceBlockBase, "[]")
+	err = b.s.SetBlockAsync(clickPos, BasePlaceBlock, "[]")
 	if err != nil {
 		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
 	}
@@ -304,7 +304,7 @@ func (b *BotClick) PlaceBlockHighLevel(
 		UseItemOnBlocks{
 			HotbarSlotID: hotBarSlot,
 			BlockPos:     clickPos,
-			BlockName:    PlaceBlockBase,
+			BlockName:    BasePlaceBlock,
 			BlockStates:  map[string]any{},
 		},
 		int32(facing),
@@ -320,20 +320,19 @@ func (b *BotClick) PlaceBlockHighLevel(
 	return clickPos, nil
 }
 
-// PickBlock 获取 pos 处的方块到 expectedHotbar 处的物品栏。
+// PickBlock 获取 pos 处的方块到物品栏。
 // assignNBTData 指示是否需要携带该方块的 NBT 数据。
 //
 // 返回的 success 指示操作是否成功；
-// resultHotbar 指示物品最终所在的物品栏位置。
+// slot 指示物品最终所在的物品栏位置。
 //
 // 此函数不会自动切换物品栏，也不会等待租赁服响应更改
 func (b *BotClick) PickBlock(
 	pos protocol.BlockPos,
-	expectedHotbar resources_control.SlotID,
 	assignNBTData bool,
 ) (
 	success bool,
-	resultHotbar resources_control.SlotID,
+	slot resources_control.SlotID,
 	err error,
 ) {
 	channel := make(chan struct{})
@@ -343,7 +342,7 @@ func (b *BotClick) PickBlock(
 		uniqueID := packetListener.ListenPacket(
 			[]uint32{packet.IDPlayerHotBar},
 			func(p packet.Packet) {
-				resultHotbar = resources_control.SlotID(p.(*packet.PlayerHotBar).SelectedHotBarSlot)
+				slot = resources_control.SlotID(p.(*packet.PlayerHotBar).SelectedHotBarSlot)
 				success = true
 				close(channel)
 			},
@@ -352,7 +351,7 @@ func (b *BotClick) PickBlock(
 		b.r.WritePacket(&packet.BlockPickRequest{
 			Position:    pos,
 			AddBlockNBT: assignNBTData,
-			HotBarSlot:  byte(expectedHotbar),
+			HotBarSlot:  byte(slot),
 		})
 
 		timer := time.NewTimer(DefaultTimeoutBlockPick)
@@ -368,5 +367,5 @@ func (b *BotClick) PickBlock(
 		}
 	}
 
-	return success, resultHotbar, nil
+	return success, slot, nil
 }

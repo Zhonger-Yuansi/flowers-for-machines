@@ -21,15 +21,6 @@ func newVirtualInventories(api *resources_control.Inventories) *virtualInventori
 	}
 }
 
-// loadItemCount 加载 slotLocation 处的物品数量
-func (v *virtualInventories) loadItemCount(slotLocation resources_control.SlotLocation) (result uint16, err error) {
-	item, inventoryExisted := v.api.GetItemStack(slotLocation.WindowID, slotLocation.SlotID)
-	if !inventoryExisted {
-		return 0, fmt.Errorf("loadItemCount: Can not find the item whose at %#v", slotLocation)
-	}
-	return item.Stack.Count, nil
-}
-
 // loadStackNetworkID 加载 slotLocation 处的物品堆栈网络 ID
 func (v *virtualInventories) loadStackNetworkID(slotLocation resources_control.SlotLocation) (result int32, err error) {
 	if result, ok := v.mapping[slotLocation]; ok {

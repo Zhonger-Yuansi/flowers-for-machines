@@ -89,7 +89,7 @@ func (c *ContainerOpenAndClose) openContainer(
 		}
 	}
 
-	for range DefaultTimeoutContainerOperation {
+	for range MaxRetryContainerOperation {
 		err = openFunc()
 		if err != nil {
 			return false, fmt.Errorf("openContainer: %v", err)

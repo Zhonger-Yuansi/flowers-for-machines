@@ -52,7 +52,7 @@ func FromUUIDSafeString(uuidSafeString string) (result uuid.UUID, err error) {
 	for _, value := range uuidSafeString {
 		builder.WriteRune(StringUUIDInvReplaceMap[value])
 	}
-	result, err = uuid.Parse(uuidSafeString)
+	result, err = uuid.Parse(builder.String())
 	if err != nil {
 		return result, fmt.Errorf("FromUUIDSafeString: %v", err)
 	}

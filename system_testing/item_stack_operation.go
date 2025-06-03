@@ -83,9 +83,6 @@ func SystemTestingItemStackOperation() {
 		}
 
 		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
-			GetCreativeItemToInventory(1, 6, 64).
-			GetCreativeItemToInventory(2, 7, 64).
-			GetCreativeItemToInventory(0x5bc, 8, 1).
 			MoveBetweenInventory(0, 3, 25).                 // Slot 0 -> Slot 3
 			MoveBetweenInventory(1, 4, 1).                  // Slot 1 -> Slot 4
 			MoveBetweenInventory(2, 5, 20).                 // Slot 2 -> Slot 5

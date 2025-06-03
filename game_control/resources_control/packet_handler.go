@@ -197,6 +197,8 @@ func (r *Resources) handlePacket(pk packet.Packet) {
 		r.handleContainerOpen(p)
 	case *packet.ContainerClose:
 		r.handleContainerClose(p)
+	case *packet.CreativeContent:
+		r.constant.onCreativeContent(p)
 	}
 	// for other implements
 	r.listener.onPacket(pk)

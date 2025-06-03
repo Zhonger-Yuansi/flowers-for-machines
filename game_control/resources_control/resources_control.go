@@ -27,6 +27,8 @@ type Resources struct {
 	container *ContainerManager
 	// listener 是一个可撤销的简单数据包监听器实现
 	listener *PacketListener
+	// constant 是常量数据包的简要记录实现
+	constant *ConstantPacket
 }
 
 // NewResourcesControl 基于 client 创建一个新的资源中心。
@@ -43,20 +45,23 @@ func NewResourcesControl(client *client.Client) *Resources {
 		itemStack: NewItemStackOperationManager(),
 		container: NewContainerManager(),
 		listener:  NewPacketListener(),
+		constant:  NewConstantPacket(),
+	}
+
+	for {
+		pk := <-resourcesControl.client.CachedPacket()
+		if pk == nil {
+			break
+		}
+		resourcesControl.handlePacket(pk)
 	}
 	go resourcesControl.listenPacket()
+
 	return resourcesControl
 }
 
 // listenPacket ..
 func (r *Resources) listenPacket() {
-	for {
-		pk := <-r.client.CachedPacket()
-		if pk == nil {
-			break
-		}
-		r.handlePacket(pk)
-	}
 	for {
 		pk, err := r.client.Conn().ReadPacket()
 		if err != nil {
@@ -104,4 +109,9 @@ func (r *Resources) Container() *ContainerManager {
 // PacketListener 返回数据包监听的有关实现
 func (r *Resources) PacketListener() *PacketListener {
 	return r.listener
+}
+
+// ConstantPacket 返回常量数据包的有关实现
+func (r *Resources) ConstantPacket() *ConstantPacket {
+	return r.constant
 }

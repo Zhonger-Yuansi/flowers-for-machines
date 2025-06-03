@@ -36,18 +36,17 @@ func (i *ItemStackTransaction) MoveInventoryItem(
 	destination resources_control.SlotID,
 	count uint8,
 ) *ItemStackTransaction {
-	i.operations = append(i.operations, item_stack_operation.Move{
-		Source: resources_control.SlotLocation{
+	return i.MoveItem(
+		resources_control.SlotLocation{
 			WindowID: protocol.WindowIDInventory,
 			SlotID:   source,
 		},
-		Destination: resources_control.SlotLocation{
+		resources_control.SlotLocation{
 			WindowID: protocol.WindowIDInventory,
 			SlotID:   destination,
 		},
-		Count: int32(count),
-	})
-	return i
+		count,
+	)
 }
 
 // MoveToContainer 将背包中 source 处的物品移动到已打开容器的
@@ -64,18 +63,17 @@ func (i *ItemStackTransaction) MoveToContainer(
 	count uint8,
 ) *ItemStackTransaction {
 	data, _ := i.api.Container().ContainerData()
-	i.operations = append(i.operations, item_stack_operation.Move{
-		Source: resources_control.SlotLocation{
+	return i.MoveItem(
+		resources_control.SlotLocation{
 			WindowID: protocol.WindowIDInventory,
 			SlotID:   source,
 		},
-		Destination: resources_control.SlotLocation{
+		resources_control.SlotLocation{
 			WindowID: resources_control.WindowID(data.WindowID),
 			SlotID:   destination,
 		},
-		Count: int32(count),
-	})
-	return i
+		count,
+	)
 }
 
 // MoveToInventory 将已打开容器中 source 处的物品移动到
@@ -92,18 +90,17 @@ func (i *ItemStackTransaction) MoveToInventory(
 	count uint8,
 ) *ItemStackTransaction {
 	data, _ := i.api.Container().ContainerData()
-	i.operations = append(i.operations, item_stack_operation.Move{
-		Source: resources_control.SlotLocation{
+	return i.MoveItem(
+		resources_control.SlotLocation{
 			WindowID: resources_control.WindowID(data.WindowID),
 			SlotID:   source,
 		},
-		Destination: resources_control.SlotLocation{
+		resources_control.SlotLocation{
 			WindowID: protocol.WindowIDInventory,
 			SlotID:   destination,
 		},
-		Count: int32(count),
-	})
-	return i
+		count,
+	)
 }
 
 // SwapItem 交换 source 处和 destination 处的物品。
@@ -134,17 +131,16 @@ func (i *ItemStackTransaction) SwapInventoryItem(
 	source resources_control.SlotID,
 	destination resources_control.SlotID,
 ) *ItemStackTransaction {
-	i.operations = append(i.operations, item_stack_operation.Swap{
-		Source: resources_control.SlotLocation{
+	return i.SwapItem(
+		resources_control.SlotLocation{
 			WindowID: protocol.WindowIDInventory,
 			SlotID:   source,
 		},
-		Destination: resources_control.SlotLocation{
+		resources_control.SlotLocation{
 			WindowID: protocol.WindowIDInventory,
 			SlotID:   destination,
 		},
-	})
-	return i
+	)
 }
 
 // SwapInventoryAndContainer 交换背包中 source 处和已
@@ -160,15 +156,16 @@ func (i *ItemStackTransaction) SwapInventoryAndContainer(
 	destination resources_control.SlotID,
 ) *ItemStackTransaction {
 	data, _ := i.api.Container().ContainerData()
-	i.operations = append(i.operations, item_stack_operation.Swap{
-		Source: resources_control.SlotLocation{
+	return i.SwapItem(
+		resources_control.SlotLocation{
 			WindowID: protocol.WindowIDInventory,
+			SlotID:   source,
 		},
-		Destination: resources_control.SlotLocation{
+		resources_control.SlotLocation{
 			WindowID: resources_control.WindowID(data.WindowID),
+			SlotID:   destination,
 		},
-	})
-	return i
+	)
 }
 
 // DropItem 将 slot 处的物品丢出，且只丢出 count 个。
@@ -193,14 +190,13 @@ func (i *ItemStackTransaction) DropItem(slot resources_control.SlotLocation, cou
 // 持内联的操作一起被内联到单个物品堆栈操
 // 作请求中
 func (i *ItemStackTransaction) DropInventoryItem(slot resources_control.SlotID, count uint8) *ItemStackTransaction {
-	i.operations = append(i.operations, item_stack_operation.Drop{
-		Path: resources_control.SlotLocation{
+	return i.DropItem(
+		resources_control.SlotLocation{
 			WindowID: protocol.WindowIDInventory,
 			SlotID:   slot,
 		},
-		Count: count,
-	})
-	return i
+		count,
+	)
 }
 
 // DropItem 将快捷栏 slot 处的物品丢出，且只丢出 count 个。
@@ -227,18 +223,17 @@ func (i *ItemStackTransaction) DropHotbarItem(slot resources_control.SlotID, cou
 // 到单个物品堆栈操作请求中
 func (i *ItemStackTransaction) DropContainerItem(slot resources_control.SlotID, count uint8) *ItemStackTransaction {
 	data, _ := i.api.Container().ContainerData()
-	i.operations = append(i.operations, item_stack_operation.Drop{
-		Path: resources_control.SlotLocation{
+	return i.DropItem(
+		resources_control.SlotLocation{
 			WindowID: resources_control.WindowID(data.WindowID),
 			SlotID:   slot,
 		},
-		Count: count,
-	})
-	return i
+		count,
+	)
 }
 
 // GetCreativeItem 从创造物品栏获取 创造物品网络 ID 为
-// creativeItemNetworkID 的物品到背包中的 slot 处，
+// creativeItemNetworkID 的物品到 slot 处，
 // 且只移动 count 个物品。
 //
 // 该操作不支持内联，但任何不支持内联的操作都可以被并发，
@@ -253,11 +248,90 @@ func (i *ItemStackTransaction) GetCreativeItem(
 	count uint8,
 ) *ItemStackTransaction {
 	i.operations = append(i.operations, item_stack_operation.CreativeItem{
-		CreativeItemNetworkID: creativeItemNetworkID,
-		SlotID:                slot.SlotID,
-		Count:                 count,
+		UseCreativeItemNetworkID: true,
+		CreativeItemNetworkID:    creativeItemNetworkID,
+		UseNetworkID:             false,
+		NetworkID:                0,
+		Path:                     slot,
+		Count:                    count,
 	})
 	return i
+}
+
+// GetCreativeItemToInventory 从创造物品栏获取 创造物品网络 ID 为
+// creativeItemNetworkID 的物品到背包中的 slot 处，
+// 且只移动 count 个物品。
+//
+// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
+// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
+// 但最终可以被紧缩在一个数据包中。
+//
+// 请确保不要将此操作与内联操作混用，否则将会发送多个
+// 数据包从而降低事务的效率
+func (i *ItemStackTransaction) GetCreativeItemToInventory(
+	creativeItemNetworkID uint32,
+	slot resources_control.SlotID,
+	count uint8,
+) *ItemStackTransaction {
+	return i.GetCreativeItem(
+		creativeItemNetworkID,
+		resources_control.SlotLocation{
+			WindowID: protocol.WindowIDInventory,
+			SlotID:   slot,
+		},
+		count,
+	)
+}
+
+// GetCreativeItemByNetworkID 从创造物品栏获取
+// 网络数字 ID 为 networkID 的物品到 slot 处，
+// 且只移动 count 个物品。
+//
+// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
+// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
+// 但最终可以被紧缩在一个数据包中。
+//
+// 请确保不要将此操作与内联操作混用，否则将会发送多个
+// 数据包从而降低事务的效率
+func (i *ItemStackTransaction) GetCreativeItemByNetworkID(
+	networkID int32,
+	slot resources_control.SlotLocation,
+	count uint8,
+) *ItemStackTransaction {
+	i.operations = append(i.operations, item_stack_operation.CreativeItem{
+		UseCreativeItemNetworkID: false,
+		CreativeItemNetworkID:    0,
+		UseNetworkID:             true,
+		NetworkID:                networkID,
+		Path:                     slot,
+		Count:                    count,
+	})
+	return i
+}
+
+// GetCreativeItemToInventoryByNetworkID 从创造物品栏获取
+// 网络数字 ID 为 networkID 的物品到背包中的 slot 处，且只移
+// 动 count 个物品。
+//
+// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
+// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
+// 但最终可以被紧缩在一个数据包中。
+//
+// 请确保不要将此操作与内联操作混用，否则将会发送多个
+// 数据包从而降低事务的效率
+func (i *ItemStackTransaction) GetCreativeItemToInventoryByNetworkID(
+	networkID int32,
+	slot resources_control.SlotID,
+	count uint8,
+) *ItemStackTransaction {
+	return i.GetCreativeItemByNetworkID(
+		networkID,
+		resources_control.SlotLocation{
+			WindowID: protocol.WindowIDInventory,
+			SlotID:   slot,
+		},
+		count,
+	)
 }
 
 // RenameItem 将 slot 处的物品全部重命名为 newName。
@@ -309,14 +383,13 @@ func (i *ItemStackTransaction) RenameInventoryItem(
 	slot resources_control.SlotID,
 	newName string,
 ) *ItemStackTransaction {
-	i.operations = append(i.operations, item_stack_operation.Renaming{
-		Path: resources_control.SlotLocation{
+	return i.RenameItem(
+		resources_control.SlotLocation{
 			WindowID: protocol.WindowIDInventory,
 			SlotID:   slot,
 		},
-		NewName: newName,
-	})
-	return i
+		newName,
+	)
 }
 
 // Looming 将 patternSlot 处的旗帜放入织布机中，
@@ -357,4 +430,50 @@ func (i *ItemStackTransaction) Looming(
 		ResultItem:  resultItem,
 	})
 	return i
+}
+
+// LoomingInventory 将背包中 patternSlot 处的旗帜放入织布机中，
+// 并通过使用背包中 dyeSlot 处的染料合成新旗帜。
+//
+// patternName 是织布时使用的图案，patternSlot 则指示该图案物品
+// 在背包中的位置。如果无需使用图案，请将 patternName 和 patternSlot
+// 都置为默认的零值。
+//
+// resultItem 指示期望得到的旗帜的部分数据。
+// 如果操作成功，则新旗帜将回到原位。
+//
+// 该操作不支持内联，但任何不支持内联的操作都可以被并发，
+// 这意味着虽然它们会被分配在各自独立的物品堆栈请求中，
+// 但最终可以被紧缩在一个数据包中。
+//
+// 请确保不要将此操作与内联操作交替使用，而是应该尽可能
+// 连续的使用多个非内联操作。如果不这么做，提交事务时将
+// 会发送多个数据包从而降低事务的效率。
+//
+// 除此外，基于非内联操作的并发组织，你无法在同一个物品
+// 栏处重用非内联操作 (重命名操作或织布机操作)，除非您在
+// 操作前引入了至少一个内联操作，否则整个事务将会失败
+func (i *ItemStackTransaction) LoomingInventory(
+	patternName string,
+	patternSlot resources_control.SlotID,
+	bannerSlot resources_control.SlotID,
+	dyeSlot resources_control.SlotID,
+	resultItem resources_control.ExpectedNewItem,
+) *ItemStackTransaction {
+	return i.Looming(
+		patternName,
+		resources_control.SlotLocation{
+			WindowID: protocol.WindowIDInventory,
+			SlotID:   patternSlot,
+		},
+		resources_control.SlotLocation{
+			WindowID: protocol.WindowIDInventory,
+			SlotID:   bannerSlot,
+		},
+		resources_control.SlotLocation{
+			WindowID: protocol.WindowIDInventory,
+			SlotID:   dyeSlot,
+		},
+		resultItem,
+	)
 }

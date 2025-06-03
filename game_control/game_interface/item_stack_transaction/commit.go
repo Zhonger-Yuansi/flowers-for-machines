@@ -90,6 +90,7 @@ func (i *ItemStackTransaction) Commit() (
 		waiters := make([]chan struct{}, 0)
 		handler := newItemStackOperationHandler(
 			api.Container(),
+			api.ConstantPacket(),
 			newVirtualInventories(api.Inventories()),
 			newResponseMapping(),
 		)
@@ -166,6 +167,12 @@ func (i *ItemStackTransaction) Commit() (
 				switch op := operation.(type) {
 				case item_stack_operation.CreativeItem:
 					result, err = handler.handleCreativeItem(op, requestID)
+					newItem := i.api.ConstantPacket().CreativeItemByCNI(op.CreativeItemNetworkID)
+					updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
+					updater[op.Path] = resources_control.ExpectedNewItem{
+						NetworkID: newItem.Item.NetworkID,
+						NBTData:   newItem.Item.NBTData,
+					}
 				case item_stack_operation.Renaming:
 					result, err = handler.handleRenaming(op, requestID)
 					itemNewName = &op.NewName

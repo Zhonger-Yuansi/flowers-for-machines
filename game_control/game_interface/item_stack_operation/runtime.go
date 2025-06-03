@@ -35,7 +35,9 @@ type DropHotbarRuntime struct {
 
 // CreativeItemRuntime 是将物品从创造物品栏获取操作内联为物品堆栈操作请求的运行时结构体
 type CreativeItemRuntime struct {
-	RequestID int32
+	RequestID             int32
+	DstContainerID        byte
+	CreativeItemNetworkID uint32
 }
 
 // RenamingRuntime 是将铁砧重命名操作内联为物品堆栈操作请求的运行时结构体

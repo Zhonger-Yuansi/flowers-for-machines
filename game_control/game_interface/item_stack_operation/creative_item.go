@@ -8,9 +8,15 @@ import (
 // CreativeItem 指示创造物品获取操作
 type CreativeItem struct {
 	Default
-	CreativeItemNetworkID uint32
-	SlotID                resources_control.SlotID
-	Count                 uint8
+
+	UseCreativeItemNetworkID bool
+	CreativeItemNetworkID    uint32
+
+	UseNetworkID bool
+	NetworkID    int32
+
+	Path  resources_control.SlotLocation
+	Count uint8
 }
 
 func (CreativeItem) ID() uint8 {
@@ -33,12 +39,12 @@ func (d CreativeItem) Make(runtimeData MakingRuntime) []protocol.StackRequestAct
 	}
 	move.Destination = protocol.StackRequestSlotInfo{
 		ContainerID:    protocol.ContainerCombinedHotBarAndInventory,
-		Slot:           byte(d.SlotID),
+		Slot:           data.DstContainerID,
 		StackNetworkID: 0,
 	}
 
 	return []protocol.StackRequestAction{
-		&protocol.CraftCreativeStackRequestAction{CreativeItemNetworkID: d.CreativeItemNetworkID},
+		&protocol.CraftCreativeStackRequestAction{CreativeItemNetworkID: data.CreativeItemNetworkID},
 		&move,
 	}
 }

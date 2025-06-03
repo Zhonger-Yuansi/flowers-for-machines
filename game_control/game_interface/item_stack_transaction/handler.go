@@ -11,6 +11,7 @@ import (
 // itemStackOperationHandler ..
 type itemStackOperationHandler struct {
 	api                *resources_control.ContainerManager
+	constantPacket     *resources_control.ConstantPacket
 	virtualInventories *virtualInventories
 	responseMapping    *responseMapping
 }
@@ -18,11 +19,13 @@ type itemStackOperationHandler struct {
 // newItemStackOperationHandler ..
 func newItemStackOperationHandler(
 	api *resources_control.ContainerManager,
+	constantPacket *resources_control.ConstantPacket,
 	virtualInventories *virtualInventories,
 	responseMapping *responseMapping,
 ) *itemStackOperationHandler {
 	return &itemStackOperationHandler{
 		api:                api,
+		constantPacket:     constantPacket,
 		virtualInventories: virtualInventories,
 		responseMapping:    responseMapping,
 	}
@@ -150,10 +153,26 @@ func (i *itemStackOperationHandler) handleCreativeItem(
 	op item_stack_operation.CreativeItem,
 	requestID resources_control.ItemStackRequestID,
 ) (result []protocol.StackRequestAction, err error) {
-	i.responseMapping.bind(protocol.WindowIDInventory, protocol.ContainerCombinedHotBarAndInventory)
+	var creativeItemNetworkID uint32
+
+	cid, found := slotLocationToContainerID(i.api, op.Path)
+	if !found {
+		return nil, fmt.Errorf("handleCreativeItem: Can not find the container ID of given item whose at %#v", op.Path)
+	}
+	i.responseMapping.bind(op.Path.WindowID, cid)
+
+	if op.UseCreativeItemNetworkID {
+		creativeItemNetworkID = op.CreativeItemNetworkID
+	}
+	if op.UseNetworkID {
+		creativeItemNetworkID = i.constantPacket.CreativeItemByNI(op.NetworkID).CreativeItemNetworkID
+	}
+
 	return op.Make(
 		item_stack_operation.CreativeItemRuntime{
-			RequestID: int32(requestID),
+			RequestID:             int32(requestID),
+			DstContainerID:        byte(cid),
+			CreativeItemNetworkID: creativeItemNetworkID,
 		},
 	), nil
 }

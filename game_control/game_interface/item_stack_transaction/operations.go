@@ -305,6 +305,7 @@ func (i *ItemStackTransaction) GetCreativeItemToInventoryByNetworkID(
 }
 
 // RenameItem 将 slot 处的物品全部重命名为 newName。
+// count 指示 slot 处物品的数量。
 //
 // 重命名操作是通过铁砧完成的，这意味着您需要确保铁砧已被打开，
 // 且铁砧内没有放置任何物品。
@@ -327,6 +328,7 @@ func (i *ItemStackTransaction) RenameItem(
 }
 
 // RenameInventoryItem 将背包中 slot 处的物品全部重命名为 newName。
+// count 指示背包中 slot 处物品的数量
 //
 // 重命名操作是通过铁砧完成的，这意味着您需要确保铁砧已被打开，
 // 且铁砧内没有放置任何物品。如果操作成功，则物品将回到原位。

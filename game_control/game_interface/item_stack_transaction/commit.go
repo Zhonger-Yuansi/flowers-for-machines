@@ -13,6 +13,9 @@ import (
 // Discord 丢弃曾经执行的更改。
 // 从本质上说，它将清空底层操作序列
 func (i *ItemStackTransaction) Discord() *ItemStackTransaction {
+	for index := range i.operations {
+		i.operations[index] = nil
+	}
 	i.operations = nil
 	return i
 }
@@ -206,12 +209,12 @@ func (i *ItemStackTransaction) Commit() (
 	// Setp 5.1: Return unsuccess
 	for _, response := range serverResponse {
 		if response.Status != protocol.ItemStackResponseStatusOK {
-			i.Discord()
+			_ = i.Discord()
 			return false, pk, serverResponse, nil
 		}
 	}
 
 	// Step 5.2: Return success
-	i.Discord()
+	_ = i.Discord()
 	return true, pk, serverResponse, nil
 }

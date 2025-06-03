@@ -24,14 +24,14 @@ func (i *ItemStackTransaction) MoveItem(
 	return i
 }
 
-// MoveInventoryItem 将背包中 source 处的物品移动到 destination 处，
+// MoveBetweenInventory 将背包中 source 处的物品移动到 destination 处，
 // 且只移动 count 个物品。
 //
 // 此操作需要保证背包已被打开，或者已打开的容器中可以在背包中移动物品。
 //
 // 该操作是支持内联的，它会与所有相邻的支持内联的操作一 起被内联到单个
 // 物品堆栈操作请求中
-func (i *ItemStackTransaction) MoveInventoryItem(
+func (i *ItemStackTransaction) MoveBetweenInventory(
 	source resources_control.SlotID,
 	destination resources_control.SlotID,
 	count uint8,
@@ -118,7 +118,7 @@ func (i *ItemStackTransaction) SwapItem(
 	return i
 }
 
-// SwapInventoryItem 交换背包中 source
+// SwapBetweenInventory 交换背包中 source
 // 处和背包中 destination 处的物品。
 //
 // 此操作需要保证背包已被打开，或者已打开
@@ -127,7 +127,7 @@ func (i *ItemStackTransaction) SwapItem(
 // 该操作是支持内联的，它会与所有相邻的支
 // 持内联的操作一起被内联到单个物品堆栈操
 // 作请求中
-func (i *ItemStackTransaction) SwapInventoryItem(
+func (i *ItemStackTransaction) SwapBetweenInventory(
 	source resources_control.SlotID,
 	destination resources_control.SlotID,
 ) *ItemStackTransaction {
@@ -143,15 +143,15 @@ func (i *ItemStackTransaction) SwapInventoryItem(
 	)
 }
 
-// SwapInventoryAndContainer 交换背包中 source 处和已
-// 打开容器 destination 处的物品。
+// SwapInventoryBetweenContainer 交换背包中 source
+// 处和已打开容器 destination 处的物品。
 //
 // 此操作需要保证目前已经打开了一个容器，否则效果将会与
 // SwapInventoryItem 等同。
 //
 // 该操作是支持内联的，它会与所有相邻的支持内联的操作一起
 // 被内联到单个物品堆栈操作请求中
-func (i *ItemStackTransaction) SwapInventoryAndContainer(
+func (i *ItemStackTransaction) SwapInventoryBetweenContainer(
 	source resources_control.SlotID,
 	destination resources_control.SlotID,
 ) *ItemStackTransaction {
@@ -432,7 +432,7 @@ func (i *ItemStackTransaction) Looming(
 	return i
 }
 
-// LoomingInventory 将背包中 patternSlot 处的旗帜放入织布机中，
+// LoomingFromInventory 将背包中 patternSlot 处的旗帜放入织布机中，
 // 并通过使用背包中 dyeSlot 处的染料合成新旗帜。
 //
 // patternName 是织布时使用的图案，patternSlot 则指示该图案物品
@@ -453,7 +453,7 @@ func (i *ItemStackTransaction) Looming(
 // 除此外，基于非内联操作的并发组织，你无法在同一个物品
 // 栏处重用非内联操作 (重命名操作或织布机操作)，除非您在
 // 操作前引入了至少一个内联操作，否则整个事务将会失败
-func (i *ItemStackTransaction) LoomingInventory(
+func (i *ItemStackTransaction) LoomingFromInventory(
 	patternName string,
 	patternSlot resources_control.SlotID,
 	bannerSlot resources_control.SlotID,

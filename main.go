@@ -54,8 +54,8 @@ func main() {
 	t1 := time.Now()
 	fmt.Println(
 		api.ItemStackOperation().OpenTransaction().
-			MoveInventoryItem(0, 2, 10).
-			MoveInventoryItem(1, 3, 1).
+			MoveBetweenInventory(0, 2, 10).
+			MoveBetweenInventory(1, 3, 1).
 			MoveToContainer(2, 0, 9).
 			MoveToContainer(3, 1, 1).
 			DropContainerItem(1, 1).

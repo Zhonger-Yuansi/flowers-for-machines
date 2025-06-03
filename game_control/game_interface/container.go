@@ -63,21 +63,22 @@ func (c *ContainerOpenAndClose) openContainer(
 		c.mu.Unlock()
 	}()
 
+	doOnce := new(sync.Once)
 	channel := make(chan struct{})
 	api.SetContainerOpenCallback(
 		func() {
-			success = true
-			close(channel)
+			doOnce.Do(func() {
+				success = true
+				close(channel)
+			})
 		},
 	)
 	api.SetContainerCloseCallback(
 		func(isServerSide bool) {
-			if isServerSide {
-				c.mu.Lock()
-				defer c.mu.Unlock()
-				c.occupy.TryLock()
-				c.occupy.Unlock()
-			}
+			c.mu.Lock()
+			defer c.mu.Unlock()
+			c.occupy.TryLock()
+			c.occupy.Unlock()
 		},
 	)
 
@@ -176,8 +177,13 @@ func (c *ContainerOpenAndClose) CloseContainer() error {
 		return nil
 	}
 
+	doOnce := new(sync.Once)
 	channel := make(chan struct{})
-	c.api.Container().SetContainerCloseCallback(func(isServerSide bool) { close(channel) })
+	c.api.Container().SetContainerCloseCallback(
+		func(isServerSide bool) {
+			doOnce.Do(func() { close(channel) })
+		},
+	)
 
 	for range DefaultTimeoutContainerOperation {
 		err := c.api.WritePacket(&packet.ContainerClose{WindowID: containerData.WindowID})

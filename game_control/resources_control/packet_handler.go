@@ -104,6 +104,7 @@ func (r *Resources) handleInventorySlot(p *packet.InventorySlot) {
 func (r *Resources) handleItemStackResponse(p *packet.ItemStackResponse) {
 	for _, response := range p.Responses {
 		requestID := ItemStackRequestID(response.RequestID)
+		itemRepeatChecker := make(map[SlotLocation]bool)
 
 		callback, ok := r.itemStack.itemStackCallback.LoadAndDelete(requestID)
 		if !ok {
@@ -134,6 +135,12 @@ func (r *Resources) handleItemStackResponse(p *packet.ItemStackResponse) {
 
 			for _, slotInfo := range containerInfo.SlotInfo {
 				slotID := SlotID(slotInfo.Slot)
+
+				slotLocation := SlotLocation{WindowID: windowID, SlotID: slotID}
+				if _, ok := itemRepeatChecker[slotLocation]; ok {
+					panic(fmt.Sprintf("handleItemStackResponse: The item at %#v was found duplicates (Should nerver happened)", slotLocation))
+				}
+				itemRepeatChecker[slotLocation] = true
 
 				item, inventoryExisted := r.inventory.GetItemStack(windowID, slotID)
 				if !inventoryExisted {

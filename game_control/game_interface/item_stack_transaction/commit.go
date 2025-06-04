@@ -46,7 +46,7 @@ func (i *ItemStackTransaction) Commit() (
 	mu := new(sync.Mutex)
 
 	pk = new(packet.ItemStackRequest)
-	requests := make([][]item_stack_operation.ItemStackOperation, 0)
+	allRequests := make([][]item_stack_operation.ItemStackOperation, 0)
 	waiters := make([]chan struct{}, 0)
 
 	handler := newItemStackOperationHandler(
@@ -61,35 +61,35 @@ func (i *ItemStackTransaction) Commit() (
 	for _, operation := range i.operations {
 		if !operation.CanInline() {
 			if len(currentRequest) != 0 {
-				requests = append(requests, currentRequest)
+				allRequests = append(allRequests, currentRequest)
 			}
-			requests = append(requests, []item_stack_operation.ItemStackOperation{operation})
+			allRequests = append(allRequests, []item_stack_operation.ItemStackOperation{operation})
 			currentRequest = nil
 			continue
 		}
 		currentRequest = append(currentRequest, operation)
 	}
 	if len(currentRequest) != 0 {
-		requests = append(requests, currentRequest)
+		allRequests = append(allRequests, currentRequest)
 		currentRequest = nil
 	}
-	serverResponse = make([]*protocol.ItemStackResponse, len(requests))
+	serverResponse = make([]*protocol.ItemStackResponse, len(allRequests))
 
 	// Step 2: Construct actions
-	for index, request := range requests {
-		if len(request) == 0 {
+	for index, requests := range allRequests {
+		var result []protocol.StackRequestAction
+		var err error
+
+		if len(requests) == 0 {
 			continue
 		}
 
 		// Step 2.1: If can inline
-		if request[0].CanInline() {
+		if requests[0].CanInline() {
 			requestID := api.ItemStackOperation().NewRequestID()
 			actions := make([]protocol.StackRequestAction, 0)
 
-			for _, operation := range request {
-				var result []protocol.StackRequestAction
-				var err error
-
+			for _, operation := range requests {
 				switch op := operation.(type) {
 				case item_stack_operation.Move:
 					result, err = handler.handleMove(op, requestID)
@@ -98,11 +98,9 @@ func (i *ItemStackTransaction) Commit() (
 				case item_stack_operation.Drop:
 					result, err = handler.handleDrop(op, requestID)
 				}
-
 				if err != nil {
 					return false, nil, nil, fmt.Errorf("Commit: %v", err)
 				}
-
 				actions = append(actions, result...)
 			}
 
@@ -129,69 +127,63 @@ func (i *ItemStackTransaction) Commit() (
 					close(channel)
 				},
 			)
+			continue
 		}
 
 		// Step 2.2: If can not inline
-		if !request[0].CanInline() {
-			for _, operation := range request {
-				var (
-					itemNewName *string
-					updater     map[resources_control.SlotLocation]resources_control.ExpectedNewItem
+		for _, operation := range requests {
+			var (
+				requestID   resources_control.ItemStackRequestID = api.ItemStackOperation().NewRequestID()
+				updater     map[resources_control.SlotLocation]resources_control.ExpectedNewItem
+				itemNewName *string
+			)
 
-					result []protocol.StackRequestAction
-					err    error
-
-					requestID resources_control.ItemStackRequestID = api.ItemStackOperation().NewRequestID()
-				)
-
-				switch op := operation.(type) {
-				case item_stack_operation.CreativeItem:
-					result, err = handler.handleCreativeItem(op, requestID)
-					newItem := i.api.ConstantPacket().CreativeItemByCNI(op.CreativeItemNetworkID)
-					updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
-					updater[op.Path] = resources_control.ExpectedNewItem{
-						NetworkID: newItem.Item.NetworkID,
-						NBTData:   newItem.Item.NBTData,
-					}
-				case item_stack_operation.Renaming:
-					result, err = handler.handleRenaming(op, requestID)
-					itemNewName = &op.NewName
-				case item_stack_operation.Looming:
-					result, err = handler.handleLooming(op, requestID)
-					updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
-					updater[op.BannerPath] = op.ResultItem
+			switch op := operation.(type) {
+			case item_stack_operation.CreativeItem:
+				result, err = handler.handleCreativeItem(op, requestID)
+				newItem := i.api.ConstantPacket().CreativeItemByCNI(op.CreativeItemNetworkID)
+				updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
+				updater[op.Path] = resources_control.ExpectedNewItem{
+					NetworkID: newItem.Item.NetworkID,
+					NBTData:   newItem.Item.NBTData,
 				}
-
-				if err != nil {
-					return false, nil, nil, fmt.Errorf("Commit: %v", err)
-				}
-
-				newRequest := protocol.ItemStackRequest{
-					RequestID: int32(requestID),
-					Actions:   result,
-				}
-				if itemNewName != nil {
-					newRequest.FilterStrings = []string{*itemNewName}
-					newRequest.FilterCause = protocol.FilterCauseAnvilText
-				}
-				pk.Requests = append(pk.Requests, newRequest)
-
-				idx := index
-				channel := make(chan struct{})
-				waiters = append(waiters, channel)
-
-				api.ItemStackOperation().AddNewRequest(
-					requestID,
-					handler.responseMapping.mapping,
-					updater,
-					func(response *protocol.ItemStackResponse) {
-						mu.Lock()
-						defer mu.Unlock()
-						serverResponse[idx] = response
-						close(channel)
-					},
-				)
+			case item_stack_operation.Renaming:
+				result, err = handler.handleRenaming(op, requestID)
+				itemNewName = &op.NewName
+			case item_stack_operation.Looming:
+				result, err = handler.handleLooming(op, requestID)
+				updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
+				updater[op.BannerPath] = op.ResultItem
 			}
+			if err != nil {
+				return false, nil, nil, fmt.Errorf("Commit: %v", err)
+			}
+
+			newRequest := protocol.ItemStackRequest{
+				RequestID: int32(requestID),
+				Actions:   result,
+			}
+			if itemNewName != nil {
+				newRequest.FilterStrings = []string{*itemNewName}
+				newRequest.FilterCause = protocol.FilterCauseAnvilText
+			}
+			pk.Requests = append(pk.Requests, newRequest)
+
+			idx := index
+			channel := make(chan struct{})
+			waiters = append(waiters, channel)
+
+			api.ItemStackOperation().AddNewRequest(
+				requestID,
+				handler.responseMapping.mapping,
+				updater,
+				func(response *protocol.ItemStackResponse) {
+					mu.Lock()
+					defer mu.Unlock()
+					serverResponse[idx] = response
+					close(channel)
+				},
+			)
 		}
 	}
 

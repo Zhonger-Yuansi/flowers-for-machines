@@ -207,7 +207,7 @@ func (i *itemStackOperationHandler) handleRenaming(
 	op item_stack_operation.Renaming,
 	requestID resources_control.ItemStackRequestID,
 ) (result []protocol.StackRequestAction, err error) {
-	containerData, existed := i.api.ContainerData()
+	containerData, _, existed := i.api.ContainerData()
 	if !existed {
 		return nil, fmt.Errorf("handleRenaming: Anvil is not opened")
 	}
@@ -270,7 +270,7 @@ func (i *itemStackOperationHandler) handleLooming(
 		}
 	}
 
-	containerData, existed := i.api.ContainerData()
+	containerData, _, existed := i.api.ContainerData()
 	if !existed {
 		return nil, fmt.Errorf("handleLooming: Loom is not opened")
 	}

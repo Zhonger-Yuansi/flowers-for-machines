@@ -49,11 +49,39 @@ func (i *ItemStackTransaction) MoveBetweenInventory(
 	)
 }
 
+// MoveBetweenContainer 将已打开容器中 source 处的物品
+// 移动到已打开容器的 destination 处，且只移动 count 个物品。
+//
+// 此操作需要保证目前已经打开了一个容器，否则效果将会与
+// MoveBetweenInventory 等同。
+//
+// 该操作是支持内联的，它会与所有相邻的支持内联的操作一起被内联
+// 到单个物品堆栈操作请求中
+func (i *ItemStackTransaction) MoveBetweenContainer(
+	source resources_control.SlotID,
+	destination resources_control.SlotID,
+	count uint8,
+) *ItemStackTransaction {
+	data, _, _ := i.api.Container().ContainerData()
+	windowID := resources_control.WindowID(data.WindowID)
+	return i.MoveItem(
+		resources_control.SlotLocation{
+			WindowID: windowID,
+			SlotID:   source,
+		},
+		resources_control.SlotLocation{
+			WindowID: windowID,
+			SlotID:   destination,
+		},
+		count,
+	)
+}
+
 // MoveToContainer 将背包中 source 处的物品移动到已打开容器的
 // destination 处，且只移动 count 个物品。
 //
 // 此操作需要保证目前已经打开了一个容器，否则效果将会与
-// MoveInventoryItem 等同。
+// MoveBetweenInventory 等同。
 //
 // 该操作是支持内联的，它会与所有相邻的支持内联的操作一起被内联
 // 到单个物品堆栈操作请求中
@@ -62,7 +90,7 @@ func (i *ItemStackTransaction) MoveToContainer(
 	destination resources_control.SlotID,
 	count uint8,
 ) *ItemStackTransaction {
-	data, _ := i.api.Container().ContainerData()
+	data, _, _ := i.api.Container().ContainerData()
 	return i.MoveItem(
 		resources_control.SlotLocation{
 			WindowID: protocol.WindowIDInventory,
@@ -80,7 +108,7 @@ func (i *ItemStackTransaction) MoveToContainer(
 // 背包的 destination 处，且只移动 count 个物品。
 //
 // 此操作需要保证目前已经打开了一个容器，否则效果将会与
-// MoveInventoryItem 等同。
+// MoveBetweenInventory 等同。
 //
 // 该操作是支持内联的，它会与所有相邻的支持内联的操作一起
 // 被内联到单个物品堆栈操作请求中
@@ -89,7 +117,7 @@ func (i *ItemStackTransaction) MoveToInventory(
 	destination resources_control.SlotID,
 	count uint8,
 ) *ItemStackTransaction {
-	data, _ := i.api.Container().ContainerData()
+	data, _, _ := i.api.Container().ContainerData()
 	return i.MoveItem(
 		resources_control.SlotLocation{
 			WindowID: resources_control.WindowID(data.WindowID),
@@ -155,7 +183,7 @@ func (i *ItemStackTransaction) SwapInventoryBetweenContainer(
 	source resources_control.SlotID,
 	destination resources_control.SlotID,
 ) *ItemStackTransaction {
-	data, _ := i.api.Container().ContainerData()
+	data, _, _ := i.api.Container().ContainerData()
 	return i.SwapItem(
 		resources_control.SlotLocation{
 			WindowID: protocol.WindowIDInventory,
@@ -207,7 +235,7 @@ func (i *ItemStackTransaction) DropInventoryItem(slot resources_control.SlotID, 
 // 该操作是支持内联的，它会与所有相邻的支持内联的操作一起被内联
 // 到单个物品堆栈操作请求中
 func (i *ItemStackTransaction) DropContainerItem(slot resources_control.SlotID, count uint8) *ItemStackTransaction {
-	data, _ := i.api.Container().ContainerData()
+	data, _, _ := i.api.Container().ContainerData()
 	return i.DropItem(
 		resources_control.SlotLocation{
 			WindowID: resources_control.WindowID(data.WindowID),

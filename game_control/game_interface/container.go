@@ -2,10 +2,14 @@ package game_interface
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
 )
 
 const (
@@ -43,6 +47,7 @@ func NewContainerOpenAndClose(
 
 // openContainer ..
 func (c *ContainerOpenAndClose) openContainer(
+	expectedContainerID resources_control.ContainerID,
 	changeToTargetSlot func() error,
 	openFunc func() error,
 ) (success bool, err error) {
@@ -66,6 +71,7 @@ func (c *ContainerOpenAndClose) openContainer(
 	doOnce := new(sync.Once)
 	channel := make(chan struct{})
 	api.SetContainerOpenCallback(
+		expectedContainerID,
 		func() {
 			doOnce.Do(func() {
 				success = true
@@ -127,6 +133,12 @@ func (c *ContainerOpenAndClose) OpenContainer(
 	changeToTargetSlot bool,
 ) (success bool, err error) {
 	var prepareFunc func() error
+	var expectedContainerID resources_control.ContainerID = mapping.ContainerIDUnknown
+
+	// Special process
+	if strings.Contains(container.BlockName, "barrel") {
+		expectedContainerID = protocol.ContainerBarrel
+	}
 
 	openFunc := func() error {
 		return c.botClick.ClickBlock(container)
@@ -137,7 +149,7 @@ func (c *ContainerOpenAndClose) OpenContainer(
 		}
 	}
 
-	success, err = c.openContainer(prepareFunc, openFunc)
+	success, err = c.openContainer(expectedContainerID, prepareFunc, openFunc)
 	if err != nil {
 		return false, fmt.Errorf("OpenContainer: %v", err)
 	}
@@ -148,6 +160,7 @@ func (c *ContainerOpenAndClose) OpenContainer(
 // 可以确保 OpenContainer 在逻辑上是线程安全的
 func (c *ContainerOpenAndClose) OpenInventory() (success bool, err error) {
 	success, err = c.openContainer(
+		mapping.ContainerIDUnknown,
 		nil,
 		func() error {
 			return c.api.WritePacket(&packet.Interact{
@@ -168,7 +181,7 @@ func (c *ContainerOpenAndClose) CloseContainer() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	containerData, existed := c.api.Container().ContainerData()
+	containerData, _, existed := c.api.Container().ContainerData()
 	if !existed {
 		return nil
 	}

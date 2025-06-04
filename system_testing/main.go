@@ -32,6 +32,7 @@ func main() {
 	SystemTestingBotClick()
 	SystemTestingContainer()
 	SystemTestingItemStackOperation()
+	SystemTestingItemCopy()
 
 	pterm.Success.Printfln("System Testing: ALL PASS (Time used = %v)", time.Since(tA))
 }

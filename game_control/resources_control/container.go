@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
 )
 
 const (
@@ -19,6 +20,7 @@ type ContainerManager struct {
 	states uint8
 
 	openingData  *packet.ContainerOpen
+	containerID  ContainerID
 	openCallback func()
 
 	closingData   *packet.ContainerClose
@@ -30,6 +32,7 @@ func NewContainerManager() *ContainerManager {
 	return &ContainerManager{
 		mu:            new(sync.Mutex),
 		openingData:   nil,
+		containerID:   mapping.ContainerIDUnknown,
 		openCallback:  nil,
 		closingData:   nil,
 		closeCallback: nil,
@@ -48,21 +51,31 @@ func (c ContainerManager) States() uint8 {
 }
 
 // ContainerData 获取当前已打开容器的状态。
-// 返回的 existed 指示当前是否已经打开了容器
-func (c ContainerManager) ContainerData() (data packet.ContainerOpen, existed bool) {
+// 返回的 existed 指示当前是否已经打开了容器。
+//
+// containerID 是提前预设的，这意味着其值如果
+// 不是 mapping.ContainerIDUnknown 则应当优
+// 先使用
+func (c ContainerManager) ContainerData() (data packet.ContainerOpen, containerID ContainerID, existed bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.states != ContainerStatesOpening {
-		return packet.ContainerOpen{}, false
+		return packet.ContainerOpen{}, 0, false
 	}
-	return *c.openingData, true
+	return *c.openingData, c.containerID, true
 }
 
 // SetContainerOpenCallback 设置容器打开时应该执行的回调函数。
-// 另外，设置的回调函数会在其被执行后被移除
-func (c *ContainerManager) SetContainerOpenCallback(f func()) {
+// 另外，设置的回调函数会在其被执行后被移除。
+//
+// containerID 是提前预设的将要打开容器的容器 ID，
+// 通常情况下可以安全的置为 mapping.ContainerIDUnknown (255)。
+//
+// 只有部分容器需要提前预设，目前已知的包含木桶
+func (c *ContainerManager) SetContainerOpenCallback(containerID ContainerID, f func()) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	c.containerID = containerID
 	c.openCallback = f
 }
 
@@ -97,6 +110,7 @@ func (c *ContainerManager) onContainerClose(p *packet.ContainerClose) {
 
 	c.closingData = p
 	c.openingData = nil
+	c.containerID = mapping.ContainerIDUnknown
 	c.states = ContainerStatesClosed
 
 	if c.closeCallback != nil {

@@ -26,12 +26,15 @@ func slotLocationToContainerID(
 		return 0, false // TODO: Figure out what WindowIDUI means
 	}
 
-	containerData, existed := api.ContainerData()
+	containerData, containerID, existed := api.ContainerData()
 	if !existed {
 		return 0, false
 	}
 	if containerData.WindowID != byte(slotLocation.WindowID) {
 		return 0, false
+	}
+	if containerID != mapping.ContainerIDUnknown {
+		return containerID, true
 	}
 
 	containerTypeWithSlot := mapping.ContainerTypeWithSlot{

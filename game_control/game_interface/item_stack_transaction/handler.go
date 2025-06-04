@@ -60,11 +60,11 @@ func (i *itemStackOperationHandler) handleMove(
 	i.responseMapping.bind(op.Source.WindowID, srcCID)
 	i.responseMapping.bind(op.Destination.WindowID, dstCID)
 
-	_, err = i.virtualInventories.loadAndAddItemCount(op.Source, -int8(op.Count))
+	_, err = i.virtualInventories.loadAndAddItemCount(op.Source, -int8(op.Count), false)
 	if err != nil {
 		return nil, fmt.Errorf("handleMove: %v", err)
 	}
-	_, err = i.virtualInventories.loadAndAddItemCount(op.Destination, int8(op.Count))
+	_, err = i.virtualInventories.loadAndAddItemCount(op.Destination, int8(op.Count), false)
 	if err != nil {
 		return nil, fmt.Errorf("handleMove: %v", err)
 	}
@@ -107,11 +107,11 @@ func (i *itemStackOperationHandler) handleSwap(
 	i.responseMapping.bind(op.Source.WindowID, srcCID)
 	i.responseMapping.bind(op.Destination.WindowID, dstCID)
 
-	srcCount, err := i.virtualInventories.loadAndAddItemCount(op.Source, 0)
+	srcCount, err := i.virtualInventories.loadAndAddItemCount(op.Source, 0, true)
 	if err != nil {
 		return nil, fmt.Errorf("handleSwap: %v", err)
 	}
-	dstCount, err := i.virtualInventories.loadAndAddItemCount(op.Destination, 0)
+	dstCount, err := i.virtualInventories.loadAndAddItemCount(op.Destination, 0, true)
 	if err != nil {
 		return nil, fmt.Errorf("handleSwap: %v", err)
 	}
@@ -149,7 +149,7 @@ func (i *itemStackOperationHandler) handleDrop(
 	}
 	i.responseMapping.bind(op.Path.WindowID, srcCID)
 
-	_, err = i.virtualInventories.loadAndAddItemCount(op.Path, -int8(op.Count))
+	_, err = i.virtualInventories.loadAndAddItemCount(op.Path, -int8(op.Count), false)
 	if err != nil {
 		return nil, fmt.Errorf("handleDrop: %v", err)
 	}
@@ -180,7 +180,7 @@ func (i *itemStackOperationHandler) handleCreativeItem(
 	}
 	i.responseMapping.bind(op.Path.WindowID, cid)
 
-	_, err = i.virtualInventories.loadAndAddItemCount(op.Path, int8(op.Count))
+	_, err = i.virtualInventories.loadAndAddItemCount(op.Path, int8(op.Count), false)
 	if err != nil {
 		return nil, fmt.Errorf("handleCreativeItem: %v", err)
 	}
@@ -234,7 +234,7 @@ func (i *itemStackOperationHandler) handleRenaming(
 	i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerAnvilInput)
 	i.responseMapping.bind(op.Path.WindowID, srcCID)
 
-	srcCount, err := i.virtualInventories.loadAndAddItemCount(op.Path, 0)
+	srcCount, err := i.virtualInventories.loadAndAddItemCount(op.Path, 0, true)
 	if err != nil {
 		return nil, fmt.Errorf("handleRenaming: %v", err)
 	}
@@ -297,7 +297,7 @@ func (i *itemStackOperationHandler) handleLooming(
 		i.responseMapping.bind(op.PatternPath.WindowID, cid)
 		i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerLoomMaterial)
 
-		_, err = i.virtualInventories.loadAndAddItemCount(op.PatternPath, 0)
+		_, err = i.virtualInventories.loadAndAddItemCount(op.PatternPath, 0, true)
 		if err != nil {
 			return nil, fmt.Errorf("handleLooming: %v", err)
 		}
@@ -330,7 +330,7 @@ func (i *itemStackOperationHandler) handleLooming(
 		i.responseMapping.bind(op.BannerPath.WindowID, cid)
 		i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerLoomInput)
 
-		_, err = i.virtualInventories.loadAndAddItemCount(op.BannerPath, 0)
+		_, err = i.virtualInventories.loadAndAddItemCount(op.BannerPath, 0, true)
 		if err != nil {
 			return nil, fmt.Errorf("handleLooming: %v", err)
 		}
@@ -363,7 +363,7 @@ func (i *itemStackOperationHandler) handleLooming(
 		i.responseMapping.bind(op.DyePath.WindowID, cid)
 		i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerLoomDye)
 
-		_, err = i.virtualInventories.loadAndAddItemCount(op.DyePath, -1)
+		_, err = i.virtualInventories.loadAndAddItemCount(op.DyePath, -1, false)
 		if err != nil {
 			return nil, fmt.Errorf("handleLooming: %v", err)
 		}

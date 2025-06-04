@@ -109,7 +109,11 @@ func (v *virtualInventories) setItemCount(slotLocation resources_control.SlotLoc
 func (v *virtualInventories) loadAndAddItemCount(
 	slotLocation resources_control.SlotLocation,
 	delta int8,
+	allowNoChange bool,
 ) (result uint8, err error) {
+	if delta == 0 && !allowNoChange {
+		return 0, fmt.Errorf("loadAndAddItemCount: Item count no change when not allow no change")
+	}
 	result, err = v.loadItemCount(slotLocation)
 	if err != nil {
 		return 0, fmt.Errorf("loadAndAddItemCount: %v", err)

@@ -82,8 +82,18 @@ func (v *virtualInventories) loadItemCount(slotLocation resources_control.SlotLo
 }
 
 // addItemCount 将 slotLocation 处的物品数量添加 delta。
-// 另外，delta 可以是负数
-func (v *virtualInventories) addItemCount(slotLocation resources_control.SlotLocation, delta int8) error {
+// 另外，delta 可以是负数。
+// allowNoChange 指示是否允许 delta 为 0。如果填写假且
+// delta 为 0，那么返回错误
+func (v *virtualInventories) addItemCount(
+	slotLocation resources_control.SlotLocation,
+	delta int8,
+	allowNoChange bool,
+) error {
+	if delta == 0 && !allowNoChange {
+		return fmt.Errorf("addItemCount: Item count no change when not allow no change")
+	}
+
 	resultCount := int8(v.itemCount[slotLocation]) + delta
 	if resultCount < 0 {
 		return fmt.Errorf(
@@ -92,6 +102,7 @@ func (v *virtualInventories) addItemCount(slotLocation resources_control.SlotLoc
 		)
 	}
 	v.itemCount[slotLocation] = uint8(resultCount)
+
 	return nil
 }
 
@@ -105,20 +116,19 @@ func (v *virtualInventories) setItemCount(slotLocation resources_control.SlotLoc
 }
 
 // loadAndAddItemCount 加载 slotLocation 处的物品数量，
-// 并将该数量添加 delta
+// 并将该数量添加 delta。
+// allowNoChange 指示是否允许 delta 为 0。如果填写假且
+// delta 为 0，那么返回错误
 func (v *virtualInventories) loadAndAddItemCount(
 	slotLocation resources_control.SlotLocation,
 	delta int8,
 	allowNoChange bool,
 ) (result uint8, err error) {
-	if delta == 0 && !allowNoChange {
-		return 0, fmt.Errorf("loadAndAddItemCount: Item count no change when not allow no change")
-	}
 	result, err = v.loadItemCount(slotLocation)
 	if err != nil {
 		return 0, fmt.Errorf("loadAndAddItemCount: %v", err)
 	}
-	err = v.addItemCount(slotLocation, delta)
+	err = v.addItemCount(slotLocation, delta, allowNoChange)
 	if err != nil {
 		return 0, fmt.Errorf("loadAndAddItemCount: %v", err)
 	}

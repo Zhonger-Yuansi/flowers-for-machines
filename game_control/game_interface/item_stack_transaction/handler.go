@@ -36,6 +36,10 @@ func (i *itemStackOperationHandler) handleMove(
 	op item_stack_operation.Move,
 	requestID resources_control.ItemStackRequestID,
 ) (result []protocol.StackRequestAction, err error) {
+	if op.Source == op.Destination {
+		return nil, fmt.Errorf("handleMove: Source is equal to Destination")
+	}
+
 	srcRID, err := i.virtualInventories.loadAndSetStackNetworkID(op.Source, requestID)
 	if err != nil {
 		return nil, fmt.Errorf("handleMove: %v", err)
@@ -79,6 +83,10 @@ func (i *itemStackOperationHandler) handleSwap(
 	op item_stack_operation.Swap,
 	requestID resources_control.ItemStackRequestID,
 ) (result []protocol.StackRequestAction, err error) {
+	if op.Source == op.Destination {
+		return nil, fmt.Errorf("handleSwap: Source is equal to Destination")
+	}
+
 	srcRID, err := i.virtualInventories.loadAndSetStackNetworkID(op.Source, requestID)
 	if err != nil {
 		return nil, fmt.Errorf("handleSwap: %v", err)
@@ -248,6 +256,18 @@ func (i *itemStackOperationHandler) handleLooming(
 ) (result []protocol.StackRequestAction, err error) {
 	runtimeData := item_stack_operation.LoomingRuntime{
 		RequestID: int32(requestID),
+	}
+
+	if op.BannerPath == op.DyePath {
+		return nil, fmt.Errorf("handleSwap: BannerPath is equal to DyePath")
+	}
+	if op.UsePattern {
+		if op.PatternPath == op.BannerPath {
+			return nil, fmt.Errorf("handleSwap: PatternPath is equal to BannerPath")
+		}
+		if op.PatternPath == op.DyePath {
+			return nil, fmt.Errorf("handleSwap: PatternPath is equal to DyePath")
+		}
 	}
 
 	containerData, existed := i.api.ContainerData()

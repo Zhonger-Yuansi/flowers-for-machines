@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
@@ -219,6 +220,38 @@ func SystemTestingItemStackOperation() {
 		err = api.ContainerOpenAndClose().CloseContainer()
 		if err != nil {
 			panic(fmt.Sprintf("SystemTestingItemStackOperation: Test round 4 failed due to %v (stage 3)", err))
+		}
+	}
+
+	// Test round 5
+	{
+		api.Commands().SendSettingsCommand("clear", true)
+		api.Commands().AwaitChangesGeneral()
+		api.Commands().SendSettingsCommand("give @s enchanted_golden_apple 10", true)
+		api.Commands().AwaitChangesGeneral()
+
+		success, err := api.ContainerOpenAndClose().OpenInventory()
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemStackOperation: Test round 5 failed due to %v (stage 1)", err))
+		}
+		if !success {
+			panic("SystemTestingItemStackOperation: Failed on test round 5")
+		}
+
+		_, _, _, err = api.ItemStackOperation().OpenTransaction().
+			MoveBetweenInventory(0, 1, 5).
+			MoveBetweenInventory(1, 0, 13).
+			Commit()
+		if err == nil {
+			panic("SystemTestingItemStackOperation: Failed on test round 5")
+		}
+		if !strings.Contains(fmt.Sprintf("%v", err), "(origin count = 5, delta = -13, result count = -8)") {
+			panic("SystemTestingItemStackOperation: Failed on test round 5")
+		}
+
+		err = api.ContainerOpenAndClose().CloseContainer()
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemStackOperation: Test round 5 failed due to %v (stage 2)", err))
 		}
 	}
 

@@ -83,13 +83,25 @@ func (v *virtualInventories) loadItemCount(slotLocation resources_control.SlotLo
 
 // addItemCount 将 slotLocation 处的物品数量添加 delta。
 // 另外，delta 可以是负数
-func (v *virtualInventories) addItemCount(slotLocation resources_control.SlotLocation, delta int8) {
-	v.itemCount[slotLocation] = uint8(int8(v.itemCount[slotLocation]) + delta)
+func (v *virtualInventories) addItemCount(slotLocation resources_control.SlotLocation, delta int8) error {
+	resultCount := int8(v.itemCount[slotLocation]) + delta
+	if resultCount < 0 {
+		return fmt.Errorf(
+			"addItemCount: Invalid result count (origin count = %d, delta = %d, result count = %d)",
+			v.itemCount[slotLocation], delta, resultCount,
+		)
+	}
+	v.itemCount[slotLocation] = uint8(resultCount)
+	return nil
 }
 
 // addItemCount 将 slotLocation 处的物品数量设置为 count
-func (v *virtualInventories) setItemCount(slotLocation resources_control.SlotLocation, count uint8) {
+func (v *virtualInventories) setItemCount(slotLocation resources_control.SlotLocation, count uint8) error {
+	if count > 64 {
+		return fmt.Errorf("setItemCount: Invalid count %d because it more than 64", count)
+	}
 	v.itemCount[slotLocation] = count
+	return nil
 }
 
 // loadAndAddItemCount 加载 slotLocation 处的物品数量，
@@ -102,7 +114,10 @@ func (v *virtualInventories) loadAndAddItemCount(
 	if err != nil {
 		return 0, fmt.Errorf("loadAndAddItemCount: %v", err)
 	}
-	v.addItemCount(slotLocation, delta)
+	err = v.addItemCount(slotLocation, delta)
+	if err != nil {
+		return 0, fmt.Errorf("loadAndAddItemCount: %v", err)
+	}
 	return
 }
 
@@ -116,7 +131,10 @@ func (v *virtualInventories) loadAndSetItemCount(
 	if err != nil {
 		return 0, fmt.Errorf("loadAndSetItemCount: %v", err)
 	}
-	v.setItemCount(slotLocation, count)
+	err = v.setItemCount(slotLocation, count)
+	if err != nil {
+		return 0, fmt.Errorf("loadAndAddItemCount: %v", err)
+	}
 	return
 }
 

@@ -304,8 +304,7 @@ func (i *ItemStackTransaction) GetCreativeItemToInventoryByNetworkID(
 	)
 }
 
-// RenameItem 将 slot 处的物品全部重命名为 newName。
-// count 指示 slot 处物品的数量。
+// RenameItem 将 slot 处的物品全部重命名为 newName
 //
 // 重命名操作是通过铁砧完成的，这意味着您需要确保铁砧已被打开，
 // 且铁砧内没有放置任何物品。
@@ -314,21 +313,15 @@ func (i *ItemStackTransaction) GetCreativeItemToInventoryByNetworkID(
 //
 // 该操作不支持内联，但它仍然可以被紧缩在单个的物品堆栈操作请
 // 求的数据包中
-func (i *ItemStackTransaction) RenameItem(
-	slot resources_control.SlotLocation,
-	count uint8,
-	newName string,
-) *ItemStackTransaction {
+func (i *ItemStackTransaction) RenameItem(slot resources_control.SlotLocation, newName string) *ItemStackTransaction {
 	i.operations = append(i.operations, item_stack_operation.Renaming{
 		Path:    slot,
-		Count:   count,
 		NewName: newName,
 	})
 	return i
 }
 
 // RenameInventoryItem 将背包中 slot 处的物品全部重命名为 newName。
-// count 指示背包中 slot 处物品的数量
 //
 // 重命名操作是通过铁砧完成的，这意味着您需要确保铁砧已被打开，
 // 且铁砧内没有放置任何物品。如果操作成功，则物品将回到原位。
@@ -337,17 +330,12 @@ func (i *ItemStackTransaction) RenameItem(
 // 因此您需要确保背包已被打开。
 //
 // 该操作不支持内联，但它仍然可以被紧缩在单个的物品堆栈操作请求的数据包中
-func (i *ItemStackTransaction) RenameInventoryItem(
-	slot resources_control.SlotID,
-	count uint8,
-	newName string,
-) *ItemStackTransaction {
+func (i *ItemStackTransaction) RenameInventoryItem(slot resources_control.SlotID, newName string) *ItemStackTransaction {
 	return i.RenameItem(
 		resources_control.SlotLocation{
 			WindowID: protocol.WindowIDInventory,
 			SlotID:   slot,
 		},
-		count,
 		newName,
 	)
 }

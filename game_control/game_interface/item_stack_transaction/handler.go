@@ -53,9 +53,17 @@ func (i *itemStackOperationHandler) handleMove(
 	if !found {
 		return nil, fmt.Errorf("handleMove: Can not find the container ID of given item whose at %#v", op.Destination)
 	}
-
 	i.responseMapping.bind(op.Source.WindowID, srcCID)
 	i.responseMapping.bind(op.Destination.WindowID, dstCID)
+
+	_, err = i.virtualInventories.loadAndAddItemCount(op.Source, -int8(op.Count))
+	if err != nil {
+		return nil, fmt.Errorf("handleMove: %v", err)
+	}
+	_, err = i.virtualInventories.loadAndAddItemCount(op.Destination, int8(op.Count))
+	if err != nil {
+		return nil, fmt.Errorf("handleMove: %v", err)
+	}
 
 	runtimeData := item_stack_operation.MoveRuntime{
 		MoveSrcContainerID:    byte(srcCID),
@@ -88,9 +96,25 @@ func (i *itemStackOperationHandler) handleSwap(
 	if !found {
 		return nil, fmt.Errorf("handleSwap: Can not find the container ID of given item whose at %#v", op.Destination)
 	}
-
 	i.responseMapping.bind(op.Source.WindowID, srcCID)
 	i.responseMapping.bind(op.Destination.WindowID, dstCID)
+
+	srcCount, err := i.virtualInventories.loadAndAddItemCount(op.Source, 0)
+	if err != nil {
+		return nil, fmt.Errorf("handleSwap: %v", err)
+	}
+	dstCount, err := i.virtualInventories.loadAndAddItemCount(op.Destination, 0)
+	if err != nil {
+		return nil, fmt.Errorf("handleSwap: %v", err)
+	}
+	_, err = i.virtualInventories.loadAndSetItemCount(op.Source, dstCount)
+	if err != nil {
+		return nil, fmt.Errorf("handleSwap: %v", err)
+	}
+	_, err = i.virtualInventories.loadAndSetItemCount(op.Destination, srcCount)
+	if err != nil {
+		return nil, fmt.Errorf("handleSwap: %v", err)
+	}
 
 	runtimeData := item_stack_operation.SwapRuntime{
 		SwapSrcContainerID:    byte(srcCID),
@@ -117,6 +141,11 @@ func (i *itemStackOperationHandler) handleDrop(
 	}
 	i.responseMapping.bind(op.Path.WindowID, srcCID)
 
+	_, err = i.virtualInventories.loadAndAddItemCount(op.Path, -int8(op.Count))
+	if err != nil {
+		return nil, fmt.Errorf("handleDrop: %v", err)
+	}
+
 	runtimeData := item_stack_operation.DropRuntime{
 		DropSrcContainerID:    byte(srcCID),
 		DropSrcStackNetworkID: srcRID,
@@ -142,6 +171,11 @@ func (i *itemStackOperationHandler) handleCreativeItem(
 		return nil, fmt.Errorf("handleCreativeItem: Can not find the container ID of given item whose at %#v", op.Path)
 	}
 	i.responseMapping.bind(op.Path.WindowID, cid)
+
+	_, err = i.virtualInventories.loadAndAddItemCount(op.Path, int8(op.Count))
+	if err != nil {
+		return nil, fmt.Errorf("handleCreativeItem: %v", err)
+	}
 
 	if op.UseCreativeItemNetworkID {
 		creativeItemNetworkID = op.CreativeItemNetworkID
@@ -189,14 +223,19 @@ func (i *itemStackOperationHandler) handleRenaming(
 	if !found {
 		return nil, fmt.Errorf("handleRenaming: Can not find the container ID of given item whose at %#v", op.Path)
 	}
-
 	i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerAnvilInput)
 	i.responseMapping.bind(op.Path.WindowID, srcCID)
 
+	srcCount, err := i.virtualInventories.loadAndAddItemCount(op.Path, 0)
+	if err != nil {
+		return nil, fmt.Errorf("handleRenaming: %v", err)
+	}
+
 	runtimeData := item_stack_operation.RenamingRuntime{
 		RequestID:               int32(requestID),
-		ContainerID:             byte(srcCID),
-		StackNetworkID:          srcRID,
+		ItemCount:               srcCount,
+		SrcContainerID:          byte(srcCID),
+		SrcStackNetworkID:       srcRID,
 		AnvilSlotStackNetworkID: anvilRID,
 	}
 	return op.Make(runtimeData), nil
@@ -235,9 +274,13 @@ func (i *itemStackOperationHandler) handleLooming(
 		if !found {
 			return nil, fmt.Errorf("handleLooming: Can not find the container ID of given item whose at %#v", op.PatternPath)
 		}
-
 		i.responseMapping.bind(op.PatternPath.WindowID, cid)
 		i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerLoomMaterial)
+
+		_, err = i.virtualInventories.loadAndAddItemCount(op.PatternPath, 0)
+		if err != nil {
+			return nil, fmt.Errorf("handleLooming: %v", err)
+		}
 
 		runtimeData.LoomPatternStackNetworkID = loomRID
 		runtimeData.MovePatternSrcContainerID = byte(cid)
@@ -264,9 +307,13 @@ func (i *itemStackOperationHandler) handleLooming(
 		if !found {
 			return nil, fmt.Errorf("handleLooming: Can not find the container ID of given item whose at %#v", op.BannerPath)
 		}
-
 		i.responseMapping.bind(op.BannerPath.WindowID, cid)
 		i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerLoomInput)
+
+		_, err = i.virtualInventories.loadAndAddItemCount(op.BannerPath, 0)
+		if err != nil {
+			return nil, fmt.Errorf("handleLooming: %v", err)
+		}
 
 		runtimeData.LoomBannerStackNetworkID = loomRID
 		runtimeData.MoveBannerSrcContainerID = byte(cid)
@@ -293,9 +340,13 @@ func (i *itemStackOperationHandler) handleLooming(
 		if !found {
 			return nil, fmt.Errorf("handleLooming: Can not find the container ID of given item whose at %#v", op.DyePath)
 		}
-
 		i.responseMapping.bind(op.DyePath.WindowID, cid)
 		i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerLoomDye)
+
+		_, err = i.virtualInventories.loadAndAddItemCount(op.DyePath, -1)
+		if err != nil {
+			return nil, fmt.Errorf("handleLooming: %v", err)
+		}
 
 		runtimeData.LoomDyeStackNetworkID = loomRID
 		runtimeData.MoveDyeSrcContainerID = byte(cid)

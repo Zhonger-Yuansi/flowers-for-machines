@@ -83,34 +83,34 @@ func SystemTestingItemStackOperation() {
 		}
 
 		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
-			MoveBetweenInventory(0, 3, 25).                           // Slot 0 -> Slot 3
-			MoveBetweenInventory(1, 4, 1).                            // Slot 1 -> Slot 4
-			MoveBetweenInventory(2, 5, 20).                           // Slot 2 -> Slot 5
-			RenameInventoryItem(3, 25, "SYSTEM TESTING A").           // Hacking Attempt
-			RenameInventoryItem(4, 1, "SYSTEM TESTING B").            // Hacking Attempt
-			SwapBetweenInventory(3, 4).                               // Slot 3 <-> Slot 4
-			SwapBetweenInventory(3, 5).                               // Slot 3 <-> Slot 5
-			RenameInventoryItem(5, 1, "INLINE").                      // Hacking Attempt
-			RenameInventoryItem(5, 1, "INLINE A").                    // Hacking Attempt
-			RenameInventoryItem(3, 20, "INLINE B").                   // Hacking Attempt
-			RenameInventoryItem(4, 25, "INLINE C").                   // Hacking Attempt
-			RenameInventoryItem(3, 20, "§r§fflowers for m[A]chines"). // Real Name
-			RenameInventoryItem(4, 25, "§r§fAPPLE").                  // Real Name
-			RenameInventoryItem(5, 1, "§r§fSWORD").                   // Real Name
-			SwapBetweenInventory(3, 4).                               // Slot 3 <-> Slot 4
-			SwapBetweenInventory(4, 5).                               // Slot 4 <-> Slot 5
-			MoveToContainer(3, 1, 25).                                // Slot 3 (Inventory) -> Slot 1 (Anvil)
-			DropContainerItem(1, 25).                                 // Slot 1 (Anvil, 25 -> 0)
-			SwapBetweenInventory(4, 5).                               // Slot 4 <-> Slot 5
-			SwapBetweenInventory(4, 5).                               // Slot 4 <-> Slot 5
-			SwapBetweenInventory(5, 4).                               // Slot 5 <-> Slot 4
-			DropInventoryItem(5, 1).                                  // Slot 5 (1 -> 0)
-			MoveBetweenInventory(4, 5, 10).                           // Slot 4 (20 -> 10) -> Slot 5 (0 -> 10)
-			MoveToContainer(4, 1, 10).                                // Slot 4 (Inventory) -> Slot 1 (Anvil)
-			SwapInventoryBetweenContainer(5, 1).                      // Slot 5 (Anvil) <-> Slot 1 (Anvil)
-			MoveToInventory(1, 4, 10).                                // Slot 1 (Anvil) -> Slot 4 (Inventory)
-			DropInventoryItem(4, 10).                                 // Slot 4 (10 -> 0)
-			DropInventoryItem(5, 10).                                 // Slot 5 (10 -> 0)
+			MoveBetweenInventory(0, 3, 25).                       // Slot 0 -> Slot 3
+			MoveBetweenInventory(1, 4, 1).                        // Slot 1 -> Slot 4
+			MoveBetweenInventory(2, 5, 20).                       // Slot 2 -> Slot 5
+			RenameInventoryItem(3, "SYSTEM TESTING A").           // Hacking Attempt
+			RenameInventoryItem(4, "SYSTEM TESTING B").           // Hacking Attempt
+			SwapBetweenInventory(3, 4).                           // Slot 3 <-> Slot 4
+			SwapBetweenInventory(3, 5).                           // Slot 3 <-> Slot 5
+			RenameInventoryItem(5, "INLINE").                     // Hacking Attempt
+			RenameInventoryItem(5, "INLINE A").                   // Hacking Attempt
+			RenameInventoryItem(3, "INLINE B").                   // Hacking Attempt
+			RenameInventoryItem(4, "INLINE C").                   // Hacking Attempt
+			RenameInventoryItem(3, "§r§fflowers for m[A]chines"). // Real Name
+			RenameInventoryItem(4, "§r§fAPPLE").                  // Real Name
+			RenameInventoryItem(5, "§r§fSWORD").                  // Real Name
+			SwapBetweenInventory(3, 4).                           // Slot 3 <-> Slot 4
+			SwapBetweenInventory(4, 5).                           // Slot 4 <-> Slot 5
+			MoveToContainer(3, 1, 25).                            // Slot 3 (Inventory) -> Slot 1 (Anvil)
+			DropContainerItem(1, 25).                             // Slot 1 (Anvil, 25 -> 0)
+			SwapBetweenInventory(4, 5).                           // Slot 4 <-> Slot 5
+			SwapBetweenInventory(4, 5).                           // Slot 4 <-> Slot 5
+			SwapBetweenInventory(5, 4).                           // Slot 5 <-> Slot 4
+			DropInventoryItem(5, 1).                              // Slot 5 (1 -> 0)
+			MoveBetweenInventory(4, 5, 10).                       // Slot 4 (20 -> 10) -> Slot 5 (0 -> 10)
+			MoveToContainer(4, 1, 10).                            // Slot 4 (Inventory) -> Slot 1 (Anvil)
+			SwapInventoryBetweenContainer(5, 1).                  // Slot 5 (Anvil) <-> Slot 1 (Anvil)
+			MoveToInventory(1, 4, 10).                            // Slot 1 (Anvil) -> Slot 4 (Inventory)
+			DropInventoryItem(4, 10).                             // Slot 4 (10 -> 0)
+			DropInventoryItem(5, 10).                             // Slot 5 (10 -> 0)
 			Commit()
 		if !success {
 			panic("SystemTestingItemStackOperation: Failed on test round 2")

@@ -44,8 +44,9 @@ type CreativeItemRuntime struct {
 // RenamingRuntime 是将铁砧重命名操作内联为物品堆栈操作请求的运行时结构体
 type RenamingRuntime struct {
 	RequestID               int32
-	ContainerID             byte
-	StackNetworkID          int32
+	ItemCount               uint8
+	SrcContainerID          byte
+	SrcStackNetworkID       int32
 	AnvilSlotStackNetworkID int32
 }
 

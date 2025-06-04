@@ -9,7 +9,6 @@ import (
 type Renaming struct {
 	Default
 	Path    resources_control.SlotLocation
-	Count   uint8
 	NewName string
 }
 
@@ -25,11 +24,11 @@ func (r Renaming) Make(runtimeData MakingRuntime) []protocol.StackRequestAction 
 	data := runtimeData.(RenamingRuntime)
 
 	move := protocol.TakeStackRequestAction{}
-	move.Count = r.Count
+	move.Count = data.ItemCount
 	move.Source = protocol.StackRequestSlotInfo{
-		ContainerID:    data.ContainerID,
+		ContainerID:    data.SrcContainerID,
 		Slot:           byte(r.Path.SlotID),
-		StackNetworkID: data.StackNetworkID,
+		StackNetworkID: data.SrcStackNetworkID,
 	}
 	move.Destination = protocol.StackRequestSlotInfo{
 		ContainerID:    0,
@@ -38,14 +37,14 @@ func (r Renaming) Make(runtimeData MakingRuntime) []protocol.StackRequestAction 
 	}
 
 	moveBack := protocol.PlaceStackRequestAction{}
-	moveBack.Count = r.Count
+	moveBack.Count = data.ItemCount
 	moveBack.Source = protocol.StackRequestSlotInfo{
 		ContainerID:    protocol.ContainerCreatedOutput,
 		Slot:           0x32,
 		StackNetworkID: data.RequestID,
 	}
 	moveBack.Destination = protocol.StackRequestSlotInfo{
-		ContainerID:    data.ContainerID,
+		ContainerID:    data.SrcContainerID,
 		Slot:           byte(r.Path.SlotID),
 		StackNetworkID: data.RequestID,
 	}
@@ -58,7 +57,7 @@ func (r Renaming) Make(runtimeData MakingRuntime) []protocol.StackRequestAction 
 		},
 		&protocol.ConsumeStackRequestAction{
 			DestroyStackRequestAction: protocol.DestroyStackRequestAction{
-				Count: r.Count,
+				Count: data.ItemCount,
 				Source: protocol.StackRequestSlotInfo{
 					ContainerID:    0,
 					Slot:           1,

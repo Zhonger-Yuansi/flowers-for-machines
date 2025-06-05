@@ -86,7 +86,7 @@ func SystemTestingItemCopy() {
 	{
 		success, err := api.ContainerOpenAndClose().OpenInventory()
 		if err != nil {
-			panic(fmt.Sprintf("SystemTestingItemCopy: Test round 1 failed due to %v (stage 1)", err))
+			panic(fmt.Sprintf("SystemTestingItemCopy: Test round 2 failed due to %v (stage 1)", err))
 		}
 		if !success {
 			panic("SystemTestingItemCopy: Failed on test round 2")
@@ -313,6 +313,138 @@ func SystemTestingItemCopy() {
 		)
 		if err != nil {
 			panic(fmt.Sprintf("SystemTestingItemCopy: Test round 4 failed due to %v (stage 4)", err))
+		}
+	}
+
+	// Test round 5
+	{
+		success, err := api.ContainerOpenAndClose().OpenInventory()
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemCopy: Test round 5 failed due to %v (stage 1)", err))
+		}
+		if !success {
+			panic("SystemTestingItemCopy: Failed on test round 5")
+		}
+
+		api.Commands().SendSettingsCommand("clear", true)
+		api.Commands().AwaitChangesGeneral()
+		api.Commands().SendSettingsCommand("setblock 0 0 0 air", true)
+		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
+			GetCreativeItemToInventory(0x5bc, 6, 16).
+			Commit()
+		if !success {
+			panic("SystemTestingItemCopy: Failed on test round 5")
+		}
+
+		err = api.ContainerOpenAndClose().CloseContainer()
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemCopy: Test round 5 failed due to %v (stage 2)", err))
+		}
+
+		api.BotClick().ChangeSelectedHotbarSlot(8)
+		err = api.SetBlock().SetBlock([3]int32{0, 0, 0}, "chest", `["minecraft:cardinal_direction"="east"]`)
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemCopy: Test round 4 failed due to %v (stage 3)", err))
+		}
+
+		targetItems := make([]*game_interface.ItemInfo, 27)
+		for index := range targetItems {
+			targetItems[index] = &game_interface.ItemInfo{Count: 3, ItemType: 7}
+		}
+
+		err = api.ItemCopy().CopyItem(
+			game_interface.UseItemOnBlocks{
+				HotbarSlotID: 8,
+				BlockPos:     [3]int32{0, 0, 0},
+				BlockName:    "chest",
+				BlockStates: map[string]any{
+					"minecraft:cardinal_direction": "east",
+				},
+			},
+			game_interface.UseItemOnBlocks{
+				HotbarSlotID: 8,
+				BlockPos:     [3]int32{0, 0, 0},
+				BlockName:    "chest",
+				BlockStates: map[string]any{
+					"minecraft:cardinal_direction": "east",
+				},
+			},
+			[]game_interface.ItemInfoWithSlot{
+				{
+					Slot:     6,
+					ItemInfo: game_interface.ItemInfo{Count: 16, ItemType: 7},
+				},
+			},
+			targetItems,
+		)
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemCopy: Test round 5 failed due to %v (stage 4)", err))
+		}
+	}
+
+	// Test round 6
+	{
+		success, err := api.ContainerOpenAndClose().OpenInventory()
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemCopy: Test round 6 failed due to %v (stage 1)", err))
+		}
+		if !success {
+			panic("SystemTestingItemCopy: Failed on test round 6")
+		}
+
+		api.Commands().SendSettingsCommand("clear", true)
+		api.Commands().AwaitChangesGeneral()
+		api.Commands().SendSettingsCommand("setblock 0 0 0 air", true)
+		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
+			GetCreativeItemToInventory(0x5bc, 6, 16).
+			Commit()
+		if !success {
+			panic("SystemTestingItemCopy: Failed on test round 6")
+		}
+
+		err = api.ContainerOpenAndClose().CloseContainer()
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemCopy: Test round 6 failed due to %v (stage 2)", err))
+		}
+
+		api.BotClick().ChangeSelectedHotbarSlot(8)
+		err = api.SetBlock().SetBlock([3]int32{0, 0, 0}, "chest", `["minecraft:cardinal_direction"="east"]`)
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemCopy: Test round 6 failed due to %v (stage 3)", err))
+		}
+
+		targetItems := make([]*game_interface.ItemInfo, 4)
+		for index := range targetItems {
+			targetItems[index] = &game_interface.ItemInfo{Count: 3, ItemType: 7}
+		}
+
+		err = api.ItemCopy().CopyItem(
+			game_interface.UseItemOnBlocks{
+				HotbarSlotID: 8,
+				BlockPos:     [3]int32{0, 0, 0},
+				BlockName:    "chest",
+				BlockStates: map[string]any{
+					"minecraft:cardinal_direction": "east",
+				},
+			},
+			game_interface.UseItemOnBlocks{
+				HotbarSlotID: 8,
+				BlockPos:     [3]int32{0, 0, 0},
+				BlockName:    "chest",
+				BlockStates: map[string]any{
+					"minecraft:cardinal_direction": "east",
+				},
+			},
+			[]game_interface.ItemInfoWithSlot{
+				{
+					Slot:     6,
+					ItemInfo: game_interface.ItemInfo{Count: 16, ItemType: 7},
+				},
+			},
+			targetItems,
+		)
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemCopy: Test round 6 failed due to %v (stage 4)", err))
 		}
 	}
 

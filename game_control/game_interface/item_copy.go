@@ -268,6 +268,12 @@ func (i *ItemCopy) copyItem(
 		return fmt.Errorf("copyItem: Failed to move baseItems to the container")
 	}
 
+	// Step 3: Clean inventory
+	_, err = i.commands.SendWSCommandWithResp("clear")
+	if err != nil {
+		return fmt.Errorf("copyItem: %v", err)
+	}
+
 	// Step 3: Copy item
 	for {
 		err = i.stepGetAllThingBack()
@@ -289,32 +295,50 @@ func (i *ItemCopy) copyItem(
 
 // stepGetAllThingBack 将容器中的全部物品放入背包
 func (i *ItemCopy) stepGetAllThingBack() error {
-	// Step 1: Clean inventory
-	_, err := i.commands.SendWSCommandWithResp("clear")
-	if err != nil {
-		return fmt.Errorf("stepGetAllThingBack: %v", err)
-	}
-	i.inventory = [27]ItemInfo{}
-
-	// Step 2: Backup structure
+	// Step 1: Backup structure
 	uniqueID, err := i.structure.BackupStructure(i.closedContainer.BlockPos)
 	if err != nil {
 		return fmt.Errorf("stepGetAllThingBack: %v", err)
 	}
 	defer i.structure.DeleteStructure(uniqueID)
 
-	// Step 3: Move all items back to inventory
+	// Step 2: Move all items back to inventory
 	transaction := i.itemStack.OpenTransaction()
-	for index, item := range i.container {
-		if item.Count == 0 {
-			continue
+	for itemType, group := range i.itemGroups {
+		for _, child := range append([]itemGroupElement{group.parent}, group.child...) {
+			haveCount := i.container[child.Slot].Count
+			extraCount := i.inventory[child.Slot].Count
+
+			if haveCount == 0 {
+				continue
+			}
+
+			childAllGrown := true
+			for _, grow := range group.childHaveGrown {
+				if !grow {
+					childAllGrown = false
+					break
+				}
+			}
+			if haveCount >= child.Count && childAllGrown {
+				continue
+			}
+
+			if extraCount != 0 {
+				// This should nerver happened, or there happened some underlying internal problems
+				panic("stepMergeToContainer: Should nerver happened")
+			}
+
+			_ = transaction.MoveToInventory(
+				child.Slot,
+				child.Slot,
+				haveCount,
+			)
+			i.inventory[child.Slot] = ItemInfo{
+				Count:    haveCount,
+				ItemType: itemType,
+			}
 		}
-		_ = transaction.MoveToInventory(
-			resources_control.SlotID(index),
-			resources_control.SlotID(index),
-			item.Count,
-		)
-		i.inventory[index] = item
 	}
 	success, _, _, err := transaction.Commit()
 	if err != nil {
@@ -324,14 +348,14 @@ func (i *ItemCopy) stepGetAllThingBack() error {
 		return fmt.Errorf("stepGetAllThingBack: Move item back unsuccessful")
 	}
 
-	// Step 4: Close container
+	// Step 3: Close container
 	err = i.api.CloseContainer()
 	if err != nil {
 		return fmt.Errorf("stepGetAllThingBack: %v", err)
 	}
 	i.containerIsOpened = false
 
-	// Step 5: Revert structure
+	// Step 4: Revert structure
 	err = i.structure.RevertStructure(uniqueID, i.closedContainer.BlockPos)
 	if err != nil {
 		return fmt.Errorf("stepGetAllThingBack: %v", err)
@@ -434,17 +458,6 @@ func (i *ItemCopy) stepMergeToContainer() (canStop bool, err error) {
 			moveCount := i.inventory[child.Slot].Count
 			unusedCount := uint8(0)
 
-			// It's possibly for the item have zero count
-			if moveCount == 0 {
-				continue
-			}
-
-			// Compute the actual move count and the item we will not used
-			if moveCount+haveCount > child.Count {
-				unusedCount = moveCount - (child.Count - haveCount)
-				moveCount -= unusedCount
-			}
-
 			// This only can be happened for a parent.
 			// By this way, record the unused items and continue.
 			if child.Count < haveCount {
@@ -457,20 +470,25 @@ func (i *ItemCopy) stepMergeToContainer() (canStop bool, err error) {
 				continue
 			}
 
+			// It's possibly for the item have zero count
+			if moveCount == 0 {
+				continue
+			}
+			// Compute the actual move count and the item we will not used
+			if moveCount+haveCount > child.Count {
+				unusedCount = moveCount - (child.Count - haveCount)
+				moveCount -= unusedCount
+			}
 			// We have some item that not used, and here we mark them.
 			if unusedCount > 0 {
 				unusedInventoryMapping[child.Slot] = unusedCount
 			}
-
 			// Current item is finished, and can continue here
 			if moveCount == 0 {
 				continue
 			}
 
 			// Do move operation.
-			if moveCount == 0 {
-				fmt.Println("?")
-			}
 			_ = transaction.MoveToContainer(child.Slot, child.Slot, moveCount)
 
 			// Update underlying virtual inventories information.
@@ -503,7 +521,7 @@ func (i *ItemCopy) stepMergeToContainer() (canStop bool, err error) {
 					moveCount,
 				)
 
-				i.container[child.Count].Count += moveCount
+				i.container[child.Slot].Count += moveCount
 				i.container[allElements[0].Slot].Count -= moveCount
 				if i.container[allElements[0].Slot].Count == 0 {
 					i.container[allElements[0].Slot].ItemType = 0

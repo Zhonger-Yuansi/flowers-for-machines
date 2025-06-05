@@ -26,15 +26,6 @@ var (
 		[3]int32{0, 0, 1},
 		[3]int32{0, 0, -1},
 	}
-	// offsetMappingInv ..
-	offsetMappingInv = map[protocol.BlockPos]int{
-		[3]int32{-1, 0, 0}: 0,
-		[3]int32{1, 0, 0}:  1,
-		[3]int32{0, -1, 0}: 2,
-		[3]int32{0, 1, 0}:  3,
-		[3]int32{0, 0, 1}:  4,
-		[3]int32{0, 0, -1}: 5,
-	}
 	// nearBlockMapping ..
 	nearBlockMapping = []protocol.BlockPos{
 		[3]int32{0, 0, 0},
@@ -43,15 +34,22 @@ var (
 		[3]int32{0, 0, 3},
 		[3]int32{0, 0, -3},
 	}
+	// offsetMappingInv ..
+	offsetMappingInv map[protocol.BlockPos]int
 	// nearBlockMappingInv ..
-	nearBlockMappingInv = map[protocol.BlockPos]int{
-		[3]int32{0, 0, 0}:  0,
-		[3]int32{-3, 0, 0}: 1,
-		[3]int32{3, 0, 0}:  2,
-		[3]int32{0, 0, 3}:  3,
-		[3]int32{0, 0, -3}: 4,
-	}
+	nearBlockMappingInv map[protocol.BlockPos]int
 )
+
+func init() {
+	offsetMappingInv = make(map[protocol.BlockPos]int)
+	for key, value := range offsetMapping {
+		offsetMappingInv[value] = key
+	}
+	nearBlockMappingInv = make(map[protocol.BlockPos]int)
+	for key, value := range nearBlockMapping {
+		nearBlockMappingInv[value] = key
+	}
+}
 
 // Console 是机器人导入 NBT 方块所使用的操作台。
 // 它目前被定义为一个 11*5*11 的全空气区域

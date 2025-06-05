@@ -29,22 +29,22 @@ type (
 )
 
 type (
-	// itemGroupElement 是 itemGroup 中的单个元素
-	itemGroupElement struct {
+	// ItemGroupElement 是 ItemGroup 中的单个元素
+	ItemGroupElement struct {
 		Slot  resources_control.SlotID // 该物品所在的槽位索引
 		Count uint8                    // 该物品的数量
 	}
-	// itemGroup 描述 ItemType 一致的物品，
+	// ItemGroup 描述 ItemType 一致的物品，
 	// 并且记载这些物品在目标容器中的分布情况。
 	// 我们把这一系列物品称为一个 Group
-	itemGroup struct {
-		// parent 是这个 Group 的父结点。
+	ItemGroup struct {
+		// Parent 是这个 Group 的父结点。
 		// 父节点最初来源于已有的基物品，
 		// 可以保证它一定是存在的
-		parent itemGroupElement
-		// child 是这个 Group 的所有子结点
-		child []itemGroupElement
-		// childHaveGrown 指示每个子结点
+		Parent ItemGroupElement
+		// Child 是这个 Group 的所有子结点
+		Child []ItemGroupElement
+		// ChildHaveGrown 指示每个子结点
 		// 是否已经存在至少 1 个物品。
 		//
 		// 在每个生成轮次中，应当优先保证
@@ -53,7 +53,7 @@ type (
 		//
 		// 如果存在没有诞生的子节点，则该 Group
 		// 应当重复子结点生成操作，直到全部诞生
-		childHaveGrown []bool
+		ChildHaveGrown []bool
 	}
 )
 
@@ -70,7 +70,7 @@ type ItemCopy struct {
 
 	closedContainer UseItemOnBlocks
 	openedContainer UseItemOnBlocks
-	itemGroups      map[ItemType]itemGroup
+	ItemGroups      map[ItemType]ItemGroup
 
 	containerIsOpened bool
 }
@@ -91,7 +91,7 @@ func NewItemCopy(
 		inventory:         [27]ItemInfo{},
 		container:         [27]ItemInfo{},
 		closedContainer:   UseItemOnBlocks{},
-		itemGroups:        make(map[ItemType]itemGroup),
+		ItemGroups:        make(map[ItemType]ItemGroup),
 		containerIsOpened: false,
 	}
 }
@@ -102,6 +102,9 @@ func NewItemCopy(
 // closedContainer 提供的信息指示机器人如何打开“已经关闭”的目标容器，
 // 而 openedContainer 提供的信息指示机器人如何打开“已经打开”的目标容器。
 // 目前已知的特殊区块是木桶，因为其在打开和关闭状态下具有不同的方块状态。
+//
+// 您有责任确保 closedContainer.HotbarSlotID 和 openedContainer.HotbarSlotID
+// 是一致的。
 //
 // targetItems 指示是最终容器的物品状态，即机器人将按照背包中已有的 baseItems 物品，
 // 通过多次的物品拷贝操作，使得容器中物品的状态为 targetItems。
@@ -182,7 +185,7 @@ func (i *ItemCopy) copyItem(
 	i.container = [27]ItemInfo{}
 	i.closedContainer = closedContainer
 	i.openedContainer = openedContainer
-	i.itemGroups = make(map[ItemType]itemGroup)
+	i.ItemGroups = make(map[ItemType]ItemGroup)
 	i.containerIsOpened = false
 
 	// Step 1: Convert target items to item groups
@@ -191,25 +194,25 @@ func (i *ItemCopy) copyItem(
 			continue
 		}
 
-		group, ok := i.itemGroups[item.ItemType]
+		group, ok := i.ItemGroups[item.ItemType]
 		if !ok {
-			i.itemGroups[item.ItemType] = itemGroup{
-				parent: itemGroupElement{
+			i.ItemGroups[item.ItemType] = ItemGroup{
+				Parent: ItemGroupElement{
 					Slot:  resources_control.SlotID(index),
 					Count: item.Count,
 				},
-				child:          nil,
-				childHaveGrown: nil,
+				Child:          nil,
+				ChildHaveGrown: nil,
 			}
 			continue
 		}
 
-		group.child = append(group.child, itemGroupElement{
+		group.Child = append(group.Child, ItemGroupElement{
 			Slot:  resources_control.SlotID(index),
 			Count: item.Count,
 		})
-		group.childHaveGrown = append(group.childHaveGrown, false)
-		i.itemGroups[item.ItemType] = group
+		group.ChildHaveGrown = append(group.ChildHaveGrown, false)
+		i.ItemGroups[item.ItemType] = group
 	}
 
 	// Step 2.1: Open the container
@@ -230,23 +233,23 @@ func (i *ItemCopy) copyItem(
 
 	// Step 2.3: Move base item to the container
 	transaction := i.itemStack.OpenTransaction()
-	for itemType, group := range i.itemGroups {
+	for itemType, group := range i.ItemGroups {
 		agent := baseItemMapping[itemType]
 
 		_ = transaction.MoveToContainer(
 			agent.Slot,
-			group.parent.Slot,
+			group.Parent.Slot,
 			agent.ItemInfo.Count,
 		)
 
-		for index, child := range group.child {
+		for index, child := range group.Child {
 			if agent.ItemInfo.Count == 1 {
 				break
 			}
 			agent.ItemInfo.Count--
 
 			_ = transaction.MoveBetweenContainer(
-				group.parent.Slot,
+				group.Parent.Slot,
 				child.Slot,
 				1,
 			)
@@ -255,10 +258,10 @@ func (i *ItemCopy) copyItem(
 				Count:    1,
 				ItemType: itemType,
 			}
-			i.itemGroups[itemType].childHaveGrown[index] = true
+			i.ItemGroups[itemType].ChildHaveGrown[index] = true
 		}
 
-		i.container[group.parent.Slot] = agent.ItemInfo
+		i.container[group.Parent.Slot] = agent.ItemInfo
 	}
 	success, _, _, err = transaction.Commit()
 	if err != nil {
@@ -304,8 +307,8 @@ func (i *ItemCopy) stepGetAllThingBack() error {
 
 	// Step 2: Move all items back to inventory
 	transaction := i.itemStack.OpenTransaction()
-	for itemType, group := range i.itemGroups {
-		for _, child := range append([]itemGroupElement{group.parent}, group.child...) {
+	for itemType, group := range i.ItemGroups {
+		for _, child := range append([]ItemGroupElement{group.Parent}, group.Child...) {
 			haveCount := i.container[child.Slot].Count
 			extraCount := i.inventory[child.Slot].Count
 
@@ -314,7 +317,7 @@ func (i *ItemCopy) stepGetAllThingBack() error {
 			}
 
 			childAllGrown := true
-			for _, grow := range group.childHaveGrown {
+			for _, grow := range group.ChildHaveGrown {
 				if !grow {
 					childAllGrown = false
 					break
@@ -382,34 +385,34 @@ func (i *ItemCopy) stepMergeToContainer() (canStop bool, err error) {
 	transaction := i.itemStack.OpenTransaction()
 
 	// Step 3: Grow child and merge
-	for itemType, group := range i.itemGroups {
+	for itemType, group := range i.ItemGroups {
 		// Try to grow child from their parent
-		for index, child := range group.child {
-			if i.container[group.parent.Slot].Count <= group.parent.Count {
+		for index, child := range group.Child {
+			if i.container[group.Parent.Slot].Count <= group.Parent.Count {
 				break
 			}
 
-			if group.childHaveGrown[index] {
+			if group.ChildHaveGrown[index] {
 				continue
 			}
 
 			_ = transaction.MoveBetweenContainer(
-				group.parent.Slot,
+				group.Parent.Slot,
 				child.Slot,
 				1,
 			)
 
-			i.container[group.parent.Slot].Count--
+			i.container[group.Parent.Slot].Count--
 			i.container[child.Slot] = ItemInfo{
 				Count:    1,
 				ItemType: itemType,
 			}
-			i.itemGroups[itemType].childHaveGrown[index] = true
+			i.ItemGroups[itemType].ChildHaveGrown[index] = true
 		}
 
 		// Try to grow child from inventory
-		for index, child := range group.child {
-			if group.childHaveGrown[index] {
+		for index, child := range group.Child {
+			if group.ChildHaveGrown[index] {
 				continue
 			}
 
@@ -428,7 +431,7 @@ func (i *ItemCopy) stepMergeToContainer() (canStop bool, err error) {
 				Count:    1,
 				ItemType: itemType,
 			}
-			i.itemGroups[itemType].childHaveGrown[index] = true
+			i.ItemGroups[itemType].ChildHaveGrown[index] = true
 		}
 
 		// If their still have child not grown,
@@ -436,7 +439,7 @@ func (i *ItemCopy) stepMergeToContainer() (canStop bool, err error) {
 		// items to grown more child, and also
 		// have no items to merge
 		stillHaveChildNotGrown := false
-		for _, grown := range group.childHaveGrown {
+		for _, grown := range group.ChildHaveGrown {
 			if !grown {
 				stillHaveChildNotGrown = true
 				break
@@ -446,7 +449,7 @@ func (i *ItemCopy) stepMergeToContainer() (canStop bool, err error) {
 			continue
 		}
 
-		allElements := append([]itemGroupElement{group.parent}, group.child...)
+		allElements := append([]ItemGroupElement{group.Parent}, group.Child...)
 		unusedContainerCount := uint8(0)
 		unusedInventoryMapping := make(map[resources_control.SlotID]uint8)
 
@@ -581,15 +584,15 @@ func (i *ItemCopy) stepMergeToContainer() (canStop bool, err error) {
 	parentExistMoreThanSituation := false
 
 	// Step 5: Check can stop
-	for _, group := range i.itemGroups {
-		count := i.container[group.parent.Slot].Count
-		if group.parent.Count < count {
+	for _, group := range i.ItemGroups {
+		count := i.container[group.Parent.Slot].Count
+		if group.Parent.Count < count {
 			parentExistMoreThanSituation = true
 		}
-		if group.parent.Count > count {
+		if group.Parent.Count > count {
 			return false, nil
 		}
-		for _, child := range group.child {
+		for _, child := range group.Child {
 			if child.Count < i.container[child.Slot].Count {
 				// This should nerver happened, or there happened some underlying internal problems
 				panic("stepMergeToContainer: Should nerver happened")
@@ -612,26 +615,26 @@ func (i *ItemCopy) stepMergeToContainer() (canStop bool, err error) {
 	}
 
 	// Step 8.1: Clean extra item from each parent
-	for itemType, group := range i.itemGroups {
-		count := i.container[group.parent.Slot].Count
-		if group.parent.Count > count {
+	for itemType, group := range i.ItemGroups {
+		count := i.container[group.Parent.Slot].Count
+		if group.Parent.Count > count {
 			// This should nerver happened, or there happened some underlying internal problems
 			panic("stepMergeToContainer: Should nerver happened")
 		}
-		if group.parent.Count == count {
+		if group.Parent.Count == count {
 			continue
 		}
 
-		cleanCount := count - group.parent.Count
+		cleanCount := count - group.Parent.Count
 		airSlot, found := i.searchAirFromInventory()
 		if !found {
 			// This should nerver happened, or there happened some underlying internal problems
 			panic("stepMergeToContainer: Should nerver happened")
 		}
-		_ = transaction.MoveToInventory(group.parent.Slot, airSlot, cleanCount)
+		_ = transaction.MoveToInventory(group.Parent.Slot, airSlot, cleanCount)
 
-		i.container[group.parent.Slot].Count -= cleanCount
-		i.inventory[group.parent.Slot] = ItemInfo{
+		i.container[group.Parent.Slot].Count -= cleanCount
+		i.inventory[group.Parent.Slot] = ItemInfo{
 			Count:    cleanCount,
 			ItemType: itemType,
 		}

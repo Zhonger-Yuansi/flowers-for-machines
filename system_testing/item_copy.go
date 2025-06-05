@@ -448,5 +448,56 @@ func SystemTestingItemCopy() {
 		}
 	}
 
+	// Test round 7
+	{
+
+		api.Commands().SendSettingsCommand("clear", true)
+		api.Commands().AwaitChangesGeneral()
+		api.Commands().SendSettingsCommand("setblock 0 0 0 air", true)
+		api.Commands().AwaitChangesGeneral()
+		api.Commands().SendSettingsCommand("give @s deny 1", true)
+		api.Commands().AwaitChangesGeneral()
+
+		api.BotClick().ChangeSelectedHotbarSlot(4)
+		err := api.SetBlock().SetBlock([3]int32{0, 0, 0}, "chest", `["minecraft:cardinal_direction"="east"]`)
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemCopy: Test round 7 failed due to %v (stage 1)", err))
+		}
+
+		targetItems := make([]*game_interface.ItemInfo, 27)
+		for index := range targetItems {
+			targetItems[index] = &game_interface.ItemInfo{Count: 64, ItemType: 240}
+		}
+
+		err = api.ItemCopy().CopyItem(
+			game_interface.UseItemOnBlocks{
+				HotbarSlotID: 4,
+				BlockPos:     [3]int32{0, 0, 0},
+				BlockName:    "chest",
+				BlockStates: map[string]any{
+					"minecraft:cardinal_direction": "east",
+				},
+			},
+			game_interface.UseItemOnBlocks{
+				HotbarSlotID: 4,
+				BlockPos:     [3]int32{0, 0, 0},
+				BlockName:    "chest",
+				BlockStates: map[string]any{
+					"minecraft:cardinal_direction": "east",
+				},
+			},
+			[]game_interface.ItemInfoWithSlot{
+				{
+					Slot:     0,
+					ItemInfo: game_interface.ItemInfo{Count: 1, ItemType: 240},
+				},
+			},
+			targetItems,
+		)
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemCopy: Test round 7 failed due to %v (stage 2)", err))
+		}
+	}
+
 	pterm.Success.Printfln("SystemTestingItemCopy: PASS (Time used = %v)", time.Since(tA))
 }

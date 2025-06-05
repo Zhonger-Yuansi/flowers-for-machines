@@ -105,11 +105,11 @@ func NewConsole(api *game_interface.GameInterface, center protocol.BlockPos) *Co
 // 并试图初始化操作台的地板方块。
 //
 // InitConsoleArea 应当至多调用一次，并且应在 NewConsole
-// 尽可能快的调用。
+// 完成后尽可能快的调用。
 //
 // InitConsoleArea 的调用者有责任确保操作台位于主世界，
-// 并且操作台中心方块处的 11*5*11 的区域全为空气且没有
-// 任何实体
+// 并且以操作台中心方块为中心处的 11*5*11 的区域全为空气
+// 且没有任何实体
 func (c *Console) InitConsoleArea() error {
 	api := c.api.Commands()
 

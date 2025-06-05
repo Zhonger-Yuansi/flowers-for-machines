@@ -208,8 +208,8 @@ func (i *ItemStackTransaction) DropItem(slot resources_control.SlotLocation, cou
 	return i
 }
 
-// DropItem 将背包中 slot 处的物品丢出，
-// 且只丢出 count 个。
+// DropInventoryItem 将背包中 slot 处的
+// 物品丢出，且只丢出 count 个。
 //
 // 此操作需要保证背包已被打开，
 // 或者已打开的容器中可以在背包中移动物品。

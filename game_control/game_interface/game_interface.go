@@ -18,6 +18,7 @@ type GameInterface struct {
 	structureBackup       *StructureBackup
 	querytarget           *Querytarget
 	setblock              *SetBlock
+	replaceitem           *Replaceitem
 	botClick              *BotClick
 	itemStackOperation    *ItemStackOperation
 	containerOpenAndClose *ContainerOpenAndClose
@@ -41,6 +42,7 @@ func NewGameInterface(resources *resources_control.Resources) *GameInterface {
 	result.structureBackup = NewStructureBackup(result.commands)
 	result.querytarget = NewQuerytarget(result.commands)
 	result.setblock = NewSetBlock(result.commands)
+	result.replaceitem = NewReplaceitem(result.commands)
 	result.botClick = NewBotClick(result.wrapper, result.commands, result.setblock)
 	result.itemStackOperation = NewItemStackOperation(result.wrapper)
 	result.containerOpenAndClose = NewContainerOpenAndClose(result.wrapper, result.commands, result.botClick)
@@ -82,6 +84,11 @@ func (g *GameInterface) Querytarget() *Querytarget {
 // SetBlock 返回机器人在方块放置 (MC 命令的方式) 上的相关实现
 func (g *GameInterface) SetBlock() *SetBlock {
 	return g.setblock
+}
+
+// Replaceitem 返回机器人在 Replaceitem 命令上的简单包装
+func (g *GameInterface) Replaceitem() *Replaceitem {
+	return g.replaceitem
 }
 
 // BotClick 返回机器人在点击操作上的相关实现。

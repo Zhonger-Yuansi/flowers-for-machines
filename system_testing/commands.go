@@ -68,6 +68,7 @@ func SystemTestingCommands() {
 			},
 		)
 
+		api.Commands().SendSettingsCommand("gamemode 1", false)
 		api.Commands().SendSettingsCommand("gamerule sendcommandfeedback false", false)
 		time.Sleep(time.Second)
 		api.Commands().SendSettingsCommand("gamerule sendcommandfeedback true", false)

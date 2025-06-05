@@ -99,12 +99,13 @@ func NewItemCopy(
 // CopyItem 根据给定的基物品 baseItems 和蓝图 targetItems 向相应的容器载入物品。
 // 应确保调用 CopyItem 前没有打开任何容器。
 //
-// closedContainer 提供的信息指示机器人如何打开“已经关闭”的目标容器，
+// closedContainer 提供的信息指示机器人应当如何打开“已经关闭”的目标容器，
 // 而 openedContainer 提供的信息指示机器人如何打开“已经打开”的目标容器。
-// 目前已知的特殊区块是木桶，因为其在打开和关闭状态下具有不同的方块状态。
+// 目前已知的特殊方块是木桶，因为其在打开和关闭状态下具有不同的方块状态。
 //
 // 您有责任确保 closedContainer.HotbarSlotID 和 openedContainer.HotbarSlotID
-// 是一致的。
+// 是一致的。并且，此函数不会自动切换物品栏，因此您需要确保在调用前已经切换物品栏到
+// closedContainer.HotbarSlotID 的值。
 //
 // targetItems 指示是最终容器的物品状态，即机器人将按照背包中已有的 baseItems 物品，
 // 通过多次的物品拷贝操作，使得容器中物品的状态为 targetItems。
@@ -118,9 +119,6 @@ func NewItemCopy(
 //
 // 当然，targetItems 的长度不应超过 27，这意味着目标容器的格子数量被限制在 27 最大；
 // 同时，您不应操作一个连体的大箱子，即便它具有 54 个格子。
-//
-// 此函数不会自动切换物品栏，因此您需要确保在调用前已经切换物品栏到
-// closedContainer.HotbarSlotID 的值。
 //
 // 另外，CopyItem 是阻塞的，这意味着如果存在多个 go 惯例调用 CopyItem，则每个调用
 // 都将会阻塞，直到上一个调用完成

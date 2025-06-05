@@ -88,12 +88,12 @@ func NewConsole(api *game_interface.GameInterface, center protocol.BlockPos) *Co
 	}
 
 	for index := range 5 {
-		var airBlock block_helper.BlockHelper = block_helper.AirBlock{}
+		var airBlock block_helper.BlockHelper = block_helper.Air{}
 		c.helperBlocks[index] = &airBlock
 	}
 	for index := range 5 {
 		for idx := range 6 {
-			var airBlock block_helper.BlockHelper = block_helper.AirBlock{}
+			var airBlock block_helper.BlockHelper = block_helper.Air{}
 			c.nearBlocks[index][idx] = &airBlock
 		}
 	}
@@ -176,7 +176,7 @@ func (c *Console) InitConsoleArea() error {
 	}
 
 	for index := range 5 {
-		var baseBlock block_helper.BlockHelper = block_helper.NearBlockHelper{
+		var baseBlock block_helper.BlockHelper = block_helper.NearBlock{
 			Name: BaseBackground,
 		}
 		c.nearBlocks[index][offsetMappingInv[[3]int32{0, -1, 0}]] = &baseBlock

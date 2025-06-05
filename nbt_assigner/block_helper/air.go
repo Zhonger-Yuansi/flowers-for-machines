@@ -1,16 +1,16 @@
 package block_helper
 
-// AirBlock 描述了一个空气方块
-type AirBlock struct{}
+// Air 描述了一个空气方块
+type Air struct{}
 
-func (AirBlock) BlockName() string {
+func (Air) BlockName() string {
 	return "minecraft:air"
 }
 
-func (AirBlock) BlockStates() map[string]any {
+func (Air) BlockStates() map[string]any {
 	return map[string]any{}
 }
 
-func (AirBlock) BlockStatesString() string {
+func (Air) BlockStatesString() string {
 	return `[]`
 }

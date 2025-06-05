@@ -177,7 +177,7 @@ func (c *Console) InitConsoleArea() error {
 		var baseBlock block_helper.BlockHelper = block_helper.NearBlock{
 			Name: BaseBackground,
 		}
-		c.nearBlocks[index][offsetMappingInv[[3]int32{0, -1, 0}]] = &baseBlock
+		*c.nearBlocks[index][offsetMappingInv[[3]int32{0, -1, 0}]] = baseBlock
 	}
 
 	return nil

@@ -3,6 +3,7 @@ package item_cache
 import (
 	"fmt"
 
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
 )
 
@@ -83,19 +84,41 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 	}
 
 	// Move item / Load cache from second cache
-	inventorySlot := i.console.FindAndUseInventorySlot(exclusion)
-	success, _, _, err = api.ItemStackOperation().OpenTransaction().
-		MoveToInventory(hitItem.SlotID, inventorySlot, 1).
-		Commit()
-	if err != nil {
-		i.console.SetInventorySlot(inventorySlot, false)
-		return false, false, fmt.Errorf("loadSecondCacheToFirstCache: %v", err)
-	}
-	if !success {
-		i.console.SetInventorySlot(inventorySlot, false)
-		return false, false, fmt.Errorf(
-			"loadSecondCacheToFirstCache: Failed to load cache due to the server reject the request; item = %#v", hitItem,
-		)
+	{
+		// Find a possible place to place the cached item
+		inventorySlot := i.console.FindAndUseInventorySlot(exclusion)
+		errFunc := func(err error) (bool, bool, error) {
+			i.console.SetInventorySlot(inventorySlot, false)
+			return false, false, fmt.Errorf("loadSecondCacheToFirstCache: %v", err)
+		}
+		// If the inventory is full, then we try to grow a new air to place the item
+		if !i.console.GetInventorySlot(inventorySlot) {
+			err = api.Replaceitem().ReplaceitemInInventory(
+				"@s",
+				game_interface.ReplacePathInventory,
+				game_interface.ReplaceitemInfo{
+					Name:     "minecraft:air",
+					Count:    1,
+					MetaData: 0,
+					Slot:     uint8(inventorySlot),
+				},
+				"",
+				true,
+			)
+			if err != nil {
+				return errFunc(err)
+			}
+		}
+		// Load cache from the helper container block
+		success, _, _, err = api.ItemStackOperation().OpenTransaction().
+			MoveToInventory(hitItem.SlotID, inventorySlot, 1).
+			Commit()
+		if err != nil {
+			return errFunc(err)
+		}
+		if !success {
+			return errFunc(err)
+		}
 	}
 
 	// Close container
@@ -118,21 +141,11 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 	}
 
 	// Update third cache data
-	hitFirstCache := false
-	for index, value := range i.firstCache {
-		if value.SlotID == inventorySlot {
-			i.firstCache[index].Count += 1
-			hitFirstCache = true
-			break
-		}
-	}
-	if !hitFirstCache {
-		i.firstCache = append(i.firstCache, ItemCacheInfo{
-			SlotID: inventorySlot,
-			Count:  1,
-			Hash:   hitItem.Hash,
-		})
-	}
+	i.firstCache = append(i.firstCache, ItemCacheInfo{
+		SlotID: inventorySlot,
+		Count:  1,
+		Hash:   hitItem.Hash,
+	})
 
 	return true, isSetHashHit, nil
 }

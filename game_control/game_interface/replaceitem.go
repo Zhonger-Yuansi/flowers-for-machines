@@ -11,8 +11,9 @@ import (
 type ReplaceitemPath string
 
 const (
-	ReplaceitemPathInventory ReplaceitemPath = "slot.inventory"
-	ReplaceitemPathHotbar    ReplaceitemPath = "slot.hotbar"
+	ReplacePathInventoryOnly ReplaceitemPath = "slot.inventory"
+	ReplacePathHotbarOnly    ReplaceitemPath = "slot.hotbar"
+	ReplacePathInventory     ReplaceitemPath = "slot.inventory | slot.hotbar"
 )
 
 // ReplaceitemInfo 指示要通过 replaceitem 生成的物品的基本信息
@@ -76,6 +77,16 @@ func (r *Replaceitem) ReplaceitemInInventory(
 	blocked bool,
 ) error {
 	api := r.api
+
+	if path == ReplacePathInventory {
+		if itemInfo.Slot <= 8 {
+			path = ReplacePathHotbarOnly
+		} else {
+			path = ReplacePathInventory
+			itemInfo.Slot -= 9
+		}
+	}
+
 	request := fmt.Sprintf(
 		"replaceitem entity %s %s %d %s %d %d %s",
 		target, path,

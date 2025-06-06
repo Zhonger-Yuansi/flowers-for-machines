@@ -40,6 +40,11 @@ func (c *Console) FindAndUseInventorySlot(exclusion []resources_control.SlotID) 
 	return result
 }
 
+// GetInventorySlot 返回背包 slotID 处的物品是否是空气
+func (c Console) GetInventorySlot(slotID resources_control.SlotID) (empty bool) {
+	return c.airSlotInInventory[slotID]
+}
+
 // SetInventorySlot 将背包 slotID 处的物品设置为 empty。
 // empty 为真指示该槽位是空气，否则是已被使用的其他物品
 func (c *Console) SetInventorySlot(slotID resources_control.SlotID, empty bool) {

@@ -11,7 +11,7 @@ type ItemCache struct {
 	console *nbt_console.Console
 
 	// allStructure 记载每个结构中物品的分布。
-	// 应确保这里的每个结构都保存的是是一个不相
+	// 应确保这里的每个结构都保存的是一个不相
 	// 连的容器
 	allStructure map[uuid.UUID]StructureItems
 	// thirdCache 是缓存命中系统的第三级缓存，

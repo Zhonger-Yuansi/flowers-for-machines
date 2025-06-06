@@ -33,6 +33,9 @@ func (i *ItemCache) StoreCache(
 	}
 
 	for _, item := range items {
+		if _, ok := i.thirdCache[item.Hash.HashNumber]; ok {
+			continue
+		}
 		i.thirdCache[item.Hash.HashNumber] = StructureItemCache{
 			UniqueID: uniqueID,
 			CompletelyInfo: CompletelyItemInfo{

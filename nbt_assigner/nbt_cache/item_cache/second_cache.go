@@ -23,6 +23,7 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 	var hitContainerIndex int
 	var hitSliceIndex int
 	var hitItem ItemCacheInfo
+	var inventorySlot resources_control.SlotID
 	api := i.console.API()
 
 	// Check hash is hit or load cache from third cache
@@ -86,7 +87,7 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 	// Move item / Load cache from second cache
 	{
 		// Find a possible place to place the cached item
-		inventorySlot := i.console.FindAndUseInventorySlot(exclusion)
+		inventorySlot = i.console.FindAndUseInventorySlot(exclusion)
 		errFunc := func(err error) (bool, bool, error) {
 			i.console.SetInventorySlot(inventorySlot, false)
 			return false, false, fmt.Errorf("loadSecondCacheToFirstCache: %v", err)

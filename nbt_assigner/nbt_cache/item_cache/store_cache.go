@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
+	"github.com/google/uuid"
 )
 
 // StoreCache 保存操作台中心方块所指示容器中的全部物品到当前缓存命中系统。
@@ -45,5 +46,29 @@ func (i *ItemCache) StoreCache(
 		}
 	}
 
+	structureItems := StructureItems{
+		ContainerInfo: container,
+	}
+	for _, item := range items {
+		structureItems.Items = append(structureItems.Items, CompletelyItemInfo{
+			ContainerInfo: container,
+			ItemInfo:      item,
+		})
+	}
+	i.allStructure[uniqueID] = structureItems
+
 	return nil
+}
+
+// CleanCache 清除三级缓存中的所有内容。
+// 它从设计上确保不会返回错误
+func (i *ItemCache) CleanThirdCache() {
+	api := i.console.API().StructureBackup()
+
+	for _, value := range i.thirdCache {
+		_ = api.DeleteStructure(value.UniqueID)
+	}
+
+	i.allStructure = make(map[uuid.UUID]StructureItems)
+	i.thirdCache = make(map[int64]StructureItemCache)
 }

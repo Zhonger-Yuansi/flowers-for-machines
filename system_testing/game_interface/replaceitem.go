@@ -86,7 +86,7 @@ func SystemTestingReplaceitem() {
 		api.Commands().AwaitChangesGeneral()
 
 		api.Replaceitem().ReplaceitemInInventory(
-			"@s", game_interface.ReplaceitemPathHotbar,
+			"@s", game_interface.ReplacePathHotbarOnly,
 			game_interface.ReplaceitemInfo{
 				Name:     "apple",
 				Count:    8,
@@ -116,7 +116,7 @@ func SystemTestingReplaceitem() {
 		api.Commands().AwaitChangesGeneral()
 
 		api.Replaceitem().ReplaceitemInInventory(
-			"@s", game_interface.ReplaceitemPathHotbar,
+			"@s", game_interface.ReplacePathHotbarOnly,
 			game_interface.ReplaceitemInfo{
 				Name:     "apple",
 				Count:    64,

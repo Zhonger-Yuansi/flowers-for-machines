@@ -101,7 +101,7 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 					Name:     "minecraft:air",
 					Count:    1,
 					MetaData: 0,
-					Slot:     uint8(inventorySlot),
+					Slot:     inventorySlot,
 				},
 				"",
 				true,

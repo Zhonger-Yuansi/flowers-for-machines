@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
 )
 
 // ReplaceitemPath 指示 replaceitem 时目标物品栏的槽位类型。
@@ -18,10 +19,10 @@ const (
 
 // ReplaceitemInfo 指示要通过 replaceitem 生成的物品的基本信息
 type ReplaceitemInfo struct {
-	Name     string // 该物品的名称
-	Count    uint8  // 该物品的数量
-	MetaData int16  // 该物品的元数据
-	Slot     uint8  // 该物品应当生成在哪个槽位
+	Name     string                   // 该物品的名称
+	Count    uint8                    // 该物品的数量
+	MetaData int16                    // 该物品的元数据
+	Slot     resources_control.SlotID // 该物品应当生成在哪个槽位
 }
 
 // Replaceitem 是基于 Commands 实现的简单 replaceitem 包装

@@ -1,0 +1,185 @@
+package nbt_console
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
+)
+
+// Console 是机器人导入 NBT 方块所使用的操作台。
+// 它目前被定义为一个 11*5*11 的全空气区域
+type Console struct {
+	// api 是与租赁服进行交互的若干接口
+	api *game_interface.GameInterface
+
+	// center 是操作台的中心位置
+	center protocol.BlockPos
+	// position 是机器人目前所在的方块位置
+	position protocol.BlockPos
+	// currentHotBar 是机器人当前的手持物品栏
+	currentHotBar resources_control.SlotID
+
+	// airSlotInInventory 记录机器人槽位中
+	// 哪些地方的槽位已经存在物品，而哪些没有
+	airSlotInInventory [36]bool
+
+	// helperBlocks 是操作台中心及其
+	// 不远处等距离分布的 4 个帮助方块。
+	// 通过记录这 5 个方块的实际情况，
+	// 有助于减少部分操作的实际耗时
+	helperBlocks [5]*block_helper.BlockHelper
+	// nearBlocks 是操作台中心方块及另
+	// 外 4 个帮助方块相邻的方块。
+	//
+	// 如果认为操作台中心方块和另外 4 个
+	// 帮助方块是 master 方块，那么对于
+	// 第二层数组，可以通过 offsetMapping
+	// 确定它们各自相邻其 master 方块的位置变化。
+	//
+	// 另外，offsetMappingInv 是 offsetMapping
+	// 的逆映射
+	nearBlocks [5][6]*block_helper.BlockHelper
+}
+
+// NewConsole 根据交互接口 api 和操作台中心 center
+// 创建并返回一个新的操作台实例。
+//
+// NewConsole 会将机器人切换为创造模式，清空物品栏，
+// 然后重置手持物品栏为 5 并将机器人传送至操作台的中
+// 心方块处。在传送完成后，NewConsole 将试图初始化操
+// 作台的地板方块。
+//
+// NewConsole 的调用者有责任确保操作台位于主世界，
+// 并且以操作台中心方块为中心处的 11*5*11 的区域全
+// 为空气且没有任何实体
+func NewConsole(api *game_interface.GameInterface, center protocol.BlockPos) (result *Console, err error) {
+	c := &Console{
+		api:                api,
+		center:             center,
+		position:           protocol.BlockPos{},
+		currentHotBar:      DefaultHotbarSlot,
+		airSlotInInventory: [36]bool{},
+		helperBlocks:       [5]*block_helper.BlockHelper{},
+		nearBlocks:         [5][6]*block_helper.BlockHelper{},
+	}
+
+	for index := range 5 {
+		var airBlock block_helper.BlockHelper = block_helper.Air{}
+		c.helperBlocks[index] = &airBlock
+	}
+	for index := range 5 {
+		for idx := range 6 {
+			var airBlock block_helper.BlockHelper = block_helper.Air{}
+			c.nearBlocks[index][idx] = &airBlock
+		}
+	}
+
+	err = c.initConsole()
+	if err != nil {
+		return nil, fmt.Errorf("NewConsole: %v", err)
+	}
+
+	return c, nil
+}
+
+// initConsole 初始化操作台。
+// 它是一个内部实现细节，不应被其他人所使用
+func (c *Console) initConsole() error {
+	api := c.api.Commands()
+
+	// Change gamemode and hotbar slot
+	err := api.SendSettingsCommand("gamemode 1", true)
+	if err != nil {
+		return fmt.Errorf("initConsole: %v", err)
+	}
+	err = api.SendSettingsCommand("clear", true)
+	if err != nil {
+		return fmt.Errorf("initConsole: %v", err)
+	}
+	err = c.api.BotClick().ChangeSelectedHotbarSlot(DefaultHotbarSlot)
+	if err != nil {
+		return fmt.Errorf("initConsole: %v", err)
+	}
+
+	// Teleport to target area
+	err = api.SendSettingsCommand(
+		fmt.Sprintf("execute in overworld run tp %d %d %d", c.center[0], c.center[1], c.center[2]),
+		true,
+	)
+	if err != nil {
+		return fmt.Errorf("initConsole: %v", err)
+	}
+
+	timer := time.NewTimer(DefaultTimeoutInitConsole)
+	defer timer.Stop()
+
+	// Waiting bot to go to the target area
+	for {
+		resp, err := api.SendWSCommandWithResp(
+			fmt.Sprintf(
+				"execute as @s at @s positioned %d ~ ~ positioned ~ 0 ~ positioned ~ ~ %d run testforblock ~ 320 ~ air",
+				c.center[0], c.center[2],
+			),
+		)
+		if err != nil {
+			return fmt.Errorf("initConsole: %v", err)
+		}
+
+		if resp.SuccessCount > 0 {
+			c.position = c.center
+			break
+		}
+
+		select {
+		case <-timer.C:
+			return fmt.Errorf("initConsole: Can not teleport to the target area (timeout)")
+		default:
+		}
+	}
+
+	// Init console blocks
+	{
+		// Clean area frist
+		_, err = api.SendWSCommandWithResp(
+			fmt.Sprintf(
+				"execute as @s at @s positioned %d ~ ~ positioned ~ %d ~ positioned ~ ~ %d run fill ~-5 ~-2 ~-5 ~5 ~2 ~5 air",
+				c.center[0], c.center[1], c.center[2],
+			),
+		)
+		if err != nil {
+			return fmt.Errorf("initConsole: %v", err)
+		}
+		// Teleport again
+		err = api.SendSettingsCommand(
+			fmt.Sprintf("execute in overworld run tp %d %d %d", c.center[0], c.center[1], c.center[2]),
+			true,
+		)
+		if err != nil {
+			return fmt.Errorf("initConsole: %v", err)
+		}
+		// Filling floor blocks
+		_, err = api.SendWSCommandWithResp(
+			fmt.Sprintf(
+				"execute as @s at @s positioned %d ~ ~ positioned ~ %d ~ positioned ~ ~ %d run fill ~-5 ~-1 ~-5 ~5 ~-1 ~5 %s",
+				c.center[0], c.center[1], c.center[2], BaseBackground,
+			),
+		)
+		if err != nil {
+			return fmt.Errorf("initConsole: %v", err)
+		}
+	}
+
+	// Sync floor blocks to underlying
+	for index := range 5 {
+		var floorBlock block_helper.BlockHelper = block_helper.NearBlock{
+			Name: BaseBackground,
+		}
+		*c.nearBlocks[index][nearBlockMappingInv[[3]int32{0, -1, 0}]] = floorBlock
+	}
+
+	return nil
+}

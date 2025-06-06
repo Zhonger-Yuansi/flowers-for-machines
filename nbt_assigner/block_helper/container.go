@@ -1,54 +1,56 @@
 package block_helper
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 )
 
-// ContainerBlockHelper 描述了一个容器，
-// 并记载了它的坐标、名称和方块状态。
-//
-// ConsiderOpenDirection 指示打开目标容器
-// 是否需要考虑其打开方向上的障碍物方块，这
-// 似乎只对箱子和潜影盒有效。
-// 当其为真时，应在 Facing 填写该容器的朝向，
-// 否则可以置为默认的零值。
-//
-// Content 指示这个容器装有的物品，
-// 为了方便，此处总是使用定长度的数组，
-// 但尝试修改超出目标容器格子数的格子
-// 会导致程序的行为未定义
-type ContainerBlockHelper struct {
-	Name   string
+// ContainerBlockOpenInfo 描述了要
+// 打开一个容器所必须知道的最少的信息
+type ContainerBlockOpenInfo struct {
+	// 这个容器的名称
+	Name string
+	// 这个容器的方块状态
 	States map[string]any
-
+	// ConsiderOpenDirection 指示打开目标容器
+	// 是否需要考虑其打开方向上的障碍物方块，
+	// 这似乎只对箱子和潜影盒有效
 	ConsiderOpenDirection bool
-	Facing                uint8
+	// 当 ConsiderOpenDirection 为真时，
+	// 应在 Facing 填写该容器的朝向，
+	// 否则可以置为默认的零值
+	Facing uint8
+}
 
-	Content [27]*protocol.ItemInstance
+// ContainerBlockHelper 描述了一个容器，
+// 并记载了它应当如何被打开
+type ContainerBlockHelper struct {
+	// OpenInfo 提供的信息足以使该容器能被打开
+	OpenInfo ContainerBlockOpenInfo
+	// IsEmpty 指示该容器是否已经全空
+	IsEmpty bool
 }
 
 func (c ContainerBlockHelper) BlockName() string {
-	return c.Name
+	return c.OpenInfo.Name
 }
 
 func (c ContainerBlockHelper) BlockStates() map[string]any {
-	return c.States
+	return c.OpenInfo.States
 }
 
 func (c ContainerBlockHelper) BlockStatesString() string {
-	return utils.MarshalBlockStates(c.States)
+	return utils.MarshalBlockStates(c.OpenInfo.States)
 }
 
 // ShouldCleanNearBlock 指示打开该容器前是否需要清除
 // 其相邻的方块。offset 指示这个相邻方块的位置。这目前
 // 只对箱子和潜影盒有用
 func (c ContainerBlockHelper) ShouldCleanNearBlock() (offset [3]int32, needClean bool) {
-	if !c.ConsiderOpenDirection {
+	if !c.OpenInfo.ConsiderOpenDirection {
 		return [3]int32{}, false
 	}
 
-	switch c.Facing {
+	switch c.OpenInfo.Facing {
 	case 0:
 		return [3]int32{0, -1, 0}, true
 	case 1:
@@ -64,12 +66,4 @@ func (c ContainerBlockHelper) ShouldCleanNearBlock() (offset [3]int32, needClean
 	}
 
 	return
-}
-
-// Contents 返回该容器装有的物品。
-// 如果一个容器的格子数量低于 27 格，
-// 那么尝试修改超出格子数量部分的物品
-// 会导致未定义行为
-func (c *ContainerBlockHelper) Contents() [27]*protocol.ItemInstance {
-	return c.Content
 }

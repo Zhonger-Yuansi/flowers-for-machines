@@ -87,11 +87,7 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 	// Move item / Load cache from second cache
 	{
 		// Find a possible place to place the cached item
-		inventorySlot = i.console.FindAndUseInventorySlot(exclusion)
-		errFunc := func(err error) (bool, bool, error) {
-			i.console.SetInventorySlot(inventorySlot, false)
-			return false, false, fmt.Errorf("loadSecondCacheToFirstCache: %v", err)
-		}
+		inventorySlot = i.console.FindInventorySlot(exclusion)
 		// If the inventory is full, then we try to grow a new air to place the item
 		if !i.console.GetInventorySlot(inventorySlot) {
 			err = api.Replaceitem().ReplaceitemInInventory(
@@ -107,19 +103,21 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 				true,
 			)
 			if err != nil {
-				return errFunc(err)
+				return false, false, fmt.Errorf("loadSecondCacheToFirstCache: %v", err)
 			}
+			i.console.SetInventorySlot(inventorySlot, true)
 		}
 		// Load cache from the helper container block
 		success, _, _, err = api.ItemStackOperation().OpenTransaction().
 			MoveToInventory(hitItem.SlotID, inventorySlot, 1).
 			Commit()
 		if err != nil {
-			return errFunc(err)
+			return false, false, fmt.Errorf("loadSecondCacheToFirstCache: %v", err)
 		}
 		if !success {
-			return errFunc(err)
+			return false, false, fmt.Errorf("loadSecondCacheToFirstCache: %v", err)
 		}
+		i.console.SetInventorySlot(inventorySlot, false)
 	}
 
 	// Close container

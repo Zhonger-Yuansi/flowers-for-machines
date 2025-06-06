@@ -28,18 +28,6 @@ func (c Console) FindInventorySlot(exclusion []resources_control.SlotID) resourc
 	panic("FindInventorySlot: Impossible to find a available slot when exclusion contains the whole inventory")
 }
 
-// FindAndUseInventorySlot 从背包查找一个空气物品。
-// 如果背包已满，返回一个不被 exclusion 包含在内的一
-// 个物品栏
-//
-// 与 FindInventorySlot 的区别在于，此函数还会将该
-// 找到的这个槽位设置为非空气
-func (c *Console) FindAndUseInventorySlot(exclusion []resources_control.SlotID) resources_control.SlotID {
-	result := c.FindInventorySlot(exclusion)
-	c.airSlotInInventory[result] = true
-	return result
-}
-
 // GetInventorySlot 返回背包 slotID 处的物品是否是空气
 func (c Console) GetInventorySlot(slotID resources_control.SlotID) (empty bool) {
 	return c.airSlotInInventory[slotID]

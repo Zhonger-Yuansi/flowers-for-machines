@@ -31,14 +31,13 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 		// Firstly, check the container we already loaded
 		for index, container := range i.secondCache {
 			// Only set hash number hit
-			for idx, item := range container {
-				if hashNumber.SetHashNumber == SetHashNumberNotExist {
-					continue
-				}
-				if item.ItemInfo.Hash.SetHashNumber == hashNumber.SetHashNumber {
-					hit, isSetHashHit, hitItem = true, true, item.ItemInfo
-					hitContainerIndex, hitSliceIndex = index, idx
-					break
+			if hashNumber.SetHashNumber != SetHashNumberNotExist {
+				for idx, item := range container {
+					if item.ItemInfo.Hash.SetHashNumber == hashNumber.SetHashNumber {
+						hit, isSetHashHit, hitItem = true, true, item.ItemInfo
+						hitContainerIndex, hitSliceIndex = index, idx
+						break
+					}
 				}
 			}
 			// Completely hit

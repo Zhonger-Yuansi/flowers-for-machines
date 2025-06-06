@@ -29,10 +29,12 @@ func (i *ItemCache) LoadCache(hashNumber ItemHashNumber, exclusion []resources_c
 			}
 		}
 		// Only set hash number hit
-		for _, value := range i.firstCache {
-			if value.Hash.HashNumber == hashNumber.HashNumber {
-				hit, slotID, isSetHashHit = true, value.SlotID, true
-				return
+		if hashNumber.SetHashNumber != SetHashNumberNotExist {
+			for _, value := range i.firstCache {
+				if value.Hash.SetHashNumber == hashNumber.SetHashNumber {
+					hit, slotID, isSetHashHit = true, value.SlotID, true
+					return
+				}
 			}
 		}
 		// Try load from second cache

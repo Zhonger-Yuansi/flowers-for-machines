@@ -83,6 +83,7 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 			*i.console.BlockByIndex(hitContainerIndex),
 		)
 	}
+	defer api.ContainerOpenAndClose().CloseContainer()
 
 	// Move item / Load cache from second cache
 	{
@@ -118,12 +119,6 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 			return false, false, fmt.Errorf("loadSecondCacheToFirstCache: %v", err)
 		}
 		i.console.SetInventorySlot(inventorySlot, false)
-	}
-
-	// Close container
-	err = api.ContainerOpenAndClose().CloseContainer()
-	if err != nil {
-		return false, false, fmt.Errorf("loadSecondCacheToFirstCache: %v", err)
 	}
 
 	// Update container data

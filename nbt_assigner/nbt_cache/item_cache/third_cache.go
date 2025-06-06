@@ -33,7 +33,7 @@ func (i *ItemCache) loadThirdCacheToSecond(hashNumber ItemHashNumber) (hit bool,
 	}
 
 	// Load cache
-	index, _, block := i.console.FindSpaceToPlaceNewContainer(true, false)
+	index, _, block := i.console.FindSpaceToPlaceNewContainer(false, true)
 	if block != nil {
 		pos = i.console.BlockPosByIndex(index)
 	} else {
@@ -45,7 +45,7 @@ func (i *ItemCache) loadThirdCacheToSecond(hashNumber ItemHashNumber) (hit bool,
 		return false, false, fmt.Errorf("loadThirdCacheToSecond: %v", err)
 	}
 
-	// Update container data
+	// Update underlying container data
 	container := block_helper.ContainerBlockHelper{
 		OpenInfo: structure.CompletelyInfo.ContainerInfo,
 		IsEmpty:  false,

@@ -5,6 +5,7 @@ import (
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
 )
 
 // loadSecondCacheToFirstCache 从二级缓存 (容器)
@@ -125,9 +126,10 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 		return false, false, fmt.Errorf("loadSecondCacheToFirstCache: %v", err)
 	}
 
-	// Update second cache data
+	// Update container data
 	i.secondCache[hitContainerIndex][hitSliceIndex].ItemInfo.Count -= 1
 	if i.secondCache[hitContainerIndex][hitSliceIndex].ItemInfo.Count == 0 {
+		// Update second cache data
 		newOne := make([]CompletelyItemInfo, 0)
 		for index, value := range i.secondCache[hitContainerIndex] {
 			if index == hitSliceIndex {
@@ -136,6 +138,11 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 			newOne = append(newOne, value)
 		}
 		i.secondCache[hitContainerIndex] = newOne
+		// Update underlying container data
+		block := i.console.BlockByIndex(hitContainerIndex)
+		container := (*block).(block_helper.ContainerBlockHelper)
+		container.IsEmpty = true
+		*block = container
 	}
 
 	// Update first cache data

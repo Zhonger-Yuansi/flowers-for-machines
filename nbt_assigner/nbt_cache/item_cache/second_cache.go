@@ -29,23 +29,23 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 	// Check hash is hit or load cache from third cache
 	for range 2 {
 		// Firstly, check the container we already loaded
-		for _, container := range i.secondCache {
+		for index, container := range i.secondCache {
 			// Only set hash number hit
-			for index, item := range container {
+			for idx, item := range container {
 				if hashNumber.SetHashNumber == SetHashNumberNotExist {
 					continue
 				}
 				if item.ItemInfo.Hash.SetHashNumber == hashNumber.SetHashNumber {
 					hit, isSetHashHit, hitItem = true, true, item.ItemInfo
-					hitSliceIndex = index
+					hitContainerIndex, hitSliceIndex = index, idx
 					break
 				}
 			}
 			// Completely hit
-			for index, item := range container {
+			for idx, item := range container {
 				if item.ItemInfo.Hash.HashNumber == hashNumber.HashNumber {
 					hit, hitItem = true, item.ItemInfo
-					hitSliceIndex = index
+					hitContainerIndex, hitSliceIndex = index, idx
 					break
 				}
 			}
@@ -139,12 +139,27 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 		i.secondCache[hitContainerIndex] = newOne
 	}
 
-	// Update third cache data
-	i.firstCache = append(i.firstCache, ItemCacheInfo{
-		SlotID: inventorySlot,
-		Count:  1,
-		Hash:   hitItem.Hash,
-	})
+	// Update first cache data
+	{
+		hitFirstCache := false
+		itemCacheInfo := ItemCacheInfo{
+			SlotID: inventorySlot,
+			Count:  1,
+			Hash:   hitItem.Hash,
+		}
+
+		for index, value := range i.firstCache {
+			if value.SlotID == inventorySlot {
+				i.firstCache[index] = itemCacheInfo
+				hitFirstCache = true
+				break
+			}
+		}
+
+		if !hitFirstCache {
+			i.firstCache = append(i.firstCache, itemCacheInfo)
+		}
+	}
 
 	return true, isSetHashHit, nil
 }

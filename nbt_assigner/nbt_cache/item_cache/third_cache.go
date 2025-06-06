@@ -52,7 +52,7 @@ func (i *ItemCache) loadThirdCacheToSecond(hashNumber ItemHashNumber) (hit bool,
 	}
 	*block = container
 
-	// Update second cache
+	// Update second cache data
 	newOne := make([]CompletelyItemInfo, 0)
 	for _, value := range i.allStructure[structure.UniqueID].Items {
 		newOne = append(newOne, CompletelyItemInfo{

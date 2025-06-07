@@ -32,7 +32,7 @@ func NewMultipleCallback[T any]() *MultipleCallback[T] {
 func (m *MultipleCallback[T]) Append(f func(data T)) (uniqueID string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	uniqueID = uuid.New().String()
+	uniqueID = uuid.NewString()
 	m.callbacks = append(
 		m.callbacks,
 		callbackWrapper[T]{

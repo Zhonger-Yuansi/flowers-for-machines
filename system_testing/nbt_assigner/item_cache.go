@@ -141,7 +141,7 @@ func SystemTestingItemCache() {
 		}
 
 		api.Commands().SendWSCommandWithResp("clear")
-		itemCache.CleanInventory()
+		console.CleanInventory()
 
 		slotIDD, hit, isSetHashHit, err := itemCache.LoadCache(
 			item_cache.ItemHashNumber{
@@ -201,7 +201,7 @@ func SystemTestingItemCache() {
 	// Test round 3
 	{
 		api.Commands().SendWSCommandWithResp("clear")
-		itemCache.CleanInventory()
+		console.CleanInventory()
 
 		api.Replaceitem().ReplaceitemInInventory(
 			"@s",
@@ -294,7 +294,7 @@ func SystemTestingItemCache() {
 
 		api.Commands().SendWSCommandWithResp("give @s barrier 2048")
 		for index := range 36 {
-			console.SetInventorySlot(resources_control.SlotID(index), true)
+			console.UseInventorySlot(nbt_console.RequesterUser, resources_control.SlotID(index), true)
 		}
 
 		slotIDB, hit, isSetHashHit, err := itemCache.LoadCache(
@@ -318,7 +318,7 @@ func SystemTestingItemCache() {
 		}
 
 		api.Commands().SendWSCommandWithResp("clear")
-		itemCache.CleanInventory()
+		console.CleanInventory()
 
 		slotIDC, hit, isSetHashHit, err := itemCache.LoadCache(
 			item_cache.ItemHashNumber{

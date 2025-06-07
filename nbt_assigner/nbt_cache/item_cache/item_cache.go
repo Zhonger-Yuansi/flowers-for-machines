@@ -7,6 +7,8 @@ import (
 
 // ItemCache 是基于操作台实现的物品缓存命中系统
 type ItemCache struct {
+	// uniqueID 是当前缓存命中系统的唯一标识
+	uniqueID string
 	// console 是机器人使用的操作台
 	console *nbt_console.Console
 
@@ -28,11 +30,17 @@ type ItemCache struct {
 
 // NewItemCache 基于操作台 console 创建并返回一个新的物品缓存命中系统
 func NewItemCache(console *nbt_console.Console) *ItemCache {
-	return &ItemCache{
+	itemCache := &ItemCache{
+		uniqueID:     uuid.NewString(),
 		console:      console,
 		allStructure: make(map[uuid.UUID]StructureItems),
 		thirdCache:   make(map[int64]StructureItemCache),
 		secondCache:  [5][]CompletelyItemInfo{},
 		firstCache:   nil,
 	}
+
+	console.SetBlockUseCallback(itemCache.useBlocksCallback)
+	console.SetSlotUseCallback(itemCache.useSlotCallback)
+
+	return itemCache
 }

@@ -44,7 +44,7 @@ func (p *PacketListener) ListenPacket(
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	uniqueID = uuid.New().String()
+	uniqueID = uuid.NewString()
 	listener := singleListener{
 		uniqueID: uniqueID,
 		callback: callback,

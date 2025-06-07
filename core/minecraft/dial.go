@@ -362,13 +362,13 @@ func defaultClientData(
 	d.DeviceOS = protocol.DeviceAndroid
 	d.GameVersion = protocol.CurrentVersion
 	d.ClientRandomID = mathRand.Int63()
-	d.DeviceID = uuid.New().String()
+	d.DeviceID = uuid.NewString()
 	d.LanguageCode = "zh_CN" // Netease
 	d.AnimatedImageData = make([]login.SkinAnimation, 0)
 	d.PersonaPieces = make([]login.PersonaPiece, 0)
 	d.PieceTintColours = make([]login.PersonaPieceTintColour, 0)
-	d.SelfSignedID = uuid.New().String()
-	d.SkinID = uuid.New().String()
+	d.SelfSignedID = uuid.NewString()
+	d.SkinID = uuid.NewString()
 	d.SkinData = base64.StdEncoding.EncodeToString(bytes.Repeat([]byte{0, 0, 0, 255}, 32*64))
 	d.SkinGeometry = base64.StdEncoding.EncodeToString(skinGeometry)
 	d.SkinResourcePatch = base64.StdEncoding.EncodeToString(skinResourcePatch)
@@ -393,7 +393,7 @@ func clearXBLIdentityData(data *login.IdentityData) {
 // unchanged.
 func defaultIdentityData(data *login.IdentityData) {
 	if data.Identity == "" {
-		data.Identity = uuid.New().String()
+		data.Identity = uuid.NewString()
 	}
 	if data.DisplayName == "" {
 		data.DisplayName = "Steve"

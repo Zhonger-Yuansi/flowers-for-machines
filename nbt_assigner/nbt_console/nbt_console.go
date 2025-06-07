@@ -44,6 +44,15 @@ type Console struct {
 	// 另外，offsetMappingInv 是 offsetMapping
 	// 的逆映射
 	nearBlocks [5][6]*block_helper.BlockHelper
+
+	// inventoryUseCallback 存放了一系列回调函数，
+	// 用于其他实现在修改机器人背包物品栏数据时通知
+	// 这件事给其他可能的使用者
+	inventoryUseCallback []func(requester string, slotID resources_control.SlotID)
+	// blocksUseCallback 存放了一系列回调函数，
+	// 用于其他实现在修改操作台上帮助方块(或中心
+	// 方块)时通知这件事给其他可能的使用者
+	blocksUseCallback []func(requester string, index int)
 }
 
 // NewConsole 根据交互接口 api 和操作台中心 center
@@ -59,13 +68,15 @@ type Console struct {
 // 为空气且没有任何实体
 func NewConsole(api *game_interface.GameInterface, center protocol.BlockPos) (result *Console, err error) {
 	c := &Console{
-		api:                api,
-		center:             center,
-		position:           protocol.BlockPos{},
-		currentHotBar:      DefaultHotbarSlot,
-		airSlotInInventory: [36]bool{},
-		helperBlocks:       [5]*block_helper.BlockHelper{},
-		nearBlocks:         [5][6]*block_helper.BlockHelper{},
+		api:                  api,
+		center:               center,
+		position:             protocol.BlockPos{},
+		currentHotBar:        DefaultHotbarSlot,
+		airSlotInInventory:   [36]bool{},
+		helperBlocks:         [5]*block_helper.BlockHelper{},
+		nearBlocks:           [5][6]*block_helper.BlockHelper{},
+		inventoryUseCallback: nil,
+		blocksUseCallback:    nil,
 	}
 
 	for index := range 5 {

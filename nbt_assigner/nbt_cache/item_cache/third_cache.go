@@ -32,14 +32,15 @@ func (i *ItemCache) loadThirdCacheToSecond(hashNumber ItemHashNumber) (hit bool,
 		return false, false, nil
 	}
 
-	// Load cache
+	// Find new space to load cache
 	index, _, block := i.console.FindSpaceToPlaceNewContainer(false, true)
 	if block != nil {
-		pos = i.console.BlockPosByIndex(index)
-	} else {
-		pos = i.console.BlockPosByIndex(nbt_console.ConsoleIndexFirstHelperBlock)
-		block = i.console.BlockByIndex(nbt_console.ConsoleIndexFirstHelperBlock)
+		index = nbt_console.ConsoleIndexFirstHelperBlock
+		block = i.console.BlockByIndex(index)
 	}
+	pos = i.console.BlockPosByIndex(index)
+
+	// Load cache
 	err = api.RevertStructure(structure.UniqueID, pos)
 	if err != nil {
 		return false, false, fmt.Errorf("loadThirdCacheToSecond: %v", err)
@@ -50,7 +51,7 @@ func (i *ItemCache) loadThirdCacheToSecond(hashNumber ItemHashNumber) (hit bool,
 		OpenInfo: structure.CompletelyInfo.ContainerInfo,
 		IsEmpty:  false,
 	}
-	*block = container
+	i.console.UseHelperBlock(i.uniqueID, index, container)
 
 	// Update second cache data
 	newOne := make([]CompletelyItemInfo, 0)

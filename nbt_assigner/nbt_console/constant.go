@@ -15,6 +15,13 @@ const (
 	DefaultTimeoutInitConsole = time.Second * 30
 )
 
+const (
+	// RequesterSystemCall 指示请求提及者是操作台本身
+	RequesterSystemCall = "System Call"
+	// NotifyUserCall 指示请求提及者是缓存命中系统的使用者
+	RequesterUser = "User"
+)
+
 // ConsoleIndex 描述操作台中心方块
 // 及 4 个帮助方块的索引
 const (

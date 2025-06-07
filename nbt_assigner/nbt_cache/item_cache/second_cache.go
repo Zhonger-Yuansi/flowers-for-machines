@@ -109,7 +109,7 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 			if err != nil {
 				return false, false, fmt.Errorf("loadSecondCacheToFirstCache: %v", err)
 			}
-			i.console.SetInventorySlot(inventorySlot, false)
+			i.console.UseInventorySlot(i.uniqueID, inventorySlot, false)
 		}
 		// Load cache from the helper container block
 		success, _, _, err = api.ItemStackOperation().OpenTransaction().
@@ -124,7 +124,7 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 				hitItem.SlotID, inventorySlot, hitItem,
 			)
 		}
-		i.console.SetInventorySlot(inventorySlot, true)
+		i.console.UseInventorySlot(i.uniqueID, inventorySlot, true)
 	}
 
 	// Update container data
@@ -143,7 +143,7 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 		block := i.console.BlockByIndex(hitContainerIndex)
 		container := (*block).(block_helper.ContainerBlockHelper)
 		container.IsEmpty = true
-		*block = container
+		i.console.UseHelperBlock(i.uniqueID, hitContainerIndex, container)
 	}
 
 	// Update first cache data

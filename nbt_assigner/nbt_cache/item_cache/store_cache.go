@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
 	"github.com/google/uuid"
 )
 
@@ -15,6 +16,14 @@ func (i *ItemCache) StoreCache(
 ) error {
 	if len(items) == 0 {
 		return nil
+	}
+
+	block := i.console.BlockByIndex(nbt_console.ConsoleIndexCenterBlock)
+	if _, ok := (*block).(block_helper.ContainerBlockHelper); !ok {
+		return fmt.Errorf(
+			"StoreCache: Center block who at %#v is not a container; block = %#v",
+			i.console.BlockPosByIndex(nbt_console.ConsoleIndexCenterBlock), block,
+		)
 	}
 
 	allHit := true

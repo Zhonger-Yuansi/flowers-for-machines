@@ -7,7 +7,9 @@ import (
 )
 
 // LoadCache 加载哈希校验和为 hashNumber 的物品到物品栏。
-// 提供的 exclusion 确保它其中所示的背包物品栏不会被意外使用。
+//
+// 提供的 exclusion 确保它其中所示的背包物品栏不会被意外
+// 使用，应当确保这些物品栏都装有物品
 //
 // 返回的 slotID 指示加载完成后物品所在的背包槽位索引；
 // 返回的 isSetHashHit 指示命中的缓存是否是不完整的，
@@ -45,6 +47,7 @@ func (i *ItemCache) LoadCache(hashNumber ItemHashNumber, exclusion []resources_c
 		if !hit {
 			return
 		}
+		hit, isSetHashHit = false, false
 	}
 	return
 }
@@ -62,7 +65,7 @@ func (i *ItemCache) ConsumeCache(slotID resources_control.SlotID) {
 	}
 
 	i.firstCache = newOne
-	i.console.SetInventorySlot(slotID, true)
+	i.console.SetInventorySlot(slotID, false)
 }
 
 // CleanInventory 将背包中所有物品都标记为空气，

@@ -12,8 +12,10 @@ import (
 // 加载校验和为 hashNumber 的物品到一级缓存 (背包)。
 //
 // 返回的 isSetHashHit 指示命中的缓存是否是不完整的，
-// 而只是命中了集合哈希校验和。exclusion 指示排除列表，
-// 它保证列表内包含的所有背包物品栏不会被意外使用。
+// 而只是命中了集合哈希校验和。
+//
+// exclusion 指示排除列表，它保证列表内所指示的背包物
+// 品栏不会被意外使用。应当确保这些物品栏都装有物品
 //
 // 在设计上应当保证 exclusion 的长度最大为 27，
 // 否则这被认为是设计者的非正常使用，并可能伴随程序崩溃
@@ -70,6 +72,7 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 		if !hit {
 			return false, false, nil
 		}
+		hit, isSetHashHit = false, false
 	}
 
 	// Open container
@@ -90,7 +93,7 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 		// Find a possible place to place the cached item
 		inventorySlot = i.console.FindInventorySlot(exclusion)
 		// If the inventory is full, then we try to grow a new air to place the item
-		if !i.console.GetInventorySlot(inventorySlot) {
+		if i.console.InventorySlotIsNonAir(inventorySlot) {
 			err = api.Replaceitem().ReplaceitemInInventory(
 				"@s",
 				game_interface.ReplacePathInventory,
@@ -106,7 +109,7 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 			if err != nil {
 				return false, false, fmt.Errorf("loadSecondCacheToFirstCache: %v", err)
 			}
-			i.console.SetInventorySlot(inventorySlot, true)
+			i.console.SetInventorySlot(inventorySlot, false)
 		}
 		// Load cache from the helper container block
 		success, _, _, err = api.ItemStackOperation().OpenTransaction().
@@ -116,9 +119,12 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 			return false, false, fmt.Errorf("loadSecondCacheToFirstCache: %v", err)
 		}
 		if !success {
-			return false, false, fmt.Errorf("loadSecondCacheToFirstCache: %v", err)
+			return false, false, fmt.Errorf(
+				"loadSecondCacheToFirstCache: Failed to move hitItem from slot ID %d to inventory slot %d; hitItem = %#v",
+				hitItem.SlotID, inventorySlot, hitItem,
+			)
 		}
-		i.console.SetInventorySlot(inventorySlot, false)
+		i.console.SetInventorySlot(inventorySlot, true)
 	}
 
 	// Update container data

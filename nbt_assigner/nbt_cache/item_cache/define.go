@@ -25,7 +25,8 @@ type ItemHashNumber struct {
 	// 那么无论这两个容器中的物品是如何分布的，
 	// SetHashNumber 对于这两个容器的校验和总是相同。
 	//
-	// 对于非容器物品，可以简单的将其置为默认零值。
+	// 对于非容器物品或空的容器物品，可以简单的将其置
+	// 为默认零值。
 	// 当然，我们更推荐置为 SetHashNumberNotExist
 	SetHashNumber int64
 }

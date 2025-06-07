@@ -13,8 +13,8 @@ func (c Console) FindInventorySlot(exclusion []resources_control.SlotID) resourc
 		exclusionMapping[int(slotID)] = true
 	}
 
-	for index, value := range c.airSlotInInventory {
-		if value {
+	for index, notAir := range c.airSlotInInventory {
+		if !notAir {
 			return resources_control.SlotID(index)
 		}
 	}
@@ -28,15 +28,15 @@ func (c Console) FindInventorySlot(exclusion []resources_control.SlotID) resourc
 	panic("FindInventorySlot: Impossible to find a available slot when exclusion contains the whole inventory")
 }
 
-// GetInventorySlot 返回背包 slotID 处的物品是否是空气
-func (c Console) GetInventorySlot(slotID resources_control.SlotID) (empty bool) {
+// InventorySlotIsNonAir 返回背包 slotID 处的物品是否不是空气
+func (c Console) InventorySlotIsNonAir(slotID resources_control.SlotID) (notAir bool) {
 	return c.airSlotInInventory[slotID]
 }
 
-// SetInventorySlot 将背包 slotID 处的物品设置为 empty。
-// empty 为真指示该槽位是空气，否则是已被使用的其他物品
-func (c *Console) SetInventorySlot(slotID resources_control.SlotID, empty bool) {
-	c.airSlotInInventory[slotID] = true
+// SetInventorySlot 将背包 slotID 处的物品设置为 notAir。
+// notAir 为真指示该槽位是非空气物品，否则它是一个空气
+func (c *Console) SetInventorySlot(slotID resources_control.SlotID, notAir bool) {
+	c.airSlotInInventory[slotID] = notAir
 }
 
 // CleanInventory 将背包中的所有物品标记为空气

@@ -1,6 +1,8 @@
 package block_helper
 
 import (
+	"strings"
+
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 )
 
@@ -15,10 +17,10 @@ type ContainerBlockOpenInfo struct {
 	// 是否需要考虑其打开方向上的障碍物方块，
 	// 这似乎只对箱子和潜影盒有效
 	ConsiderOpenDirection bool
-	// 当 ConsiderOpenDirection 为真时，
-	// 应在 Facing 填写该容器的朝向，
-	// 否则可以置为默认的零值
-	Facing uint8
+	// 当 ConsiderOpenDirection 为真且当前容器
+	// 为潜影盒时，应当在 ShulkerFacing 填写其
+	// 朝向。否则，应该可以直接置为默认的零值
+	ShulkerFacing uint8
 }
 
 // ContainerBlockHelper 描述了一个容器，
@@ -50,7 +52,11 @@ func (c ContainerBlockHelper) ShouldCleanNearBlock() (offset [3]int32, needClean
 		return [3]int32{}, false
 	}
 
-	switch c.OpenInfo.Facing {
+	if strings.Contains(c.BlockName(), "chest") {
+		return [3]int32{0, 1, 0}, true
+	}
+
+	switch c.OpenInfo.ShulkerFacing {
 	case 0:
 		return [3]int32{0, -1, 0}, true
 	case 1:

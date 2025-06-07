@@ -25,7 +25,7 @@ type Console struct {
 
 	// airSlotInInventory 记录机器人槽位中
 	// 哪些地方的槽位已经存在物品，而哪些没有。
-	// 为真指示这是一个空气，否则已存在物品
+	// 为真指示这是一个物品，否则它是一个空气
 	airSlotInInventory [36]bool
 
 	// helperBlocks 是操作台中心及其

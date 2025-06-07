@@ -18,7 +18,7 @@ const (
 const (
 	// RequesterSystemCall 指示请求提及者是操作台本身
 	RequesterSystemCall = "System Call"
-	// NotifyUserCall 指示请求提及者是缓存命中系统的使用者
+	// RequesterUser 指示请求提及者是缓存命中系统的使用者
 	RequesterUser = "User"
 )
 

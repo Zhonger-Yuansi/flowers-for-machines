@@ -35,10 +35,11 @@ func (c Console) InventorySlotIsNonAir(slotID resources_control.SlotID) (notAir 
 
 // CleanInventory 将背包中的所有物品标记为空气
 func (c *Console) CleanInventory() {
-	c.airSlotInInventory = [36]bool{}
 	for index := range 36 {
-		for _, f := range c.inventoryUseCallback {
-			f(RequesterSystemCall, resources_control.SlotID(index))
-		}
+		c.UseInventorySlot(
+			RequesterSystemCall,
+			resources_control.SlotID(index),
+			false,
+		)
 	}
 }

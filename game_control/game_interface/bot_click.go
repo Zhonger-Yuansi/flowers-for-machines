@@ -254,7 +254,9 @@ func (b *BotClick) PlaceBlock(
 //
 // clickPos 指示为了生成目标方块而使用的基方块，它与 pos 是不等价的，
 // 但可以确保 clickPos 和 pos 是相邻的。
-// 这意味着您有义务确保 pos 的相邻方块没有被使用，否则它们可能被替换。
+// offsetPos 是 clickPos 相对于 pos 的偏移量。
+//
+// 这意味着，您有义务确保 pos 的相邻方块没有被使用，否则它们可能被替换。
 // 最后，当您使用完 pos 处的方块后，您可以清除 clickPos 处的方块
 //
 // 值得注意的是，facing 必须是 0 到 5 之间的整数，
@@ -266,42 +268,46 @@ func (b *BotClick) PlaceBlockHighLevel(
 	pos protocol.BlockPos,
 	hotBarSlot resources_control.SlotID,
 	facing uint8,
-) (clickPos protocol.BlockPos, err error) {
+) (clickPos protocol.BlockPos, offsetPos protocol.BlockPos, err error) {
 	if facing > 5 {
-		return clickPos, fmt.Errorf("PlaceBlockHighLevel: Given facing (%d) is not meet 0 <= facing <= 5", facing)
+		return clickPos, clickPos, fmt.Errorf("PlaceBlockHighLevel: Given facing (%d) is not meet 0 <= facing <= 5", facing)
 	}
 
-	clickPos = pos
 	switch facing {
 	case 0:
-		clickPos[1] = clickPos[1] + 1
+		offsetPos = protocol.BlockPos{0, 1, 0}
 	case 1:
-		clickPos[1] = clickPos[1] - 1
+		offsetPos = protocol.BlockPos{0, -1, 0}
 	case 2:
-		clickPos[2] = clickPos[2] + 1
+		offsetPos = protocol.BlockPos{0, 0, 1}
 	case 3:
-		clickPos[2] = clickPos[2] - 1
+		offsetPos = protocol.BlockPos{0, 0, -1}
 	case 4:
-		clickPos[0] = clickPos[0] + 1
+		offsetPos = protocol.BlockPos{1, 0, 0}
 	case 5:
-		clickPos[0] = clickPos[0] - 1
+		offsetPos = protocol.BlockPos{-1, 0, 0}
+	}
+	clickPos = protocol.BlockPos{
+		pos[0] + offsetPos[0],
+		pos[1] + offsetPos[1],
+		pos[2] + offsetPos[2],
 	}
 
 	err = b.s.SetBlockAsync(pos, "air", "[]")
 	if err != nil {
-		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
+		return clickPos, offsetPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
 	}
 	err = b.s.SetBlockAsync(clickPos, BasePlaceBlock, "[]")
 	if err != nil {
-		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
+		return clickPos, offsetPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
 	}
 	err = b.c.SendSettingsCommand(fmt.Sprintf("tp %d %d %d", pos[0], pos[1], pos[2]), true)
 	if err != nil {
-		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
+		return clickPos, offsetPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
 	}
 	err = b.c.AwaitChangesGeneral()
 	if err != nil {
-		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
+		return clickPos, offsetPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
 	}
 
 	err = b.PlaceBlock(
@@ -314,14 +320,14 @@ func (b *BotClick) PlaceBlockHighLevel(
 		int32(facing),
 	)
 	if err != nil {
-		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
+		return clickPos, offsetPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
 	}
 	err = b.c.AwaitChangesGeneral()
 	if err != nil {
-		return clickPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
+		return clickPos, offsetPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
 	}
 
-	return clickPos, nil
+	return clickPos, offsetPos, nil
 }
 
 // PickBlock 获取 pos 处的方块到物品栏。

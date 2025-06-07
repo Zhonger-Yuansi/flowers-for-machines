@@ -139,6 +139,9 @@ func (c *ContainerOpenAndClose) OpenContainer(
 	if strings.Contains(container.BlockName, "barrel") {
 		expectedContainerID = protocol.ContainerBarrel
 	}
+	if strings.Contains(container.BlockName, "shulker") {
+		expectedContainerID = protocol.ContainerShulkerBox
+	}
 
 	openFunc := func() error {
 		return c.botClick.ClickBlock(container)

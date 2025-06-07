@@ -38,11 +38,11 @@ type Console struct {
 	//
 	// 如果认为操作台中心方块和另外 4 个
 	// 帮助方块是 master 方块，那么对于
-	// 第二层数组，可以通过 offsetMapping
+	// 第二层数组，可以通过 nearBlockMapping
 	// 确定它们各自相邻其 master 方块的位置变化。
 	//
-	// 另外，offsetMappingInv 是 offsetMapping
-	// 的逆映射
+	// 另外，nearBlockMappingInv 是
+	// nearBlockMapping 的逆映射
 	nearBlocks [5][6]*block_helper.BlockHelper
 
 	// inventoryUseCallback 存放了一系列回调函数，

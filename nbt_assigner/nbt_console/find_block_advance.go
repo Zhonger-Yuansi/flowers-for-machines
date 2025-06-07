@@ -250,7 +250,7 @@ func (c *Console) FindOrGenerateNewAnvil() (index int, err error) {
 		needFloorBlock = true
 	}
 
-	states, err := c.api.SetBlock().SetAnvil(c.BlockPosByIndex(index), true)
+	states, err := c.api.SetBlock().SetAnvil(c.BlockPosByIndex(index), needFloorBlock)
 	if err != nil {
 		return 0, fmt.Errorf("FindOrGenerateNewAnvil: %v", err)
 	}

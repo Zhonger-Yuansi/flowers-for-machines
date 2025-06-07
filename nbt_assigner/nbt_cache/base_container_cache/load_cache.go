@@ -9,7 +9,7 @@ import (
 )
 
 // LoadCache 试图从操作台上查找一个名称为 name 且方块状态为 states 的基容器。
-// 如果没有找到，则尝试从已经保存的结构中查找。
+// 如果没有找到，则尝试从已经保存的结构中查找，然后将其加载到操作台上。
 // 返回的 index 指示找到的方块在操作台上的索引
 func (b *BaseContainerCache) LoadCache(name string, states map[string]any) (index int, hit bool, err error) {
 	// Compute hash number

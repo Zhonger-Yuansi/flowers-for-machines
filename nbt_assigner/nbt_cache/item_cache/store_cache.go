@@ -21,8 +21,8 @@ func (i *ItemCache) StoreCache(
 	block := i.console.BlockByIndex(nbt_console.ConsoleIndexCenterBlock)
 	if _, ok := (*block).(block_helper.ContainerBlockHelper); !ok {
 		return fmt.Errorf(
-			"StoreCache: Center block who at %#v is not a container; block = %#v",
-			i.console.BlockPosByIndex(nbt_console.ConsoleIndexCenterBlock), block,
+			"StoreCache: Center block who at %#v is not a container; *block = %#v",
+			i.console.BlockPosByIndex(nbt_console.ConsoleIndexCenterBlock), *block,
 		)
 	}
 
@@ -79,5 +79,5 @@ func (i *ItemCache) CleanThirdCache() {
 	}
 
 	i.allStructure = make(map[uuid.UUID]StructureItems)
-	i.thirdCache = make(map[int64]StructureItemCache)
+	i.thirdCache = make(map[uint64]StructureItemCache)
 }

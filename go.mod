@@ -27,6 +27,7 @@ require (
 )
 
 require (
+	github.com/cespare/xxhash/v2 v2.3.0
 	github.com/golang/snappy v1.0.0
 	github.com/klauspost/compress v1.18.0
 	github.com/muhammadmuzzammil1998/jsonc v1.0.0

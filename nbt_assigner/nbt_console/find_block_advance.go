@@ -157,8 +157,8 @@ func (c Console) FindEmptyContainer(includeCenter bool) (index int, offset proto
 // includeCenter 指示要查找的方块是否也包括操
 // 作台中心处的方块。
 //
-// 如果 inclueEmptyContainer 为真，则会优先
-// 考虑已经是全空的容器，否则优先考虑空气方块。
+// 如果 inclueEmptyContainer 为真，则会在优先
+// 考虑空气后优先考虑空容器。
 //
 // 返回的 index 可用于 BlockByIndex，
 // 而返回的 offset 可用于 BlockByOffset。
@@ -171,6 +171,11 @@ func (c Console) FindSpaceToPlaceNewContainer(includeCenter bool, inclueEmptyCon
 	offset protocol.BlockPos,
 	block *block_helper.BlockHelper,
 ) {
+	index, offset, block = c.FindAir(includeCenter)
+	if block != nil {
+		return
+	}
+
 	if inclueEmptyContainer {
 		index, offset, block = c.FindEmptyContainer(includeCenter)
 		if block != nil {
@@ -178,17 +183,7 @@ func (c Console) FindSpaceToPlaceNewContainer(includeCenter bool, inclueEmptyCon
 		}
 	}
 
-	index, offset, block = c.FindAir(includeCenter)
-	if block != nil {
-		return
-	}
-
 	index, offset, block = c.FindNonContainerAndNonAnvil(includeCenter)
-	if block != nil {
-		return
-	}
-
-	index, offset, block = c.FindNonAnvil(includeCenter)
 	return
 }
 
@@ -196,22 +191,26 @@ func (c Console) FindSpaceToPlaceNewContainer(includeCenter bool, inclueEmptyCon
 // 在该处放置帮助方块。帮助方块应当是铁砧或织布机。
 //
 // 对于容器，应当使用 FindSpaceToPlaceNewContainer 进行查找。
-//
 // includeCenter 指示要查找的方块是否也包括操作台中心处的方块。
 //
-// 如果 inclueEmptyContainer 为真，则会优先考虑已经是全空的容器，
-// 否则优先考虑非铁砧方块。
+// 如果 inclueEmptyContainer 为真，
+// 则会在优先考虑空气后优先考虑空容器。
 //
 // 返回的 index 可用于 BlockByIndex，
 // 而返回的 offset 可用于 BlockByOffset。
 //
-// 如果返回的 block 不为空，则说明目标方块被找到，否则没有找到。
-// 找到的方块可以通过修改其指向的值从而将它变成其他方块
+// 可以保证在正确使用操作台的情况下一定可以找到需要的方块。
+// 另外，找到的方块可以通过修改其指向的值从而将它变成其他方块
 func (c Console) FindSpaceToPlaceHelper(includeCenter bool, inclueEmptyContainer bool) (
 	index int,
 	offset protocol.BlockPos,
 	block *block_helper.BlockHelper,
 ) {
+	index, offset, block = c.FindAir(includeCenter)
+	if block != nil {
+		return
+	}
+
 	if inclueEmptyContainer {
 		index, offset, block = c.FindEmptyContainer(includeCenter)
 		if block != nil {
@@ -219,12 +218,11 @@ func (c Console) FindSpaceToPlaceHelper(includeCenter bool, inclueEmptyContainer
 		}
 	}
 
-	index, offset, block = c.FindAir(includeCenter)
-	if block != nil {
-		return
+	index, offset, block = c.FindNonAnvil(includeCenter)
+	if block == nil {
+		panic("FindSpaceToPlaceHelper: Should nerver happend")
 	}
 
-	index, offset, block = c.FindNonAnvil(includeCenter)
 	return
 }
 
@@ -240,13 +238,9 @@ func (c *Console) FindOrGenerateNewAnvil() (index int, err error) {
 		return
 	}
 
-	index, _, block = c.FindSpaceToPlaceHelper(false, false)
-	if block == nil {
-		panic("FindOrGenerateNewAnvil: Should nerver happened")
-	}
-
-	block = c.NearBlockByIndex(index, protocol.BlockPos{0, -1, 0})
-	if _, ok := (*block).(block_helper.Air); ok {
+	index, _, _ = c.FindSpaceToPlaceHelper(false, false)
+	nearBlock := c.NearBlockByIndex(index, protocol.BlockPos{0, -1, 0})
+	if _, ok := (*nearBlock).(block_helper.Air); ok {
 		needFloorBlock = true
 	}
 

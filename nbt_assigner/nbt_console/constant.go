@@ -30,6 +30,10 @@ const (
 	ConsoleIndexSecondHelperBlock
 	ConsoleIndexThirdHelperBlock
 	ConsoleIndexForthHelperBlock
+	ConsoleIndexFifthHelperBlock
+	ConsoleIndexSixthHelperBlock
+	ConsoleIndexSeventhHelperBlock
+	ConsoleIndexEighthHelperBlock
 )
 
 var (

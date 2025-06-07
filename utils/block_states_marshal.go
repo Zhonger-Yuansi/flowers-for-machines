@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -13,13 +14,24 @@ const BlockStatesDefaultSeparator string = "="
 
 // MarshalBlockStates 将 blockStates 格式化为其字符串表示。
 // 该函数不会返回错误，即便 blockStates 包含了不正确的数据类型。
-// 其在被设计时被设计为“更加方便的格式化工具”
+// 其在被设计时被设计为“更加方便的格式化工具”。
+//
+// 可以保证 MarshalBlockStates 的输出是稳定的，因为其内部使用了
+// 稳定排序 (slices.SortStableFunc)
 func MarshalBlockStates(blockStates map[string]any) string {
 	result := []string{}
 	separator := BlockStatesDefaultSeparator
 
-	for key, value := range blockStates {
-		switch val := value.(type) {
+	keys := []string{}
+	for key := range blockStates {
+		keys = append(keys, key)
+	}
+	slices.SortStableFunc(keys, func(a string, b string) int {
+		return strings.Compare(a, b)
+	})
+
+	for key := range keys {
+		switch val := blockStates[keys[key]].(type) {
 		// e.g. "color"="orange"
 		case string:
 			result = append(result, fmt.Sprintf(

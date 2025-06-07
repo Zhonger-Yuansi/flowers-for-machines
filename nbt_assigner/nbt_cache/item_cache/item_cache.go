@@ -18,7 +18,7 @@ type ItemCache struct {
 	allStructure map[uuid.UUID]StructureItems
 	// thirdCache 是缓存命中系统的第三级缓存，
 	// 这意味着物品位于结构命令保存的结构中
-	thirdCache map[int64]StructureItemCache
+	thirdCache map[uint64]StructureItemCache
 
 	// secondCache 是缓存命中系统的第二级缓存，
 	// 这意味着物品已经出现在操作台附近的帮助方块中
@@ -34,7 +34,7 @@ func NewItemCache(console *nbt_console.Console) *ItemCache {
 		uniqueID:     uuid.NewString(),
 		console:      console,
 		allStructure: make(map[uuid.UUID]StructureItems),
-		thirdCache:   make(map[int64]StructureItemCache),
+		thirdCache:   make(map[uint64]StructureItemCache),
 		secondCache:  [9][]CompletelyItemInfo{},
 		firstCache:   nil,
 	}

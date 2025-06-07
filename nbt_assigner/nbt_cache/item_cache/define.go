@@ -9,14 +9,14 @@ import (
 // ------------------------- Constant -------------------------
 
 // SetHashNumberNotExist 为 0 指示相应的集合哈希校验和是不存在的
-const SetHashNumberNotExist int64 = 0
+const SetHashNumberNotExist uint64 = 0
 
 // ------------------------- Item hash number -------------------------
 
 // ItemHashNumber 描述物品的哈希哈希校验和
 type ItemHashNumber struct {
 	// HashNumber 是该物品的完整哈希校验和
-	HashNumber int64
+	HashNumber uint64
 	// 该物品的集合哈希校验和。这只对容器物品有效，
 	// 这意味着它描述的是容器物品的集合的校验和。
 	//
@@ -28,7 +28,7 @@ type ItemHashNumber struct {
 	// 对于非容器物品或空的容器物品，可以简单的将其置
 	// 为默认零值。
 	// 当然，我们更推荐置为 SetHashNumberNotExist
-	SetHashNumber int64
+	SetHashNumber uint64
 }
 
 // ------------------------- Item information -------------------------

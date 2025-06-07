@@ -34,9 +34,8 @@ func (i *ItemCache) loadThirdCacheToSecond(hashNumber ItemHashNumber) (hit bool,
 
 	// Find new space to load cache
 	index, _, block := i.console.FindSpaceToPlaceNewContainer(false, true)
-	if block != nil {
+	if block == nil {
 		index = nbt_console.ConsoleIndexFirstHelperBlock
-		block = i.console.BlockByIndex(index)
 	}
 	pos = i.console.BlockPosByIndex(index)
 

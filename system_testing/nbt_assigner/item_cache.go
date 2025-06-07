@@ -221,6 +221,7 @@ func SystemTestingItemCache() {
 			console.HotbarSlotID(),
 			0,
 		)
+		console.UpdatePosition(console.BlockPosByIndex(nbt_console.ConsoleIndexCenterBlock))
 		var nearBlock block_helper.BlockHelper = block_helper.NearBlock{
 			Name: game_interface.BasePlaceBlock,
 		}

@@ -22,7 +22,17 @@ func (c Console) Position() protocol.BlockPos {
 	return c.position
 }
 
+// UpdatePosition 设置机器人当前所处的坐标
+func (c *Console) UpdatePosition(blockPos protocol.BlockPos) {
+	c.position = blockPos
+}
+
 // HotbarSlotID 返回机器人当前所手持物品的快捷栏槽位索引
 func (c Console) HotbarSlotID() resources_control.SlotID {
 	return c.currentHotBar
+}
+
+// UpdateHotbarSlotID 设置机器人当前所手持物品栏的槽位索引
+func (c *Console) UpdateHotbarSlotID(slotID resources_control.SlotID) {
+	c.currentHotBar = slotID
 }

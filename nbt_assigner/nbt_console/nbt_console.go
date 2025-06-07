@@ -29,21 +29,21 @@ type Console struct {
 	airSlotInInventory [36]bool
 
 	// helperBlocks 是操作台中心及其
-	// 不远处等距离分布的 4 个帮助方块。
-	// 通过记录这 5 个方块的实际情况，
+	// 不远处等分布均匀的 8 个帮助方块。
+	// 通过记录这 9 个方块的实际情况，
 	// 有助于减少部分操作的实际耗时
-	helperBlocks [5]*block_helper.BlockHelper
+	helperBlocks [9]*block_helper.BlockHelper
 	// nearBlocks 是操作台中心方块及另
-	// 外 4 个帮助方块相邻的方块。
+	// 外 8 个帮助方块相邻的方块。
 	//
-	// 如果认为操作台中心方块和另外 4 个
+	// 如果认为操作台中心方块和另外 8 个
 	// 帮助方块是 master 方块，那么对于
 	// 第二层数组，可以通过 nearBlockMapping
 	// 确定它们各自相邻其 master 方块的位置变化。
 	//
 	// 另外，nearBlockMappingInv 是
 	// nearBlockMapping 的逆映射
-	nearBlocks [5][6]*block_helper.BlockHelper
+	nearBlocks [9][6]*block_helper.BlockHelper
 
 	// inventoryUseCallback 存放了一系列回调函数，
 	// 用于其他实现在修改机器人背包物品栏数据时通知
@@ -73,17 +73,17 @@ func NewConsole(api *game_interface.GameInterface, center protocol.BlockPos) (re
 		position:             protocol.BlockPos{},
 		currentHotBar:        DefaultHotbarSlot,
 		airSlotInInventory:   [36]bool{},
-		helperBlocks:         [5]*block_helper.BlockHelper{},
-		nearBlocks:           [5][6]*block_helper.BlockHelper{},
+		helperBlocks:         [9]*block_helper.BlockHelper{},
+		nearBlocks:           [9][6]*block_helper.BlockHelper{},
 		inventoryUseCallback: nil,
 		blocksUseCallback:    nil,
 	}
 
-	for index := range 5 {
+	for index := range 9 {
 		var airBlock block_helper.BlockHelper = block_helper.Air{}
 		c.helperBlocks[index] = &airBlock
 	}
-	for index := range 5 {
+	for index := range 9 {
 		for idx := range 6 {
 			var airBlock block_helper.BlockHelper = block_helper.Air{}
 			c.nearBlocks[index][idx] = &airBlock
@@ -186,7 +186,7 @@ func (c *Console) initConsole() error {
 	}
 
 	// Sync floor blocks to underlying
-	for index := range 5 {
+	for index := range 9 {
 		var floorBlock block_helper.BlockHelper = block_helper.NearBlock{
 			Name: BaseBackground,
 		}

@@ -22,7 +22,7 @@ type ItemCache struct {
 
 	// secondCache 是缓存命中系统的第二级缓存，
 	// 这意味着物品已经出现在操作台附近的帮助方块中
-	secondCache [5][]CompletelyItemInfo
+	secondCache [9][]CompletelyItemInfo
 	// firstCache 是缓存命中系统的第一级缓存，
 	// 这意味着物品已经被载入到机器人的背包中
 	firstCache []ItemCacheInfo
@@ -35,7 +35,7 @@ func NewItemCache(console *nbt_console.Console) *ItemCache {
 		console:      console,
 		allStructure: make(map[uuid.UUID]StructureItems),
 		thirdCache:   make(map[int64]StructureItemCache),
-		secondCache:  [5][]CompletelyItemInfo{},
+		secondCache:  [9][]CompletelyItemInfo{},
 		firstCache:   nil,
 	}
 

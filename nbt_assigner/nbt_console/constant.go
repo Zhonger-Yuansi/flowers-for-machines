@@ -45,6 +45,10 @@ var (
 	// helperBlockMapping ..
 	helperBlockMapping = []protocol.BlockPos{
 		[3]int32{0, 0, 0},
+		[3]int32{-3, 0, -3},
+		[3]int32{-3, 0, 3},
+		[3]int32{3, 0, 3},
+		[3]int32{3, 0, -3},
 		[3]int32{-3, 0, 0},
 		[3]int32{3, 0, 0},
 		[3]int32{0, 0, 3},

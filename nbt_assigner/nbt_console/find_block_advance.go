@@ -228,7 +228,7 @@ func (c Console) FindSpaceToPlaceHelper(includeCenter bool, inclueEmptyContainer
 	return
 }
 
-// FindOrGenerateNewAnvil 寻找操作台的 4 个帮助方块中
+// FindOrGenerateNewAnvil 寻找操作台的 8 个帮助方块中
 // 是否有一个是铁砧。如果没有，则生成一个铁砧及其承重方块。
 // index 指示找到或生成的铁砧在操作台上的索引
 func (c *Console) FindOrGenerateNewAnvil() (index int, err error) {

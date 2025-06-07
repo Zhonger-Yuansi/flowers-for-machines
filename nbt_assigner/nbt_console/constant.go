@@ -23,7 +23,7 @@ const (
 )
 
 // ConsoleIndex 描述操作台中心方块
-// 及 4 个帮助方块的索引
+// 及 8 个帮助方块的索引
 const (
 	ConsoleIndexCenterBlock int = iota
 	ConsoleIndexFirstHelperBlock

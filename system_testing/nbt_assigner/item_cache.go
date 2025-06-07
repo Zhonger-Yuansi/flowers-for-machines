@@ -304,7 +304,7 @@ func SystemTestingItemCache() {
 			[]resources_control.SlotID{slotIDA},
 		)
 		if err != nil {
-			panic(fmt.Sprintf("SystemTestingItemCache: Test round 4 failed due to %v (stage 1)", err))
+			panic(fmt.Sprintf("SystemTestingItemCache: Test round 4 failed due to %v (stage 2)", err))
 		}
 		if isSetHashHit {
 			panic("SystemTestingItemCache: Test round 4 failed")
@@ -313,6 +313,29 @@ func SystemTestingItemCache() {
 			panic("SystemTestingItemCache: Test round 4 failed")
 		}
 		if slotIDB != 1 {
+			panic("SystemTestingItemCache: Test round 4 failed")
+		}
+
+		api.Commands().SendWSCommandWithResp("clear")
+		itemCache.CleanInventory()
+
+		slotIDC, hit, isSetHashHit, err := itemCache.LoadCache(
+			item_cache.ItemHashNumber{
+				HashNumber:    3,
+				SetHashNumber: item_cache.SetHashNumberNotExist,
+			},
+			nil,
+		)
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemCache: Test round 4 failed due to %v (stage 3)", err))
+		}
+		if isSetHashHit {
+			panic("SystemTestingItemCache: Test round 4 failed")
+		}
+		if !hit {
+			panic("SystemTestingItemCache: Test round 4 failed")
+		}
+		if slotIDC != slotIDA {
 			panic("SystemTestingItemCache: Test round 4 failed")
 		}
 	}

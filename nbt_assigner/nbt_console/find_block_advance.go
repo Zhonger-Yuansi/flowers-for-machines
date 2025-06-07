@@ -1,7 +1,10 @@
 package nbt_console
 
 import (
+	"fmt"
+
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
 )
 
@@ -223,4 +226,43 @@ func (c Console) FindSpaceToPlaceHelper(includeCenter bool, inclueEmptyContainer
 
 	index, offset, block = c.FindNonAnvil(includeCenter)
 	return
+}
+
+// FindOrGenerateNewAnvil 寻找操作台的 4 个帮助方块中
+// 是否有一个是铁砧。如果没有，则生成一个铁砧及其承重方块。
+// index 指示找到或生成的铁砧在操作台上的索引
+func (c *Console) FindOrGenerateNewAnvil() (index int, err error) {
+	var block *block_helper.BlockHelper
+	var needFloorBlock bool
+
+	index, _, block = c.FindAnvil(false)
+	if block != nil {
+		return
+	}
+
+	index, _, block = c.FindSpaceToPlaceHelper(false, false)
+	if block == nil {
+		panic("FindOrGenerateNewAnvil: Should nerver happened")
+	}
+
+	block = c.NearBlockByIndex(index, protocol.BlockPos{0, -1, 0})
+	if _, ok := (*block).(block_helper.Air); ok {
+		needFloorBlock = true
+	}
+
+	states, err := c.api.SetBlock().SetAnvil(c.BlockPosByIndex(index), true)
+	if err != nil {
+		return 0, fmt.Errorf("FindOrGenerateNewAnvil: %v", err)
+	}
+
+	anvil := block_helper.AnvilBlockHelper{States: states}
+	c.UseHelperBlock(RequesterSystemCall, index, anvil)
+	if needFloorBlock {
+		var floorBlock block_helper.BlockHelper = block_helper.NearBlock{
+			Name: game_interface.BaseAnvil,
+		}
+		*c.NearBlockByIndex(index, protocol.BlockPos{0, -1, 0}) = floorBlock
+	}
+
+	return index, nil
 }

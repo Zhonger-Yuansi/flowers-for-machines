@@ -16,6 +16,14 @@ import (
 func SystemTestingItemCache() {
 	tA := time.Now()
 
+	// Hacking round 1
+	{
+		_, err := console.FindOrGenerateNewAnvil()
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemCache: Hacking round 1 failed due to %v (stage 2)", err))
+		}
+	}
+
 	// Test round 1
 	{
 		chestStatesString := `["minecraft:cardinal_direction"="east"]`

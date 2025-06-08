@@ -41,7 +41,7 @@ func ParseItemBasicDataNetwork(item protocol.ItemStack, itemNetworkIDToName map[
 
 	if len(result.Name) == 0 {
 		return ItemBasicData{}, fmt.Errorf(
-			"ParseItemBasicDataNetwork: itemNetworkIDToName not the name of item network ID %d; itemNetworkIDToName = %#v",
+			"ParseItemBasicDataNetwork: itemNetworkIDToName not record the name of item network ID %d; itemNetworkIDToName = %#v",
 			item.ItemType.NetworkID, itemNetworkIDToName,
 		)
 	}
@@ -148,7 +148,6 @@ func ParseItemEnhanceNetwork(item protocol.ItemStack) (result ItemEnhanceData, e
 	if item.NBTData == nil {
 		return
 	}
-
 	display, ok := item.NBTData["display"].(map[string]any)
 	if !ok {
 		return
@@ -194,14 +193,18 @@ func ParseItemBlock(nbtMap map[string]any) (result ItemBlockData, err error) {
 }
 
 func ParseItemBlockNetwork(item protocol.ItemStack) (result ItemBlockData, err error) {
+	if item.BlockRuntimeID == 0 {
+		return
+	}
+
 	name, states, found := block.RuntimeIDToState(uint32(item.BlockRuntimeID))
 	if !found {
 		panic("ParseItemBlockNetwork: Should nerver happened")
 	}
-	tag := item.NBTData
 
 	result.Name = name
 	result.States = states
+	tag := item.NBTData
 
 	if len(tag) > 0 {
 		result.SubBlock, err = nbt_parser_interface.ParseBlock(result.Name, result.States, tag)

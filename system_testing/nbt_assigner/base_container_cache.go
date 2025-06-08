@@ -51,7 +51,7 @@ func SystemTestingBaseContainerCache() {
 
 		err := api.ContainerOpenAndClose().CloseContainer()
 		if err != nil {
-			panic(fmt.Sprintf("SystemTestingBaseContainerCache: Failed on test round 2 due to %#v", err))
+			panic(fmt.Sprintf("SystemTestingBaseContainerCache: Failed on test round 2 due to %v", err))
 		}
 	}
 

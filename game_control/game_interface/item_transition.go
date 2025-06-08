@@ -24,7 +24,9 @@ func NewItemTransition(wrapper *ResourcesWrapper, api *ItemStackOperation) *Item
 // Transition 将库存 srcWindowID 处 src 所指示的物品状
 // 态转移到库存 dstWindowID 中，并且指定最终状态是 dst。
 //
-// 应当保证 dst 的物品可以完全从 src 中获得。
+// 应当保证 dst 的物品可以完全从 src 中获得，
+// 并且 src 和 dst 均不包括空气。
+// 另外，实现假设状态转移前 dst 所指示的所有槽位都是空气。
 //
 // 底层实现不保证最终提交的操作是最简的，
 // 这是因为目前使用的是基本的基线算法实现
@@ -34,6 +36,13 @@ func (h *ItemTransition) Transition(
 	srcWindowID resources_control.WindowID,
 	dstWindowID resources_control.WindowID,
 ) (success bool, err error) {
+	if len(dst) == 0 {
+		return true, nil
+	}
+	if len(src) == 0 {
+		return false, fmt.Errorf("Transition: Given src is empty but dst is not; src = %#v, dst = %#v", src, dst)
+	}
+
 	srcMapping := make(map[ItemType][]ItemInfoWithSlot)
 	for _, item := range src {
 		srcMapping[item.ItemInfo.ItemType] = append(
@@ -111,7 +120,12 @@ func (h *ItemTransition) Transition(
 // TransitionBetweenInventory 将背包中 src 所
 // 指示的物品进行状态转移，并且指定最终状态是 dst。
 //
-// 应当保证 dst 的物品可以完全从 src 中获得。
+// 应当保证 dst 的物品可以完全从 src 中获得，
+// 并且 src 和 dst 均不包括空气。
+// 另外，TransitionBetweenInventory 假设状态转移
+// 前 dst 所指示的所有槽位
+// 都是空气。
+
 // 底层实现不保证最终提交的操作是最简的，
 // 这是因为目前使用的是基本的基线算法实现。
 //
@@ -131,7 +145,11 @@ func (h *ItemTransition) TransitionBetweenInventory(src []ItemInfoWithSlot, dst 
 // TransitionBetweenContainer 将已打开容器中 src
 // 所指示的物品进行状态转移，并且指定最终状态是 dst。
 //
-// 应当保证 dst 的物品可以完全从 src 中获得。
+// 应当保证 dst 的物品可以完全从 src 中获得，
+// 并且 src 和 dst 均不包括空气。
+// 另外，TransitionBetweenContainer 假设状态转移前
+// dst 所指示的所有槽位都是空气。
+//
 // 底层实现不保证最终提交的操作是最简的，
 // 这是因为目前使用的是基本的基线算法实现。
 //
@@ -155,7 +173,11 @@ func (h *ItemTransition) TransitionBetweenContainer(src []ItemInfoWithSlot, dst 
 // TransitionToContainer 将背包中 src 所指示的物
 // 品状态转移到已打开容器中，并且指定最终状态是 dst。
 //
-// 应当保证 dst 的物品可以完全从 src 中获得。
+// 应当保证 dst 的物品可以完全从 src 中获得，
+// 并且 src 和 dst 均不包括空气。
+// 另外，实现TransitionToContainer 假设状态转移前
+// dst 所指示的所有槽位都是空气。
+//
 // 底层实现不保证最终提交的操作是最简的，
 // 目前使用的是基本的基线算法实现。
 //
@@ -179,7 +201,11 @@ func (h *ItemTransition) TransitionToContainer(src []ItemInfoWithSlot, dst []Ite
 // TransitionToInventory 将已打开容器中 src 所指
 // 示的物品状态转移到背包中，并且指定最终状态是 dst。
 //
-// 应当保证 dst 的物品可以完全从 src 中获得。
+// 应当保证 dst 的物品可以完全从 src 中获得，
+// 并且 src 和 dst 均不包括空气。
+// 另外，TransitionToInventory 假设状态转移前 dst
+// 所指示的所有槽位都是空气。
+//
 // 底层实现不保证最终提交的操作是最简的，
 // 这是因为目前使用的是基本的基线算法实现。
 //

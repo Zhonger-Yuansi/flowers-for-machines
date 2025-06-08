@@ -23,6 +23,7 @@ type GameInterface struct {
 	itemStackOperation    *ItemStackOperation
 	containerOpenAndClose *ContainerOpenAndClose
 	itemCopy              *ItemCopy
+	itemTransition        *ItemTransition
 }
 
 // NewResourcesWrapper 基于 resources 创建一个新的游戏交互器
@@ -47,6 +48,7 @@ func NewGameInterface(resources *resources_control.Resources) *GameInterface {
 	result.itemStackOperation = NewItemStackOperation(result.wrapper)
 	result.containerOpenAndClose = NewContainerOpenAndClose(result.wrapper, result.commands, result.botClick)
 	result.itemCopy = NewItemCopy(result.containerOpenAndClose, result.commands, result.itemStackOperation, result.structureBackup)
+	result.itemTransition = NewItemTransition(result.wrapper, result.itemStackOperation)
 
 	return result
 }
@@ -116,4 +118,9 @@ func (g *GameInterface) ContainerOpenAndClose() *ContainerOpenAndClose {
 // ItemCopy 返回机器人在物品复制上的相关实现
 func (g *GameInterface) ItemCopy() *ItemCopy {
 	return g.itemCopy
+}
+
+// ItemTransition 返回机器人在物品状态转移上的实现
+func (g *GameInterface) ItemTransition() *ItemTransition {
+	return g.itemTransition
 }

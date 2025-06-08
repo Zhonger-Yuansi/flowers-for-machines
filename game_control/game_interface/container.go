@@ -13,11 +13,11 @@ import (
 )
 
 const (
-	// 描述容器打开或关闭的最长截止时间。
+	// 描述容器打开的最长截止时间。
 	// 当超过此时间后，将不再等待
-	DefaultTimeoutContainerOperation = time.Second
-	// 描述容器打开或关闭失败后要重试的最大次数
-	MaxRetryContainerOperation = 3
+	DefaultTimeoutContainerOpen = time.Second / 20 * 3
+	// 描述容器打开失败后要重试的最大次数
+	MaxRetryContainerOpen = 35
 )
 
 // ContainerOpenAndClose 是基于 Resources 实现的容器打开和关闭控制系统
@@ -95,13 +95,13 @@ func (c *ContainerOpenAndClose) openContainer(
 		}
 	}
 
-	for range MaxRetryContainerOperation {
+	for range MaxRetryContainerOpen {
 		err = openFunc()
 		if err != nil {
 			return false, fmt.Errorf("openContainer: %v", err)
 		}
 
-		timer := time.NewTimer(DefaultTimeoutContainerOperation)
+		timer := time.NewTimer(DefaultTimeoutContainerOpen)
 		defer timer.Stop()
 
 		select {
@@ -201,22 +201,12 @@ func (c *ContainerOpenAndClose) CloseContainer() error {
 		},
 	)
 
-	for range DefaultTimeoutContainerOperation {
-		err := c.api.WritePacket(&packet.ContainerClose{WindowID: containerData.WindowID})
-		if err != nil {
-			return fmt.Errorf("CloseContainer: %v", err)
-		}
-
-		timer := time.NewTimer(DefaultTimeoutContainerOperation)
-		defer timer.Stop()
-
-		select {
-		case <-timer.C:
-		case <-channel:
-			c.occupy.Unlock()
-			return nil
-		}
+	err := c.api.WritePacket(&packet.ContainerClose{WindowID: containerData.WindowID})
+	if err != nil {
+		return fmt.Errorf("CloseContainer: %v", err)
 	}
 
-	return fmt.Errorf("CloseContainer: Failed to close the container")
+	<-channel
+	c.occupy.Unlock()
+	return nil
 }

@@ -2,6 +2,7 @@ package base_container_cache
 
 import (
 	"bytes"
+	"strings"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
@@ -30,9 +31,14 @@ func (b BaseContainer) Hash() uint64 {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
 
-	length := uint32(len(b.BlockName))
+	name := strings.ToLower(b.BlockName)
+	if !strings.HasPrefix(name, "minecraft:") {
+		name = "minecraft:" + name
+	}
+
+	length := uint32(len(name))
 	w.Varuint32(&length)
-	w.String(&b.BlockName)
+	w.String(&name)
 	length = uint32(len(b.BlockStatesString))
 	w.Varuint32(&length)
 	w.String(&b.BlockStatesString)

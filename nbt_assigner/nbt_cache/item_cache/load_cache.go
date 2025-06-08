@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+	nbt_hash "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/hash"
 )
 
 // LoadCache 加载哈希校验和为 hashNumber 的物品到物品栏。
@@ -16,7 +17,7 @@ import (
 // 而只是命中了集合哈希校验和。
 //
 // 在使用 slotID 处的物品后应当立即使用 ConsumeCache 消耗它
-func (i *ItemCache) LoadCache(hashNumber ItemHashNumber, exclusion []resources_control.SlotID) (
+func (i *ItemCache) LoadCache(hashNumber nbt_hash.CompletelyHashNumber, exclusion []resources_control.SlotID) (
 	slotID resources_control.SlotID,
 	hit bool,
 	isSetHashHit bool,
@@ -31,7 +32,7 @@ func (i *ItemCache) LoadCache(hashNumber ItemHashNumber, exclusion []resources_c
 			}
 		}
 		// Only set hash number hit
-		if hashNumber.SetHashNumber != SetHashNumberNotExist {
+		if hashNumber.SetHashNumber != nbt_hash.SetHashNumberNotExist {
 			for _, value := range i.firstCache {
 				if value.Hash.SetHashNumber == hashNumber.SetHashNumber {
 					hit, slotID, isSetHashHit = true, value.SlotID, true

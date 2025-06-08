@@ -9,6 +9,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache/item_cache"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
+	nbt_hash "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/hash"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 	"github.com/pterm/pterm"
 )
@@ -69,8 +70,8 @@ func SystemTestingItemCache() {
 
 		err := itemCache.StoreCache(
 			[]item_cache.ItemCacheInfo{
-				{SlotID: 2, Count: 3, Hash: item_cache.ItemHashNumber{HashNumber: 1, SetHashNumber: item_cache.SetHashNumberNotExist}},
-				{SlotID: 1, Count: 1, Hash: item_cache.ItemHashNumber{HashNumber: 2, SetHashNumber: 1}},
+				{SlotID: 2, Count: 3, Hash: nbt_hash.CompletelyHashNumber{HashNumber: 1, SetHashNumber: nbt_hash.SetHashNumberNotExist}},
+				{SlotID: 1, Count: 1, Hash: nbt_hash.CompletelyHashNumber{HashNumber: 2, SetHashNumber: 1}},
 			},
 			container.OpenInfo,
 		)
@@ -80,7 +81,7 @@ func SystemTestingItemCache() {
 
 		err = itemCache.StoreCache(
 			[]item_cache.ItemCacheInfo{
-				{SlotID: 1, Count: 1, Hash: item_cache.ItemHashNumber{HashNumber: 2, SetHashNumber: 1}},
+				{SlotID: 1, Count: 1, Hash: nbt_hash.CompletelyHashNumber{HashNumber: 2, SetHashNumber: 1}},
 			},
 			container.OpenInfo,
 		)
@@ -92,9 +93,9 @@ func SystemTestingItemCache() {
 	// Test round 2
 	{
 		slotIDA, hit, isSetHashHit, err := itemCache.LoadCache(
-			item_cache.ItemHashNumber{
+			nbt_hash.CompletelyHashNumber{
 				HashNumber:    1,
-				SetHashNumber: item_cache.SetHashNumberNotExist,
+				SetHashNumber: nbt_hash.SetHashNumberNotExist,
 			},
 			nil,
 		)
@@ -109,9 +110,9 @@ func SystemTestingItemCache() {
 		}
 
 		slotIDB, hit, isSetHashHit, err := itemCache.LoadCache(
-			item_cache.ItemHashNumber{
+			nbt_hash.CompletelyHashNumber{
 				HashNumber:    1,
-				SetHashNumber: item_cache.SetHashNumberNotExist,
+				SetHashNumber: nbt_hash.SetHashNumberNotExist,
 			},
 			nil,
 		)
@@ -129,7 +130,7 @@ func SystemTestingItemCache() {
 		}
 
 		slotIDC, hit, isSetHashHit, err := itemCache.LoadCache(
-			item_cache.ItemHashNumber{
+			nbt_hash.CompletelyHashNumber{
 				HashNumber:    2,
 				SetHashNumber: 1,
 			},
@@ -152,7 +153,7 @@ func SystemTestingItemCache() {
 		console.CleanInventory()
 
 		slotIDD, hit, isSetHashHit, err := itemCache.LoadCache(
-			item_cache.ItemHashNumber{
+			nbt_hash.CompletelyHashNumber{
 				HashNumber:    2018,
 				SetHashNumber: 1,
 			},
@@ -186,9 +187,9 @@ func SystemTestingItemCache() {
 		itemCache.ConsumeCache(slotIDD)
 
 		slotIDE, hit, isSetHashHit, err := itemCache.LoadCache(
-			item_cache.ItemHashNumber{
+			nbt_hash.CompletelyHashNumber{
 				HashNumber:    1,
-				SetHashNumber: item_cache.SetHashNumberNotExist,
+				SetHashNumber: nbt_hash.SetHashNumberNotExist,
 			},
 			nil,
 		)
@@ -271,8 +272,8 @@ func SystemTestingItemCache() {
 
 		err := itemCache.StoreCache(
 			[]item_cache.ItemCacheInfo{
-				{SlotID: 2, Count: 1, Hash: item_cache.ItemHashNumber{HashNumber: 3, SetHashNumber: item_cache.SetHashNumberNotExist}},
-				{SlotID: 1, Count: 1, Hash: item_cache.ItemHashNumber{HashNumber: 4, SetHashNumber: item_cache.SetHashNumberNotExist}},
+				{SlotID: 2, Count: 1, Hash: nbt_hash.CompletelyHashNumber{HashNumber: 3, SetHashNumber: nbt_hash.SetHashNumberNotExist}},
+				{SlotID: 1, Count: 1, Hash: nbt_hash.CompletelyHashNumber{HashNumber: 4, SetHashNumber: nbt_hash.SetHashNumberNotExist}},
 			},
 			container.OpenInfo,
 		)
@@ -284,9 +285,9 @@ func SystemTestingItemCache() {
 	// Test round 4
 	{
 		slotIDA, hit, isSetHashHit, err := itemCache.LoadCache(
-			item_cache.ItemHashNumber{
+			nbt_hash.CompletelyHashNumber{
 				HashNumber:    3,
-				SetHashNumber: item_cache.SetHashNumberNotExist,
+				SetHashNumber: nbt_hash.SetHashNumberNotExist,
 			},
 			nil,
 		)
@@ -306,9 +307,9 @@ func SystemTestingItemCache() {
 		}
 
 		slotIDB, hit, isSetHashHit, err := itemCache.LoadCache(
-			item_cache.ItemHashNumber{
+			nbt_hash.CompletelyHashNumber{
 				HashNumber:    4,
-				SetHashNumber: item_cache.SetHashNumberNotExist,
+				SetHashNumber: nbt_hash.SetHashNumberNotExist,
 			},
 			[]resources_control.SlotID{slotIDA},
 		)
@@ -329,9 +330,9 @@ func SystemTestingItemCache() {
 		console.CleanInventory()
 
 		slotIDC, hit, isSetHashHit, err := itemCache.LoadCache(
-			item_cache.ItemHashNumber{
+			nbt_hash.CompletelyHashNumber{
 				HashNumber:    3,
-				SetHashNumber: item_cache.SetHashNumberNotExist,
+				SetHashNumber: nbt_hash.SetHashNumberNotExist,
 			},
 			nil,
 		)

@@ -28,8 +28,10 @@ require (
 
 require (
 	github.com/cespare/xxhash/v2 v2.3.0
+	github.com/df-mc/worldupgrader v1.0.11
 	github.com/golang/snappy v1.0.0
 	github.com/klauspost/compress v1.18.0
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/muhammadmuzzammil1998/jsonc v1.0.0
 	github.com/pterm/pterm v0.12.80
 	golang.org/x/crypto v0.38.0 // indirect

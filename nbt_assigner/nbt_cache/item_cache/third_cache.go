@@ -6,18 +6,19 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
+	nbt_hash "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/hash"
 )
 
 // loadThirdCacheToSecond 从三级缓存 (已保存的结构) 中加载 hashNumber 所示的物品到二级缓存上。
 // isSetHashHit 指示命中的缓存是否是不完整的，而只是命中了集合哈希校验和
-func (i *ItemCache) loadThirdCacheToSecond(hashNumber ItemHashNumber) (hit bool, isSetHashHit bool, err error) {
+func (i *ItemCache) loadThirdCacheToSecond(hashNumber nbt_hash.CompletelyHashNumber) (hit bool, isSetHashHit bool, err error) {
 	var structure StructureItemCache
 	var pos protocol.BlockPos
 	api := i.console.API().StructureBackup()
 
 	// Try completely hash number
 	structure, hit = i.thirdCache[hashNumber.HashNumber]
-	if !hit && hashNumber.SetHashNumber != SetHashNumberNotExist {
+	if !hit && hashNumber.SetHashNumber != nbt_hash.SetHashNumberNotExist {
 		// Try set hash number
 		for _, value := range i.thirdCache {
 			if value.CompletelyInfo.ItemInfo.Hash.SetHashNumber == hashNumber.SetHashNumber {

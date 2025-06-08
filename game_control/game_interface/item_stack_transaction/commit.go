@@ -144,12 +144,19 @@ func (i *ItemStackTransaction) Commit() (
 				newItem := i.api.ConstantPacket().CreativeItemByCNI(op.CreativeItemNetworkID)
 				updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
 				updater[op.Path] = resources_control.ExpectedNewItem{
-					NetworkID: newItem.Item.NetworkID,
-					NBTData:   newItem.Item.NBTData,
+					NetworkID:  newItem.Item.NetworkID,
+					UseNBTData: true,
+					NBTData:    newItem.Item.NBTData,
 				}
 			case item_stack_operation.Renaming:
 				result, err = handler.handleRenaming(op, requestID)
 				itemNewName = &op.NewName
+				updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
+				updater[op.Path] = resources_control.ExpectedNewItem{
+					NetworkID:        -1,
+					ChangeRepairCost: true,
+					RepairCostDelta:  0,
+				}
 			case item_stack_operation.Looming:
 				result, err = handler.handleLooming(op, requestID)
 				updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)

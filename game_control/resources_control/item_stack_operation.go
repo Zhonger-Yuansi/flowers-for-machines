@@ -22,9 +22,18 @@ type (
 		// 它可正亦可负，具体取决于其所关注的物品堆栈实例。
 		// 另外，为 NetworkID 填写 -1 的值可以保持其不变
 		NetworkID int32
+
+		// UseNBTData 指示是否需要采用下方的 NBTData 更新物品的 NBT 数据
+		UseNBTData bool
 		// NBTData 指示经过相应的物品堆栈操作后，其 NBT 字段的最终状态。
 		// 需要说明的是，物品名称的 NBT 字段无需在此处更改，它会被自动维护
 		NBTData map[string]any
+
+		// ChangeRepairCost 指示是否需要更新物品的 RepairCost 字段。
+		// 应当说明的是，RepairCost 被用于铁砧的惩罚机制
+		ChangeRepairCost bool
+		// RepairCostDelta 是要修改的 RepairCost 的增量，可以为负
+		RepairCostDelta int32
 	}
 
 	// ItemStackResponseMapping 是一个由容器 ID 到库存窗口 ID 的映射。
@@ -92,9 +101,19 @@ func UpdateItem(
 	if clientExpected != nil {
 		newData, ok := clientExpected[slotLocation]
 		if ok {
-			item.Stack.NBTData = newData.NBTData
 			if newData.NetworkID != -1 {
 				item.Stack.ItemType.NetworkID = newData.NetworkID
+			}
+			if newData.UseNBTData {
+				item.Stack.NBTData = newData.NBTData
+			}
+			if newData.ChangeRepairCost {
+				if item.Stack.NBTData == nil {
+					item.Stack.NBTData = make(map[string]any)
+				}
+				repairCost, _ := item.Stack.NBTData["RepairCost"].(int32)
+				repairCost += newData.RepairCostDelta
+				item.Stack.NBTData["RepairCost"] = repairCost
 			}
 		}
 	}

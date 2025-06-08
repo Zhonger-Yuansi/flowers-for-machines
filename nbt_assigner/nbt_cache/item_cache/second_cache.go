@@ -6,6 +6,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
+	nbt_hash "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/hash"
 )
 
 // loadSecondCacheToFirstCache 从二级缓存 (容器)
@@ -20,7 +21,7 @@ import (
 // 在设计上应当保证 exclusion 的长度最大为 27，
 // 否则这被认为是设计者的非正常使用，并可能伴随程序崩溃
 func (i *ItemCache) loadSecondCacheToFirstCache(
-	hashNumber ItemHashNumber,
+	hashNumber nbt_hash.CompletelyHashNumber,
 	exclusion []resources_control.SlotID,
 ) (hit bool, isSetHashHit bool, err error) {
 	var hitContainerIndex int
@@ -34,7 +35,7 @@ func (i *ItemCache) loadSecondCacheToFirstCache(
 		// Firstly, check the container we already loaded
 		for index, container := range i.secondCache {
 			// Only set hash number hit
-			if hashNumber.SetHashNumber != SetHashNumberNotExist {
+			if hashNumber.SetHashNumber != nbt_hash.SetHashNumberNotExist {
 				for idx, item := range container {
 					if item.ItemInfo.Hash.SetHashNumber == hashNumber.SetHashNumber {
 						hit, isSetHashHit, hitItem = true, true, item.ItemInfo

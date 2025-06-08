@@ -29,9 +29,11 @@ func (d *DefaultItem) parse(basic ItemBasicData, enhance ItemEnhanceData, block 
 	// Prepare
 	var shouldCleanItemLock bool
 	// Fix logic problem
+	if len(block.Name) != 0 {
+		enhance.EnchList = nil
+	}
 	if block.SubBlock != nil {
 		if block.SubBlock.NeedSpecialHandle() {
-			enhance.EnchList = nil
 			shouldCleanItemLock = true
 		}
 	}

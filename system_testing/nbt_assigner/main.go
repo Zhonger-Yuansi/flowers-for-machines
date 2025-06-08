@@ -6,6 +6,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/client"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache/base_container_cache"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache/item_cache"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
 	"github.com/pterm/pterm"
@@ -15,8 +16,12 @@ var (
 	c         *client.Client
 	resources *resources_control.Resources
 	api       *game_interface.GameInterface
-	console   *nbt_console.Console
-	itemCache *item_cache.ItemCache
+)
+
+var (
+	console            *nbt_console.Console
+	itemCache          *item_cache.ItemCache
+	baseContainerCache *base_container_cache.BaseContainerCache
 )
 
 func main() {
@@ -29,6 +34,7 @@ func main() {
 	}()
 
 	SystemTestingItemCache()
+	SystemTestingBaseContainerCache()
 
 	pterm.Success.Printfln("System Testing: ALL PASS (Time used = %v)", time.Since(tA))
 }

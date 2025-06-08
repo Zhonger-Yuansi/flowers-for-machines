@@ -39,7 +39,7 @@ func NewItemCache(console *nbt_console.Console) *ItemCache {
 		firstCache:   nil,
 	}
 
-	console.SetBlockUseCallback(itemCache.useBlocksCallback)
+	console.SetHelperUseCallback(itemCache.useBlocksCallback)
 	console.SetSlotUseCallback(itemCache.useSlotCallback)
 
 	return itemCache

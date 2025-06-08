@@ -14,11 +14,11 @@ func (c *Console) SetSlotUseCallback(
 	c.inventoryUseCallback = append(c.inventoryUseCallback, f)
 }
 
-// SetBlockUseCallback 设置当操作台中心方
+// SetHelperUseCallback 设置当操作台中心方
 // 块或帮助方块被使用时应当执行的回调函数。
 // requester 指示每个请求提起者的唯一标识；
 // index 是这个方块在操作台上的索引
-func (c *Console) SetBlockUseCallback(
+func (c *Console) SetHelperUseCallback(
 	f func(requester string, index int),
 ) {
 	c.blocksUseCallback = append(c.blocksUseCallback, f)

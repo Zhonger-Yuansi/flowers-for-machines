@@ -60,15 +60,6 @@ func SystemTestingItemCopy() {
 					"open_bit":         byte(0),
 				},
 			},
-			game_interface.UseItemOnBlocks{
-				HotbarSlotID: 5,
-				BlockPos:     [3]int32{0, 0, 0},
-				BlockName:    "barrel",
-				BlockStates: map[string]any{
-					"facing_direction": int32(1),
-					"open_bit":         byte(1),
-				},
-			},
 			[]game_interface.ItemInfoWithSlot{
 				{
 					Slot:     6,
@@ -126,15 +117,6 @@ func SystemTestingItemCopy() {
 				BlockStates: map[string]any{
 					"facing_direction": int32(1),
 					"open_bit":         byte(0),
-				},
-			},
-			game_interface.UseItemOnBlocks{
-				HotbarSlotID: 8,
-				BlockPos:     [3]int32{0, 0, 0},
-				BlockName:    "barrel",
-				BlockStates: map[string]any{
-					"facing_direction": int32(1),
-					"open_bit":         byte(1),
 				},
 			},
 			[]game_interface.ItemInfoWithSlot{
@@ -198,15 +180,6 @@ func SystemTestingItemCopy() {
 				BlockStates: map[string]any{
 					"facing_direction": int32(1),
 					"open_bit":         byte(0),
-				},
-			},
-			game_interface.UseItemOnBlocks{
-				HotbarSlotID: 8,
-				BlockPos:     [3]int32{0, 0, 0},
-				BlockName:    "barrel",
-				BlockStates: map[string]any{
-					"facing_direction": int32(1),
-					"open_bit":         byte(1),
 				},
 			},
 			[]game_interface.ItemInfoWithSlot{
@@ -287,14 +260,6 @@ func SystemTestingItemCopy() {
 					"minecraft:cardinal_direction": "east",
 				},
 			},
-			game_interface.UseItemOnBlocks{
-				HotbarSlotID: 3,
-				BlockPos:     [3]int32{0, 0, 0},
-				BlockName:    "chest",
-				BlockStates: map[string]any{
-					"minecraft:cardinal_direction": "east",
-				},
-			},
 			[]game_interface.ItemInfoWithSlot{
 				{
 					Slot:     6,
@@ -361,14 +326,6 @@ func SystemTestingItemCopy() {
 					"minecraft:cardinal_direction": "east",
 				},
 			},
-			game_interface.UseItemOnBlocks{
-				HotbarSlotID: 8,
-				BlockPos:     [3]int32{0, 0, 0},
-				BlockName:    "chest",
-				BlockStates: map[string]any{
-					"minecraft:cardinal_direction": "east",
-				},
-			},
 			[]game_interface.ItemInfoWithSlot{
 				{
 					Slot:     6,
@@ -427,14 +384,6 @@ func SystemTestingItemCopy() {
 					"minecraft:cardinal_direction": "east",
 				},
 			},
-			game_interface.UseItemOnBlocks{
-				HotbarSlotID: 8,
-				BlockPos:     [3]int32{0, 0, 0},
-				BlockName:    "chest",
-				BlockStates: map[string]any{
-					"minecraft:cardinal_direction": "east",
-				},
-			},
 			[]game_interface.ItemInfoWithSlot{
 				{
 					Slot:     6,
@@ -470,14 +419,6 @@ func SystemTestingItemCopy() {
 		}
 
 		err = api.ItemCopy().CopyItem(
-			game_interface.UseItemOnBlocks{
-				HotbarSlotID: 4,
-				BlockPos:     [3]int32{0, 0, 0},
-				BlockName:    "chest",
-				BlockStates: map[string]any{
-					"minecraft:cardinal_direction": "east",
-				},
-			},
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: 4,
 				BlockPos:     [3]int32{0, 0, 0},
@@ -556,14 +497,6 @@ func SystemTestingItemCopy() {
 		}
 
 		err = api.ItemCopy().CopyItem(
-			game_interface.UseItemOnBlocks{
-				HotbarSlotID: 3,
-				BlockPos:     [3]int32{0, 0, 0},
-				BlockName:    "chest",
-				BlockStates: map[string]any{
-					"minecraft:cardinal_direction": "east",
-				},
-			},
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: 3,
 				BlockPos:     [3]int32{0, 0, 0},

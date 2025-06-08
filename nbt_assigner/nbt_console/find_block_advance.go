@@ -24,7 +24,7 @@ func (c Console) FindAir(includeCenter bool) (index int, offset protocol.BlockPo
 			continue
 		}
 		if _, ok := (*value).(block_helper.Air); ok {
-			return index, nearBlockMapping[index], value
+			return index, helperBlockMapping[index], value
 		}
 	}
 	return 0, protocol.BlockPos{}, nil
@@ -46,7 +46,7 @@ func (c Console) FindAnvil(includeCenter bool) (index int, offset protocol.Block
 			continue
 		}
 		if _, ok := (*value).(block_helper.AnvilBlockHelper); ok {
-			return index, nearBlockMapping[index], value
+			return index, helperBlockMapping[index], value
 		}
 	}
 	return 0, protocol.BlockPos{}, nil
@@ -68,7 +68,7 @@ func (c Console) FindLoom(includeCenter bool) (index int, offset protocol.BlockP
 			continue
 		}
 		if _, ok := (*value).(block_helper.LoomBlockHelper); ok {
-			return index, nearBlockMapping[index], value
+			return index, helperBlockMapping[index], value
 		}
 	}
 	return 0, protocol.BlockPos{}, nil
@@ -93,7 +93,7 @@ func (c Console) FindNonAnvil(includeCenter bool) (index int, offset protocol.Bl
 			continue
 		}
 		if _, ok := (*value).(block_helper.AnvilBlockHelper); !ok {
-			return index, nearBlockMapping[index], value
+			return index, helperBlockMapping[index], value
 		}
 	}
 	return 0, protocol.BlockPos{}, nil
@@ -121,7 +121,7 @@ func (c Console) FindNonContainerAndNonAnvil(includeCenter bool) (index int, off
 		case block_helper.ContainerBlockHelper:
 		case block_helper.AnvilBlockHelper:
 		default:
-			return index, nearBlockMapping[index], value
+			return index, helperBlockMapping[index], value
 		}
 	}
 	return 0, protocol.BlockPos{}, nil
@@ -145,7 +145,7 @@ func (c Console) FindEmptyContainer(includeCenter bool) (index int, offset proto
 			continue
 		}
 		if container, ok := (*value).(block_helper.ContainerBlockHelper); ok && container.IsEmpty {
-			return index, nearBlockMapping[index], value
+			return index, helperBlockMapping[index], value
 		}
 	}
 	return 0, protocol.BlockPos{}, nil

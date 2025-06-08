@@ -2,6 +2,8 @@ package game_interface
 
 import (
 	"fmt"
+	"maps"
+	"strings"
 	"sync"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
@@ -68,11 +70,10 @@ type ItemCopy struct {
 	inventory [27]ItemInfo
 	container [27]ItemInfo
 
-	closedContainer UseItemOnBlocks
-	openedContainer UseItemOnBlocks
-	ItemGroups      map[ItemType]ItemGroup
-
+	containerInfo     UseItemOnBlocks
 	containerIsOpened bool
+
+	ItemGroups map[ItemType]ItemGroup
 }
 
 // NewItemCopy 基于 api、commands、itemStack 和 structure 创建并返回一个新的 ItemCopy
@@ -90,22 +91,17 @@ func NewItemCopy(
 		structure:         structure,
 		inventory:         [27]ItemInfo{},
 		container:         [27]ItemInfo{},
-		closedContainer:   UseItemOnBlocks{},
-		ItemGroups:        make(map[ItemType]ItemGroup),
+		containerInfo:     UseItemOnBlocks{},
 		containerIsOpened: false,
+		ItemGroups:        make(map[ItemType]ItemGroup),
 	}
 }
 
 // CopyItem 根据给定的基物品 baseItems 和蓝图 targetItems 向相应的容器载入物品。
 // 应确保调用 CopyItem 前没有打开任何容器。
 //
-// closedContainer 提供的信息指示机器人应当如何打开“已经关闭”的目标容器，
-// 而 openedContainer 提供的信息指示机器人如何打开“已经打开”的目标容器。
-// 目前已知的特殊方块是木桶，因为其在打开和关闭状态下具有不同的方块状态。
-//
-// 您有责任确保 closedContainer.HotbarSlotID 和 openedContainer.HotbarSlotID
-// 是一致的。并且，此函数不会自动切换物品栏，因此您需要确保在调用前已经切换物品栏到
-// closedContainer.HotbarSlotID 的值。
+// containerInfo 提供的信息指示机器人应当如何打开目标容器。由于此函数不会自动切换物品栏，
+// 因此您需要确保在调用前已经切换物品栏到 containerInfo.HotbarSlotID 的值。
 //
 // targetItems 指示是最终容器的物品状态，即机器人将按照背包中已有的 baseItems 物品，
 // 通过多次的物品拷贝操作，使得容器中物品的状态为 targetItems。
@@ -123,8 +119,7 @@ func NewItemCopy(
 // 另外，CopyItem 是阻塞的，这意味着如果存在多个 go 惯例调用 CopyItem，则每个调用
 // 都将会阻塞，直到上一个调用完成
 func (i *ItemCopy) CopyItem(
-	closedContainer UseItemOnBlocks,
-	openedContainer UseItemOnBlocks,
+	containerInfo UseItemOnBlocks,
 	baseItems []ItemInfoWithSlot,
 	targetItems []*ItemInfo,
 ) error {
@@ -164,7 +159,7 @@ func (i *ItemCopy) CopyItem(
 		i.mu.Unlock()
 	}()
 
-	err := i.copyItem(closedContainer, openedContainer, baseItems, targetItems)
+	err := i.copyItem(containerInfo, baseItems, targetItems)
 	if err != nil {
 		return fmt.Errorf("CopyItem: %v", err)
 	}
@@ -174,17 +169,15 @@ func (i *ItemCopy) CopyItem(
 // copyItem 是内部实现细节，
 // 不应该被其他人所使用
 func (i *ItemCopy) copyItem(
-	closedContainer UseItemOnBlocks,
-	openedContainer UseItemOnBlocks,
+	containerInfo UseItemOnBlocks,
 	baseItems []ItemInfoWithSlot,
 	targetItems []*ItemInfo,
 ) error {
 	i.inventory = [27]ItemInfo{}
 	i.container = [27]ItemInfo{}
-	i.closedContainer = closedContainer
-	i.openedContainer = openedContainer
-	i.ItemGroups = make(map[ItemType]ItemGroup)
+	i.containerInfo = containerInfo
 	i.containerIsOpened = false
+	i.ItemGroups = make(map[ItemType]ItemGroup)
 
 	// Step 1: Convert target items to item groups
 	for index, item := range targetItems {
@@ -214,7 +207,7 @@ func (i *ItemCopy) copyItem(
 	}
 
 	// Step 2.1: Open the container
-	success, err := i.api.OpenContainer(i.closedContainer, false)
+	success, err := i.api.OpenContainer(i.containerInfo, false)
 	if err != nil {
 		return fmt.Errorf("copyItem: %v", err)
 	}
@@ -297,7 +290,7 @@ func (i *ItemCopy) copyItem(
 // stepGetAllThingBack 将容器中的全部物品放入背包
 func (i *ItemCopy) stepGetAllThingBack() error {
 	// Step 1: Backup structure
-	uniqueID, err := i.structure.BackupStructure(i.closedContainer.BlockPos)
+	uniqueID, err := i.structure.BackupStructure(i.containerInfo.BlockPos)
 	if err != nil {
 		return fmt.Errorf("stepGetAllThingBack: %v", err)
 	}
@@ -357,11 +350,21 @@ func (i *ItemCopy) stepGetAllThingBack() error {
 	i.containerIsOpened = false
 
 	// Step 4: Revert structure
-	err = i.structure.RevertStructure(uniqueID, i.closedContainer.BlockPos)
+	err = i.structure.RevertStructure(uniqueID, i.containerInfo.BlockPos)
 	if err != nil {
 		return fmt.Errorf("stepGetAllThingBack: %v", err)
 	}
-	i.closedContainer = i.openedContainer
+
+	// Step 5: Special process for barrel
+	if strings.Contains(i.containerInfo.BlockName, "barrel") {
+		openBit, _ := i.containerInfo.BlockStates["open_bit"].(byte)
+		if openBit == 0 {
+			newBlockStates := make(map[string]any)
+			maps.Copy(newBlockStates, i.containerInfo.BlockStates)
+			newBlockStates["open_bit"] = byte(1)
+			i.containerInfo.BlockStates = newBlockStates
+		}
+	}
 
 	return nil
 }
@@ -370,7 +373,7 @@ func (i *ItemCopy) stepGetAllThingBack() error {
 // canStop 指示目标容器是否已经完成构造
 func (i *ItemCopy) stepMergeToContainer() (canStop bool, err error) {
 	// Step 1: Open container
-	success, err := i.api.OpenContainer(i.closedContainer, false)
+	success, err := i.api.OpenContainer(i.containerInfo, false)
 	if err != nil {
 		return false, fmt.Errorf("stepMergeToContainer: %v", err)
 	}

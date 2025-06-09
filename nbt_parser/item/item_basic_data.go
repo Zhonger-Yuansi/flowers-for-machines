@@ -9,10 +9,11 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+// ItemBasicData 是物品的基本数据
 type ItemBasicData struct {
-	Name     string `mapstructure:"Name"`
-	Count    uint8  `mapstructure:"Count"`
-	Metadata int16  `mapstructure:"Damage"`
+	Name     string `mapstructure:"Name"`   // 物品名称
+	Count    uint8  `mapstructure:"Count"`  // 物品数量
+	Metadata int16  `mapstructure:"Damage"` // 物品元数据
 }
 
 func ParseItemBasicData(nbtMap map[string]any) (result ItemBasicData, err error) {

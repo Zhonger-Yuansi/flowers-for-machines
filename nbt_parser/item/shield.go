@@ -51,35 +51,26 @@ func (s *Shield) parse(tag map[string]any) error {
 }
 
 func (s *Shield) ParseNormal(nbtMap map[string]any) error {
-	err := s.DefaultItem.ParseNormal(nbtMap)
-	if err != nil {
-		return fmt.Errorf("ParseNormal: %v", err)
-	}
-
 	tag, _ := nbtMap["tag"].(map[string]any)
-	err = s.parse(tag)
+	err := s.parse(tag)
 	if err != nil {
 		return fmt.Errorf("ParseNormal: %v", err)
 	}
-
 	return nil
 }
 
 func (s *Shield) ParseNetwork(item protocol.ItemStack, itemNetworkIDToName map[int32]string) error {
-	err := s.DefaultItem.ParseNetwork(item, itemNetworkIDToName)
+	err := s.parse(item.NBTData)
 	if err != nil {
 		return fmt.Errorf("ParseNetwork: %v", err)
 	}
-
-	err = s.parse(item.NBTData)
-	if err != nil {
-		return fmt.Errorf("ParseNetwork: %v", err)
-	}
-
 	return nil
 }
 
 func (s Shield) NeedSpecialHandle() bool {
+	if s.DefaultItem.NeedSpecialHandle() {
+		return true
+	}
 	if len(s.NBT.Patterns) > 0 {
 		return true
 	}

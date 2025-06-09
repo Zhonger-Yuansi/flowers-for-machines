@@ -24,3 +24,8 @@ type Item interface {
 	TypeStableBytes() []byte
 	FullStableBytes() []byte
 }
+
+var (
+	ParseNBTItemNormal  func(nbtMap map[string]any) (item Item, err error)
+	ParseNBTItemNetwork func(itemStack protocol.ItemStack, itemNetworkIDToName map[int32]string) (item Item, err error)
+)

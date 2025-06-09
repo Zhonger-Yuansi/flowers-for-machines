@@ -69,35 +69,26 @@ func (b *Banner) parse(tag map[string]any) error {
 }
 
 func (b *Banner) ParseNormal(nbtMap map[string]any) error {
-	err := b.DefaultItem.ParseNormal(nbtMap)
-	if err != nil {
-		return fmt.Errorf("ParseNormal: %v", err)
-	}
-
 	tag, _ := nbtMap["tag"].(map[string]any)
-	err = b.parse(tag)
+	err := b.parse(tag)
 	if err != nil {
 		return fmt.Errorf("ParseNormal: %v", err)
 	}
-
 	return nil
 }
 
 func (b *Banner) ParseNetwork(item protocol.ItemStack, itemNetworkIDToName map[int32]string) error {
-	err := b.DefaultItem.ParseNetwork(item, itemNetworkIDToName)
+	err := b.parse(item.NBTData)
 	if err != nil {
 		return fmt.Errorf("ParseNetwork: %v", err)
 	}
-
-	err = b.parse(item.NBTData)
-	if err != nil {
-		return fmt.Errorf("ParseNetwork: %v", err)
-	}
-
 	return nil
 }
 
 func (b Banner) NeedSpecialHandle() bool {
+	if b.DefaultItem.NeedSpecialHandle() {
+		return true
+	}
 	if len(b.NBT.Patterns) > 0 {
 		return true
 	}

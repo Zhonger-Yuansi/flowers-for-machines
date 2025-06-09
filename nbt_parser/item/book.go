@@ -2,7 +2,6 @@ package nbt_parser
 
 import (
 	"bytes"
-	"fmt"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 )
@@ -43,27 +42,20 @@ func (b *Book) parse(tag map[string]any) {
 }
 
 func (b *Book) ParseNormal(nbtMap map[string]any) error {
-	err := b.DefaultItem.ParseNormal(nbtMap)
-	if err != nil {
-		return fmt.Errorf("ParseNormal: %v", err)
-	}
-
 	tag, _ := nbtMap["tag"].(map[string]any)
 	b.parse(tag)
-
 	return nil
 }
 
 func (b *Book) ParseNetwork(item protocol.ItemStack, itemNetworkIDToName map[int32]string) error {
-	err := b.DefaultItem.ParseNetwork(item, itemNetworkIDToName)
-	if err != nil {
-		return fmt.Errorf("ParseNetwork: %v", err)
-	}
 	b.parse(item.NBTData)
 	return nil
 }
 
 func (b *Book) NeedSpecialHandle() bool {
+	if b.DefaultItem.NeedSpecialHandle() {
+		return true
+	}
 	if b.ItemName() == "minecraft:written_book" {
 		return true
 	}

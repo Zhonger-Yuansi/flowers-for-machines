@@ -54,17 +54,15 @@ func (b *Book) ParseNetwork(item protocol.ItemStack, itemName string) error {
 	return nil
 }
 
-func (b *Book) NeedSpecialHandle() bool {
-	if b.DefaultItem.NeedSpecialHandle() {
-		return true
-	}
+func (b *Book) IsComplex() bool {
 	if b.ItemName() == "minecraft:written_book" {
 		return true
 	}
-	for _, page := range b.NBT.Pages {
-		if len(page) > 0 {
-			return true
-		}
+	if len(b.NBT.Author) > 0 {
+		return true
+	}
+	if len(b.NBT.Pages) > 0 {
+		return true
 	}
 	return false
 }

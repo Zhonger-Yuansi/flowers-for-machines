@@ -74,10 +74,7 @@ func (b *Banner) ParseNetwork(item protocol.ItemStack, itemName string) error {
 	return nil
 }
 
-func (b Banner) NeedSpecialHandle() bool {
-	if b.DefaultItem.NeedSpecialHandle() {
-		return true
-	}
+func (b Banner) IsComplex() bool {
 	if len(b.NBT.Patterns) > 0 {
 		return true
 	}

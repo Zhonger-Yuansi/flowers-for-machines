@@ -12,24 +12,13 @@ type StructureNBTBlock struct {
 	UniqueID uuid.UUID
 	// HashNumber 是这个方块的哈希校验和
 	HashNumber nbt_hash.CompletelyHashNumber
-	// ..
+	// Block 是这个结构储存的方块实体
 	Block nbt_parser_interface.Block
 }
 
-// // Hash 给出这个基容器的唯一哈希校验和。
-// // 校验和不包括该容器所在结构的唯一标识，
-// // 这意味着来自两个不同结构的相同基容器
-// // 具有完全相同的哈希校验和
-// func (b BaseContainer) Hash() uint64 {
-// 	buf := bytes.NewBuffer(nil)
-// 	w := protocol.NewWriter(buf, 0)
-
-// 	length := uint32(len(b.BlockName))
-// 	w.Varuint32(&length)
-// 	w.String(&b.BlockName)
-// 	length = uint32(len(b.BlockStatesString))
-// 	w.Varuint32(&length)
-// 	w.String(&b.BlockStatesString)
-
-// 	return xxhash.Sum64(buf.Bytes())
-// }
+// Hash 给出该结构所包含方块实体唯一哈希校验和。
+// 对于两个完全相同的 NBT 方块，它们应当具有一致
+// 的哈希校验和
+func (s StructureNBTBlock) Hash() uint64 {
+	return nbt_hash.NBTBlockHash(s.Block)
+}

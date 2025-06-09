@@ -70,10 +70,7 @@ func (s *Shield) ParseNetwork(item protocol.ItemStack, itemName string) error {
 	return nil
 }
 
-func (s Shield) NeedSpecialHandle() bool {
-	if s.DefaultItem.NeedSpecialHandle() {
-		return true
-	}
+func (s Shield) IsComplex() bool {
 	if len(s.NBT.Patterns) > 0 {
 		return true
 	}

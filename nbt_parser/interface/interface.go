@@ -53,10 +53,12 @@ type Item interface {
 	// ParseNormal 从 nbtMap 解析一个 NBT 物品。
 	// nbtMap 是含有这个物品 tag 标签的父复合标签
 	ParseNormal(nbtMap map[string]any) error
-	// NeedSpecialHandle 指示在导入这个
-	// NBT 物品时是否需要进行特殊处理。
-	// 如果不需要，则物品可以直接通过命令得到
-	NeedSpecialHandle() bool
+	// NeedEnchOrRename 指示在导入这个
+	// NBT 物品时是否需要附魔或重命名
+	NeedEnchOrRename() bool
+	// IsComplex 指示这个物品是否
+	// 需要进一步的特殊处理才能得到
+	IsComplex() bool
 	// NeedCheckCompletely 指示在完成这个
 	// NBT 物品的导入后是否需要检查其完整性。
 	// 如果 NeedSpecialHandle 为假，

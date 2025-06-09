@@ -5,6 +5,7 @@ import (
 	"cmp"
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
@@ -20,7 +21,8 @@ type ItemWithSlot struct {
 
 // ContainerNBT ..
 type ContainerNBT struct {
-	Items []ItemWithSlot
+	Items         []ItemWithSlot
+	ShulkerFacing uint8
 }
 
 // 容器
@@ -43,6 +45,17 @@ func (c Container) NeedSpecialHandle() bool {
 
 func (c Container) NeedCheckCompletely() bool {
 	return true
+}
+
+// ConsiderOpenDirection 指示打开目标容器
+// 是否需要考虑其打开方向上的障碍物方块，
+// 这似乎只对箱子和潜影盒有效
+func (c *Container) ConsiderOpenDirection() bool {
+	blockName := c.BlockName()
+	if strings.Contains(blockName, "chest") || strings.Contains(blockName, "shulker") {
+		return true
+	}
+	return false
 }
 
 func (c *Container) Parse(nbtMap map[string]any) error {
@@ -89,16 +102,22 @@ func (c *Container) Parse(nbtMap map[string]any) error {
 	}
 
 	c.CustomName, _ = nbtMap["CustomName"].(string)
+	c.NBT.ShulkerFacing, _ = nbtMap["facing"].(byte)
 	return nil
 }
 
-func (b Container) StableBytes() []byte {
+func (b *Container) StableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
-
+	isShulkerBox := strings.Contains(b.BlockName(), "shulker")
 	basicInfo := b.DefaultBlock.StableBytes()
+
 	w.ByteSlice(&basicInfo)
 	w.String(&b.CustomName)
+	w.Bool(&isShulkerBox)
+	if isShulkerBox {
+		w.Uint8(&b.NBT.ShulkerFacing)
+	}
 
 	itemMapping := make(map[uint8]ItemWithSlot)
 	slots := make([]uint8, 0)

@@ -15,10 +15,3 @@ type StructureNBTBlock struct {
 	// Block 是这个结构储存的方块实体
 	Block nbt_parser_interface.Block
 }
-
-// Hash 给出该结构所包含方块实体唯一哈希校验和。
-// 对于两个完全相同的 NBT 方块，它们应当具有一致
-// 的哈希校验和
-func (s StructureNBTBlock) Hash() uint64 {
-	return nbt_hash.NBTBlockHash(s.Block)
-}

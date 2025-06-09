@@ -43,3 +43,14 @@ func (b *BaseContainerCache) StoreCache() error {
 	}
 	return nil
 }
+
+// CleanCache 清除该缓存命中系统中已有的全部缓存
+func (b *BaseContainerCache) CleanCache() {
+	api := b.console.API().StructureBackup()
+
+	for _, value := range b.cachedBaseContainer {
+		_ = api.DeleteStructure(value.UniqueID)
+	}
+
+	b.cachedBaseContainer = make(map[uint64]StructureBaseContainer)
+}

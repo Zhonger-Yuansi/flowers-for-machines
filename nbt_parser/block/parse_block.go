@@ -32,6 +32,8 @@ func ParseNBTBlock(blockName string, blockStates map[string]any, blockNBT map[st
 	switch blockType {
 	case mapping.SupportNBTBlockTypeCommandBlock:
 		block = &CommandBlock{DefaultBlock: defaultBlock}
+	case mapping.SupportNBTBlockTypeContainer:
+		block = &Container{DefaultBlock: defaultBlock}
 	case mapping.SupportNBTBlockTypeSign:
 		block = &Sign{DefaultBlock: defaultBlock}
 	case mapping.SupportNBTBlockTypeStructureBlock:

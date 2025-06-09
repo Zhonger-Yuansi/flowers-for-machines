@@ -23,6 +23,10 @@ func (d *DefaultItem) ItemName() string {
 	return d.Basic.Name
 }
 
+func (d DefaultItem) ItemCount() uint8 {
+	return d.Basic.Count
+}
+
 func (d DefaultItem) ItemMetadata() int16 {
 	return d.Basic.Metadata
 }

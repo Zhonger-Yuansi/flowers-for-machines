@@ -16,6 +16,7 @@ var ParseBlock func(blockName string, blockStates map[string]any, blockNBT map[s
 
 type Item interface {
 	ItemName() string
+	ItemCount() uint8
 	ItemMetadata() int16
 	ParseNetwork(item protocol.ItemStack, itemNetworkIDToName map[int32]string) error
 	ParseNormal(nbtMap map[string]any) error

@@ -39,6 +39,13 @@ func (n *NBTBlockCache) LoadCache(hashNumber nbt_hash.CompletelyHashNumber) (hit
 		return false, false, fmt.Errorf("LoadCache: %v", err)
 	}
 
+	if structure.Offset != [3]int32{0, 0, 0} {
+		*n.console.NearBlockByIndex(nbt_console.ConsoleIndexCenterBlock, structure.Offset) = block_helper.ComplexBlock{
+			Name:   structure.Block.BlockName(),
+			States: structure.Block.BlockStates(),
+		}
+	}
+
 	container, ok := structure.Block.(*nbt_parser_block.Container)
 	if ok {
 		n.console.UseHelperBlock(

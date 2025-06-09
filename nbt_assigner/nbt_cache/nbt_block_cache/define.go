@@ -1,6 +1,7 @@
 package nbt_block_cache
 
 import (
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	nbt_hash "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/hash"
 	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
 	"github.com/google/uuid"
@@ -12,6 +13,9 @@ type StructureNBTBlock struct {
 	UniqueID uuid.UUID
 	// HashNumber 是这个方块的哈希校验和
 	HashNumber nbt_hash.CompletelyHashNumber
+	// Offset 用于该 NBT 方块的偏移，
+	// 例如床的尾方块相对于头的偏移
+	Offset protocol.BlockPos
 	// Block 是这个结构储存的方块实体
 	Block nbt_parser_interface.Block
 }

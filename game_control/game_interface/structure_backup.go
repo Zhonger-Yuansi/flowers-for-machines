@@ -18,44 +18,71 @@ func NewStructureBackup(api *Commands) *StructureBackup {
 	return &StructureBackup{api: api}
 }
 
-// BackupStructure 通过使用 structure 命令保存 pos 处的方块。
-// 返回的 uuid 是标识该结构的唯一标识符
-func (s *StructureBackup) BackupStructure(pos protocol.BlockPos) (result uuid.UUID, err error) {
+// backupStructure 是一个内部实现细节，
+// 不应被其他人所使用
+func (s *StructureBackup) backupStructure(startPos protocol.BlockPos, endPos protocol.BlockPos) (result uuid.UUID, err error) {
 	api := s.api
 
 	uniqueId := uuid.New()
 	request := fmt.Sprintf(
 		`structure save "%s" %d %d %d %d %d %d`,
 		utils.MakeUUIDSafeString(uniqueId),
-		pos[0], pos[1], pos[2],
-		pos[0], pos[1], pos[2],
+		startPos[0], startPos[1], startPos[2],
+		endPos[0], endPos[1], endPos[2],
 	)
 	resp, isTimeout, err := api.SendWSCommandWithTimeout(request, DefaultTimeoutCommandRequest)
 
 	if isTimeout {
 		err = api.SendSettingsCommand(request, true)
 		if err != nil {
-			return result, fmt.Errorf("BackupStructure: %v", err)
+			return uuid.UUID{}, fmt.Errorf("backupStructure: %v", err)
 		}
 		err = api.AwaitChangesGeneral()
 		if err != nil {
-			return result, fmt.Errorf("BackupStructure: %v", err)
+			return uuid.UUID{}, fmt.Errorf("backupStructure: %v", err)
 		}
 		return uniqueId, nil
 	}
 
 	if err != nil {
-		return result, fmt.Errorf("BackupStructure: %v", err)
+		return uuid.UUID{}, fmt.Errorf("backupStructure: %v", err)
 	}
 
 	if resp.SuccessCount == 0 {
-		return result, fmt.Errorf(
-			"BackupStructure: Backup (%d,%d,%d) failed because the success count of the command %#v is 0",
-			pos[0], pos[1], pos[2], request,
+		return uuid.UUID{}, fmt.Errorf(
+			"BackupStructure: Backup (%d,%d,%d) to (%d,%d,%d) failed because the success count of the command %#v is 0",
+			startPos[0], startPos[1], startPos[2],
+			endPos[0], endPos[1], endPos[2],
+			request,
 		)
 	}
 
 	return uniqueId, nil
+}
+
+// BackupStructure 通过使用 structure 命令保存 pos 处的方块。
+// 返回的 uuid 是标识该结构的唯一标识符
+func (s *StructureBackup) BackupStructure(pos protocol.BlockPos) (result uuid.UUID, err error) {
+	result, err = s.backupStructure(pos, pos)
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("BackupStructure: %v", err)
+	}
+	return
+}
+
+// BackupOffset 通过使用 structure 命令保存 pos 到 pos+offset 处的方块。
+// 返回的 uuid 是标识该结构的唯一标识符
+func (s *StructureBackup) BackupOffset(pos protocol.BlockPos, offset protocol.BlockPos) (result uuid.UUID, err error) {
+	endPos := protocol.BlockPos{
+		pos[0] + offset[0],
+		pos[1] + offset[1],
+		pos[2] + offset[2],
+	}
+	result, err = s.backupStructure(pos, endPos)
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("BackupOffset: %v", err)
+	}
+	return
 }
 
 // RevertAndDeleteStructure 在 pos 处恢复先前备份的结构，

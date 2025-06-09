@@ -464,17 +464,15 @@ func (i *ItemStackTransaction) LoomingFromInventory(
 	)
 }
 
-// Crafting 进行一个合成操作。
+// Crafting 用于合成一个物品。
+//
 // 它消耗已放入合成栏的全部物品，
 // 然后制作相应的物品到背包。
 //
 // recipeNetworkID 是合成配方的网络 ID；
 // resultSlotID 是合成后物品应当放置的位置；
 // resultCount 是合成后所得物品的数量；
-// resultItem 是合成后物品的最终数据。
-//
-// 应当确保 consumes 所指示的物品会在合成完成
-// 后被全部消耗，否则后续操作的成功性无法保证
+// resultItem 是合成后物品的最终数据
 func (i *ItemStackTransaction) Crafting(
 	recipeNetworkID uint32,
 	resultSlotID resources_control.SlotID,

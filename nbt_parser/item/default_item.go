@@ -9,6 +9,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 )
 
+// 默认 NBT 物品
 type DefaultItem struct {
 	Basic   ItemBasicData
 	Enhance ItemEnhanceData

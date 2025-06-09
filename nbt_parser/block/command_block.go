@@ -11,12 +11,11 @@ import (
 type CommandBlockNBT struct {
 	Command            string `mapstructure:"Command"`
 	CustomName         string `mapstructure:"CustomName"`
-	LastOutput         string `mapstructure:"LastOutput"`
 	TickDelay          int32  `mapstructure:"TickDelay"`
-	ExecuteOnFirstTick bool   `mapstructure:"ExecuteOnFirstTick"`
-	TrackOutput        bool   `mapstructure:"TrackOutput"`
-	ConditionalMode    bool   `mapstructure:"conditionalMode"`
-	Auto               bool   `mapstructure:"auto"`
+	ExecuteOnFirstTick byte   `mapstructure:"ExecuteOnFirstTick"`
+	TrackOutput        byte   `mapstructure:"TrackOutput"`
+	ConditionalMode    byte   `mapstructure:"conditionalMode"`
+	Auto               byte   `mapstructure:"auto"`
 	Version            int32  `mapstructure:"Version"`
 }
 
@@ -25,8 +24,37 @@ type CommandBlock struct {
 	NBT CommandBlockNBT
 }
 
-func (c CommandBlock) NeedSpecialHandle() bool {
-	return true
+func (c *CommandBlock) NeedSpecialHandle() bool {
+	if len(c.NBT.Command) > 0 || len(c.NBT.CustomName) > 0 {
+		return true
+	}
+	if c.NBT.TickDelay != 0 {
+		return true
+	}
+
+	switch c.BlockName() {
+	case "minecraft:repeating_command_block":
+		if c.NBT.ExecuteOnFirstTick == 0 {
+			return true
+		}
+	default:
+		if c.NBT.ExecuteOnFirstTick == 1 {
+			return true
+		}
+	}
+
+	switch c.BlockName() {
+	case "minecraft:chain_command_block":
+		if c.NBT.Auto == 0 {
+			return true
+		}
+	default:
+		if c.NBT.Auto == 1 {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (c CommandBlock) NeedCheckCompletely() bool {
@@ -34,12 +62,12 @@ func (c CommandBlock) NeedCheckCompletely() bool {
 }
 
 func (c *CommandBlock) Parse(nbtMap map[string]any) error {
-	var result CommandBlock
+	var result CommandBlockNBT
 	err := mapstructure.Decode(&nbtMap, &result)
 	if err != nil {
-		return fmt.Errorf("(c *CommandBlock) Parse: %v", err)
+		return fmt.Errorf("Parse: %v", err)
 	}
-	*c = result
+	c.NBT = result
 	return nil
 }
 
@@ -52,10 +80,8 @@ func (c CommandBlock) StableBytes() []byte {
 	w.String(&c.NBT.Command)
 	w.String(&c.NBT.CustomName)
 	w.Varint32(&c.NBT.TickDelay)
-	w.Bool(&c.NBT.ExecuteOnFirstTick)
-	w.Bool(&c.NBT.TrackOutput)
-	w.Bool(&c.NBT.ConditionalMode)
-	w.Bool(&c.NBT.Auto)
+	w.Uint8(&c.NBT.ExecuteOnFirstTick)
+	w.Uint8(&c.NBT.Auto)
 
 	return buf.Bytes()
 }

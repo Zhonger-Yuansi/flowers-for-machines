@@ -50,6 +50,13 @@ type RenamingRuntime struct {
 	AnvilSlotStackNetworkID int32
 }
 
+// CraftingRuntime 是将工作台操作内联为物品堆栈操作请求的运行时结构体
+type CraftingRuntime struct {
+	RequestID            int32
+	Consumes             []CraftingConsume
+	ResultStackNetworkID int32
+}
+
 // LoomingRuntime 是将织布机操作内联为物品堆栈操作请求的运行时结构体
 type LoomingRuntime struct {
 	RequestID int32

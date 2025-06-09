@@ -1,10 +1,12 @@
 package nbt_parser
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 )
 
 type DefaultItem struct {
@@ -32,10 +34,8 @@ func (d *DefaultItem) parse(basic ItemBasicData, enhance ItemEnhanceData, block 
 	if len(block.Name) != 0 {
 		enhance.EnchList = nil
 	}
-	if block.SubBlock != nil {
-		if block.SubBlock.NeedSpecialHandle() {
-			shouldCleanItemLock = true
-		}
+	if block.SubBlock != nil && block.SubBlock.NeedSpecialHandle() {
+		shouldCleanItemLock = true
 	}
 	if len(enhance.EnchList) > 0 || len(enhance.DisplayName) > 0 {
 		shouldCleanItemLock = true
@@ -64,7 +64,7 @@ func (d *DefaultItem) ParseNormal(nbtMap map[string]any) error {
 		return fmt.Errorf("ParseNormal: %v", err)
 	}
 	// Parse item block data
-	block, err := ParseItemBlock(nbtMap)
+	block, err := ParseItemBlock(basic.Name, nbtMap)
 	if err != nil {
 		return fmt.Errorf("ParseNormal: %v", err)
 	}
@@ -86,7 +86,7 @@ func (d *DefaultItem) ParseNetwork(item protocol.ItemStack, itemNetworkIDToName 
 		return fmt.Errorf("ParseNetwork: %v", err)
 	}
 	// Parse item block data
-	block, err := ParseItemBlockNetwork(item)
+	block, err := ParseItemBlockNetwork(basic.Name, item)
 	if err != nil {
 		return fmt.Errorf("ParseNetwork: %v", err)
 	}
@@ -96,18 +96,55 @@ func (d *DefaultItem) ParseNetwork(item protocol.ItemStack, itemNetworkIDToName 
 	return nil
 }
 
-func (DefaultItem) NeedSpecialHandle() bool {
-	panic("TODO")
+func (d DefaultItem) NeedSpecialHandle() bool {
+	if len(d.Enhance.DisplayName) > 0 || len(d.Enhance.EnchList) > 0 {
+		return true
+	}
+	if d.Block.SubBlock != nil && d.Block.SubBlock.NeedSpecialHandle() {
+		return true
+	}
+	return false
 }
 
-func (DefaultItem) NeedCheckCompletely() bool {
-	panic("TODO")
+func (d DefaultItem) NeedCheckCompletely() bool {
+	if len(d.Enhance.EnchList) > 0 {
+		return true
+	}
+	if d.Block.SubBlock != nil && d.Block.SubBlock.NeedCheckCompletely() {
+		return true
+	}
+	return false
 }
 
-func (DefaultItem) TypeStableBytes() []byte {
-	panic("TODO")
+func (d *DefaultItem) TypeStableBytes() []byte {
+	buf := bytes.NewBuffer(nil)
+	w := protocol.NewWriter(buf, 0)
+	name := d.ItemName()
+
+	// Basic
+	w.String(&name)
+	w.Int16(&d.Basic.Metadata)
+
+	// Enhance
+	protocol.Single(w, &d.Enhance)
+
+	// Block
+	if len(d.Block.Name) > 0 {
+		w.String(&d.Block.Name)
+		utils.MarshalNBT(buf, d.Block.States, "")
+
+		exist := (d.Block.SubBlock != nil)
+		w.Bool(&exist)
+
+		if exist {
+			subBlockData := d.Block.SubBlock.StableBytes()
+			w.ByteSlice(&subBlockData)
+		}
+	}
+
+	return buf.Bytes()
 }
 
-func (DefaultItem) FullStableBytes() []byte {
-	panic("TODO")
+func (d *DefaultItem) FullStableBytes() []byte {
+	return append(d.TypeStableBytes(), d.Basic.Count)
 }

@@ -161,6 +161,14 @@ func (i *ItemStackTransaction) Commit() (
 				result, err = handler.handleLooming(op, requestID)
 				updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
 				updater[op.BannerPath] = op.ResultItem
+			case item_stack_operation.Crafting:
+				result, err = handler.handleCrafting(op, requestID)
+				updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
+				location := resources_control.SlotLocation{
+					WindowID: protocol.WindowIDInventory,
+					SlotID:   op.ResultSlotID,
+				}
+				updater[location] = op.ResultItem
 			}
 			if err != nil {
 				return false, nil, nil, fmt.Errorf("Commit: %v", err)

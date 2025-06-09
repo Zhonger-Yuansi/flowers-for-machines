@@ -7,7 +7,6 @@ import (
 
 // Move 指示物品移动操作
 type Move struct {
-	Default
 	Source      resources_control.SlotLocation
 	Destination resources_control.SlotLocation
 	Count       int32

@@ -173,6 +173,8 @@ func SystemTestingItemStackOperation() {
 		api.Commands().AwaitChangesGeneral()
 		api.Commands().SendSettingsCommand("give @s light_blue_dye 20", true) // Slot 7
 		api.Commands().AwaitChangesGeneral()
+		api.Commands().SendSettingsCommand("give @s shield 2", true) // Slot 8
+		api.Commands().AwaitChangesGeneral()
 
 		err := api.SetBlock().SetBlock(protocol.BlockPos{0, 0, 0}, "loom", `["direction"=0]`)
 		if err != nil {
@@ -210,8 +212,6 @@ func SystemTestingItemStackOperation() {
 			LoomingFromInventory("sku", 4, 6, 3, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 2 (4)
 			LoomingFromInventory("cbo", 5, 6, 1, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 2 (5)
 			LoomingFromInventory("bo", 0, 6, 1, resources_control.ExpectedNewItem{NetworkID: -1}).  // Banner 2 (6)
-			DropInventoryItem(0, 1).
-			DropInventoryItem(6, 1).
 			Commit()
 		if !success {
 			panic("SystemTestingItemStackOperation: Failed on test round 4")
@@ -220,6 +220,34 @@ func SystemTestingItemStackOperation() {
 		err = api.ContainerOpenAndClose().CloseContainer()
 		if err != nil {
 			panic(fmt.Sprintf("SystemTestingItemStackOperation: Test round 4 failed due to %v (stage 3)", err))
+		}
+
+		success, err = api.ContainerOpenAndClose().OpenInventory()
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemStackOperation: Test round 4 failed due to %v (stage 4)", err))
+		}
+		if !success {
+			panic("SystemTestingItemStackOperation: Failed on test round 4")
+		}
+
+		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
+			MoveToCraftingTable(6, 28, 1).
+			MoveToCraftingTable(8, 29, 1).
+			Crafting(0x8f9, 10, 1, resources_control.ExpectedNewItem{NetworkID: -1}).
+			MoveToCraftingTable(9, 28, 1).
+			MoveToCraftingTable(0, 29, 1).
+			Crafting(0x8f9, 0, 1, resources_control.ExpectedNewItem{NetworkID: -1}).
+			MoveBetweenInventory(10, 8, 1).
+			DropInventoryItem(8, 1).
+			DropInventoryItem(0, 1).
+			Commit()
+		if !success {
+			panic("SystemTestingItemStackOperation: Failed on test round 4")
+		}
+
+		err = api.ContainerOpenAndClose().CloseContainer()
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemStackOperation: Test round 4 failed due to %v (stage 5)", err))
 		}
 	}
 

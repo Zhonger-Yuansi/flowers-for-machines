@@ -131,6 +131,32 @@ func (i *ItemStackTransaction) MoveToInventory(
 	)
 }
 
+// MoveToCraftingTable 将背包中 source 处的物品移动
+// 到合成栏的 destination 处，且只移动 count 个物品。
+//
+// 此操作需要保证背包已被打开，或打开了工作台，
+// 否则整个事务将会失败。
+//
+// 该操作是支持内联的，它会与所有相邻的支持内联的操作一
+// 起被内联到单个物品堆栈操作请求中
+func (i *ItemStackTransaction) MoveToCraftingTable(
+	source resources_control.SlotID,
+	destination resources_control.SlotID,
+	count uint8,
+) *ItemStackTransaction {
+	return i.MoveItem(
+		resources_control.SlotLocation{
+			WindowID: protocol.WindowIDInventory,
+			SlotID:   source,
+		},
+		resources_control.SlotLocation{
+			WindowID: protocol.WindowIDCrafting,
+			SlotID:   destination,
+		},
+		count,
+	)
+}
+
 // SwapItem 交换 source 处和 destination 处的物品。
 //
 // 该操作是支持内联的，它会与所有相邻的支持内联的操作
@@ -436,4 +462,30 @@ func (i *ItemStackTransaction) LoomingFromInventory(
 		},
 		resultItem,
 	)
+}
+
+// Crafting 进行一个合成操作。
+// 它消耗已放入合成栏的全部物品，
+// 然后制作相应的物品到背包。
+//
+// recipeNetworkID 是合成配方的网络 ID；
+// resultCount 是合成后所得物品的数量；
+// resultSlotID 是合成后物品应当放置的位置；
+// resultItem 是合成后物品的最终数据。
+//
+// 应当确保 consumes 所指示的物品会在合成完成
+// 后被全部消耗，否则后续操作的成功性无法保证
+func (i *ItemStackTransaction) Crafting(
+	recipeNetworkID uint32,
+	resultSlotID resources_control.SlotID,
+	resultCount uint8,
+	resultItem resources_control.ExpectedNewItem,
+) *ItemStackTransaction {
+	i.operations = append(i.operations, item_stack_operation.Crafting{
+		RecipeNetworkID: recipeNetworkID,
+		ResultSlotID:    resultSlotID,
+		ResultCount:     resultCount,
+		ResultItem:      resultItem,
+	})
+	return i
 }

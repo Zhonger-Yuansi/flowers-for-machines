@@ -23,6 +23,15 @@ type ItemComponent struct {
 	KeepOnDeath bool
 }
 
+// Marshal ..
+func (i *ItemComponent) Marshal(io protocol.IO) {
+	protocol.FuncSliceUint16Length(io, &i.CanPlaceOn, io.String)
+	protocol.FuncSliceUint16Length(io, &i.CanDestroy, io.String)
+	io.Bool(&i.LockInInventory)
+	io.Bool(&i.LockInSlot)
+	io.Bool(&i.KeepOnDeath)
+}
+
 // ParseItemComponent 从 nbtMap 解析一个物品的物品组件数据
 func ParseItemComponent(nbtMap map[string]any) (result ItemComponent) {
 	list, ok := nbtMap["CanDestroy"].([]any)

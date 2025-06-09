@@ -3,13 +3,13 @@ package item_stack_operation
 import "github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 
 const (
-	IDItemStackOperationDefault uint8 = iota
-	IDItemStackOperationMove
+	IDItemStackOperationMove uint8 = iota
 	IDItemStackOperationSwap
 	IDItemStackOperationDrop
 	IDItemStackOperationCreativeItem
 	IDItemStackOperationHighLevelRenaming
 	IDItemStackOperationHighLevelLooming
+	IDItemStackOperationHighLevelCrafting
 )
 
 // ItemStackOperation 指示所有实现了它的物品操作

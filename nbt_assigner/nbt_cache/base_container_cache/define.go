@@ -36,11 +36,7 @@ func (b BaseContainer) Hash() uint64 {
 		name = "minecraft:" + name
 	}
 
-	length := uint32(len(name))
-	w.Varuint32(&length)
 	w.String(&name)
-	length = uint32(len(b.BlockStatesString))
-	w.Varuint32(&length)
 	w.String(&b.BlockStatesString)
 
 	return xxhash.Sum64(buf.Bytes())

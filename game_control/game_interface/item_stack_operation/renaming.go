@@ -7,7 +7,6 @@ import (
 
 // Renaming 指示基于铁砧的物品重命名操作
 type Renaming struct {
-	Default
 	Path    resources_control.SlotLocation
 	NewName string
 }

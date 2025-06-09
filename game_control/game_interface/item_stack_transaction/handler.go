@@ -375,3 +375,60 @@ func (i *itemStackOperationHandler) handleLooming(
 
 	return op.Make(runtimeData), nil
 }
+
+// handleCrafting ..
+func (i *itemStackOperationHandler) handleCrafting(
+	op item_stack_operation.Crafting,
+	requestID resources_control.ItemStackRequestID,
+) (result []protocol.StackRequestAction, err error) {
+	runtimeData := item_stack_operation.CraftingRuntime{
+		RequestID: int32(requestID),
+	}
+
+	for slotID, count := range i.virtualInventories.allItemCount(protocol.WindowIDCrafting) {
+		if count == 0 {
+			continue
+		}
+
+		location := resources_control.SlotLocation{
+			WindowID: protocol.WindowIDCrafting,
+			SlotID:   slotID,
+		}
+
+		rid, err := i.virtualInventories.loadAndSetStackNetworkID(location, requestID)
+		if err != nil {
+			return nil, fmt.Errorf("handleCrafting: %v", err)
+		}
+
+		err = i.virtualInventories.setItemCount(location, 0)
+		if err != nil {
+			return nil, fmt.Errorf("handleCrafting: %v", err)
+		}
+
+		runtimeData.Consumes = append(runtimeData.Consumes, item_stack_operation.CraftingConsume{
+			Slot:           location.SlotID,
+			StackNetworkID: rid,
+			Count:          count,
+		})
+	}
+
+	{
+		resultPath := resources_control.SlotLocation{
+			WindowID: protocol.WindowIDInventory,
+			SlotID:   op.ResultSlotID,
+		}
+
+		rid, err := i.virtualInventories.loadAndSetStackNetworkID(resultPath, requestID)
+		if err != nil {
+			return nil, fmt.Errorf("handleCrafting: %v", err)
+		}
+
+		i.virtualInventories.addItemCount(resultPath, int8(op.ResultCount), false)
+		runtimeData.ResultStackNetworkID = rid
+	}
+
+	i.responseMapping.bind(protocol.WindowIDInventory, protocol.ContainerCombinedHotBarAndInventory)
+	i.responseMapping.bind(protocol.WindowIDCrafting, protocol.ContainerCraftingInput)
+
+	return op.Make(runtimeData), nil
+}

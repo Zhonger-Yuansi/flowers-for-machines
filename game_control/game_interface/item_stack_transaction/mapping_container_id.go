@@ -22,6 +22,8 @@ func slotLocationToContainerID(
 		return protocol.ContainerOffhand, true
 	case protocol.WindowIDArmour:
 		return protocol.ContainerArmor, true
+	case protocol.WindowIDCrafting:
+		return protocol.ContainerCraftingInput, true
 	case protocol.WindowIDUI:
 		return 0, false // TODO: Figure out what WindowIDUI means
 	}

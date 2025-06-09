@@ -47,12 +47,7 @@ func (d DefaultBlock) StableBytes() []byte {
 
 	name := d.BlockName()
 	states := d.BlockStatesString()
-
-	length := uint32(len(name))
-	w.Varuint32(&length)
 	w.String(&name)
-	length = uint32(len(states))
-	w.Varuint32(&length)
 	w.String(&states)
 
 	return buf.Bytes()

@@ -7,7 +7,6 @@ import (
 
 // Drop 指示物品丢弃操作
 type Drop struct {
-	Default
 	Path  resources_control.SlotLocation
 	Count uint8
 }

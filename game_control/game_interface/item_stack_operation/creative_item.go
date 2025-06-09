@@ -7,8 +7,6 @@ import (
 
 // CreativeItem 指示创造物品获取操作
 type CreativeItem struct {
-	Default
-
 	UseCreativeItemNetworkID bool
 	CreativeItemNetworkID    uint32
 

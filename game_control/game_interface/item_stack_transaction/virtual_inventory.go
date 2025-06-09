@@ -27,6 +27,28 @@ func newVirtualInventories(api *resources_control.Inventories) *virtualInventori
 
 // ------------------------- Stack Network ID -------------------------
 
+// allStackNetworkID 列出窗口 ID 为 windowID 的库存中所有物品的运行时 ID
+func (v *virtualInventories) allStackNetworkID(windowID resources_control.WindowID) map[resources_control.SlotID]int32 {
+	result := make(map[resources_control.SlotID]int32)
+
+	mapping, inventoryExisted := v.api.GetAllItemStack(windowID)
+	if !inventoryExisted {
+		return nil
+	}
+	for slotID, item := range mapping {
+		result[slotID] = item.StackNetworkID
+	}
+
+	for location, stackNetworkID := range v.stackNetworkID {
+		if location.WindowID != windowID {
+			continue
+		}
+		result[location.SlotID] = stackNetworkID
+	}
+
+	return result
+}
+
 // loadStackNetworkID 加载 slotLocation 处的物品堆栈网络 ID
 func (v *virtualInventories) loadStackNetworkID(slotLocation resources_control.SlotLocation) (result int32, err error) {
 	if result, ok := v.stackNetworkID[slotLocation]; ok {
@@ -65,6 +87,28 @@ func (v *virtualInventories) loadAndSetStackNetworkID(
 }
 
 // ------------------------- Item Count -------------------------
+
+// allItemCount 列出窗口 ID 为 windowID 的库存中所有物品的数量
+func (v *virtualInventories) allItemCount(windowID resources_control.WindowID) map[resources_control.SlotID]uint8 {
+	result := make(map[resources_control.SlotID]uint8)
+
+	mapping, inventoryExisted := v.api.GetAllItemStack(windowID)
+	if !inventoryExisted {
+		return nil
+	}
+	for slotID, item := range mapping {
+		result[slotID] = uint8(item.Stack.Count)
+	}
+
+	for location, itemCount := range v.itemCount {
+		if location.WindowID != windowID {
+			continue
+		}
+		result[location.SlotID] = itemCount
+	}
+
+	return result
+}
 
 // loadItemCount 加载 slotLocation 处的物品数量
 func (v *virtualInventories) loadItemCount(slotLocation resources_control.SlotLocation) (result uint8, err error) {

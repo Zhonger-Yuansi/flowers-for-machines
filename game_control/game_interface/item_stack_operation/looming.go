@@ -7,8 +7,6 @@ import (
 
 // Looming 指示织布机操作
 type Looming struct {
-	Default
-
 	UsePattern  bool
 	PatternName string
 

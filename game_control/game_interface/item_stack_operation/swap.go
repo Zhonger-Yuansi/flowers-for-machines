@@ -7,7 +7,6 @@ import (
 
 // Swap 指示物品交换操作
 type Swap struct {
-	Default
 	Source      resources_control.SlotLocation
 	Destination resources_control.SlotLocation
 }

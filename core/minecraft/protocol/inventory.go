@@ -1,6 +1,8 @@
 package protocol
 
 import (
+	"math"
+
 	"github.com/go-gl/mathgl/mgl32"
 )
 
@@ -16,6 +18,9 @@ const (
 	WindowIDOffHand   = 119
 	WindowIDArmour    = 120
 	WindowIDUI        = 124
+	// PhoenixBuilder specific constant.
+	// Author: Happy2018new
+	WindowIDCrafting = math.MaxInt32
 )
 
 // InventoryAction represents a single action that took place during an inventory transaction. On itself, this

@@ -5,29 +5,12 @@ import (
 	"fmt"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	nbt_parser_general "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/general"
 	"github.com/mitchellh/mapstructure"
 )
 
-// 描述旗帜的种类
-const (
-	BannerTypeNormal  int32 = iota // 普通旗帜
-	BannerTypeOminous              // 不祥旗帜
-)
-
-// BannerPattern 是旗帜的单个图案
-type BannerPattern struct {
-	Color   int32  `mapstructure:"Color"`
-	Pattern string `mapstructure:"Pattern"`
-}
-
-// Marshal ..
-func (b *BannerPattern) Marshal(io protocol.IO) {
-	io.Varint32(&b.Color)
-	io.String(&b.Pattern)
-}
-
 type BannerNBT struct {
-	Patterns []BannerPattern
+	Patterns []nbt_parser_general.BannerPattern
 	Type     int32
 }
 
@@ -48,8 +31,12 @@ func (b *Banner) parse(tag map[string]any) error {
 	}
 
 	patterns, _ := tag["Patterns"].([]any)
+	if len(patterns) > 6 {
+		patterns = patterns[0:6]
+	}
+
 	for _, value := range patterns {
-		var pattern BannerPattern
+		var pattern nbt_parser_general.BannerPattern
 
 		val, ok := value.(map[string]any)
 		if !ok {
@@ -92,7 +79,7 @@ func (b Banner) NeedSpecialHandle() bool {
 	if len(b.NBT.Patterns) > 0 {
 		return true
 	}
-	if b.NBT.Type == BannerTypeOminous {
+	if b.NBT.Type == nbt_parser_general.BannerTypeOminous {
 		return true
 	}
 	return false

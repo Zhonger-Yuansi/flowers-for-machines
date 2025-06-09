@@ -5,13 +5,14 @@ import (
 	"fmt"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	nbt_parser_general "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/general"
 	"github.com/mitchellh/mapstructure"
 )
 
 type ShieldNBT struct {
 	HaveBase bool
 	Base     int32
-	Patterns []BannerPattern
+	Patterns []nbt_parser_general.BannerPattern
 }
 
 type Shield struct {
@@ -31,7 +32,7 @@ func (s *Shield) parse(tag map[string]any) error {
 
 	patterns, _ := tag["Patterns"].([]any)
 	for _, value := range patterns {
-		var pattern BannerPattern
+		var pattern nbt_parser_general.BannerPattern
 
 		val, ok := value.(map[string]any)
 		if !ok {

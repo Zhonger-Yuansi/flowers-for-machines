@@ -23,11 +23,15 @@ type ContainerNBT struct {
 
 type Container struct {
 	DefaultBlock
-	CanOpen bool
-	NBT     ContainerNBT
+	CanOpen    bool
+	CustomName string
+	NBT        ContainerNBT
 }
 
 func (c Container) NeedSpecialHandle() bool {
+	if len(c.CustomName) > 0 {
+		return true
+	}
 	for _, item := range c.NBT.Items {
 		if item.Item.NeedSpecialHandle() {
 			return true
@@ -83,14 +87,17 @@ func (c *Container) Parse(nbtMap map[string]any) error {
 		)
 	}
 
+	c.CustomName, _ = nbtMap["CustomName"].(string)
 	return nil
 }
 
 func (b Container) StableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
+
 	basicInfo := b.DefaultBlock.StableBytes()
 	w.ByteSlice(&basicInfo)
+	w.String(&b.CustomName)
 
 	itemMapping := make(map[uint8]ItemWithSlot)
 	slots := make([]uint8, 0)

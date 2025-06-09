@@ -10,18 +10,21 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+// SignText ..
 type SignText struct {
 	IgnoreLighting byte   `mapstructure:"IgnoreLighting"`
 	SignTextColor  int32  `mapstructure:"SignTextColor"`
 	Text           string `mapstructure:"Text"`
 }
 
+// SignNBT ..
 type SignNBT struct {
 	IsWaxed   byte     `mapstructure:"IsWaxed"`
 	FrontText SignText `mapstructure:"FrontText"`
 	BackText  SignText `mapstructure:"BackText"`
 }
 
+// 告示牌
 type Sign struct {
 	DefaultBlock
 	NBT SignNBT

@@ -9,12 +9,14 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+// ShieldNBT ..
 type ShieldNBT struct {
 	HaveBase bool
 	Base     int32
 	Patterns []nbt_parser_general.BannerPattern
 }
 
+// 盾牌
 type Shield struct {
 	DefaultItem
 	NBT ShieldNBT

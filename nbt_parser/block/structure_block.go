@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+// StructureBlockNBT ..
 type StructureBlockNBT struct {
 	AnimationMode    byte    `mapstructure:"animationMode"`
 	AnimationSeconds float32 `mapstructure:"animationSeconds"`
@@ -31,6 +32,7 @@ type StructureBlockNBT struct {
 	ZStructureSize   int32   `mapstructure:"xStructureSize"`
 }
 
+// 结构方块
 type StructureBlock struct {
 	DefaultBlock
 	NBT StructureBlockNBT

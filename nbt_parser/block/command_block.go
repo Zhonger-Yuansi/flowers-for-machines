@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+// CommandBlockNBT ..
 type CommandBlockNBT struct {
 	Command            string `mapstructure:"Command"`
 	CustomName         string `mapstructure:"CustomName"`
@@ -19,6 +20,7 @@ type CommandBlockNBT struct {
 	Version            int32  `mapstructure:"Version"`
 }
 
+// 命令方块
 type CommandBlock struct {
 	DefaultBlock
 	NBT CommandBlockNBT

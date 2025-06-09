@@ -6,12 +6,14 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 )
 
+// BookNBT ..
 type BookNBT struct {
 	Pages  []string
 	Author string
 	Title  string
 }
 
+// 成书
 type Book struct {
 	DefaultItem
 	NBT BookNBT

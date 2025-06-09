@@ -9,12 +9,14 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+// BannerNBT ..
 type BannerNBT struct {
 	Base     int32
 	Patterns []nbt_parser_general.BannerPattern
 	Type     int32
 }
 
+// 旗帜
 type Banner struct {
 	DefaultBlock
 	NBT BannerNBT

@@ -8,12 +8,14 @@ import (
 	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
 )
 
+// FrameNBT ..
 type FrameNBT struct {
 	ItemRotation float32
 	HaveItem     bool
 	Item         nbt_parser_interface.Item
 }
 
+// 物品展示框
 type Frame struct {
 	DefaultBlock
 	NBT FrameNBT
@@ -32,7 +34,7 @@ func (f *Frame) Parse(nbtMap map[string]any) error {
 
 	itemMap, ok := nbtMap["Item"].(map[string]any)
 	if ok {
-		item, err := nbt_parser_interface.ParseNBTItemNormal(itemMap)
+		item, err := nbt_parser_interface.ParseItemNormal(itemMap)
 		if err != nil {
 			return fmt.Errorf("Parse: %v", err)
 		}

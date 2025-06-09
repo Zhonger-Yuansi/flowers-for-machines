@@ -12,15 +12,18 @@ import (
 	"github.com/cespare/xxhash/v2"
 )
 
+// ItemWithSlot ..
 type ItemWithSlot struct {
 	Item nbt_parser_interface.Item
 	Slot uint8
 }
 
+// ContainerNBT ..
 type ContainerNBT struct {
 	Items []ItemWithSlot
 }
 
+// 容器
 type Container struct {
 	DefaultBlock
 	CanOpen    bool
@@ -71,7 +74,7 @@ func (c *Container) Parse(nbtMap map[string]any) error {
 	for _, value := range itemList {
 		slotID, _ := value["Slot"].(byte)
 
-		item, err := nbt_parser_interface.ParseNBTItemNormal(value)
+		item, err := nbt_parser_interface.ParseItemNormal(value)
 		if err != nil {
 			return fmt.Errorf("Parse: %v", err)
 		}

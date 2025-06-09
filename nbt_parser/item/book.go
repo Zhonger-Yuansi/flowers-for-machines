@@ -18,7 +18,17 @@ type Book struct {
 	NBT BookNBT
 }
 
+// parse ..
 func (b *Book) parse(tag map[string]any) {
+	b.DefaultItem.Enhance.ItemComponent.LockInInventory = false
+	b.DefaultItem.Enhance.ItemComponent.LockInSlot = false
+	b.DefaultItem.Enhance.EnchList = nil
+	b.DefaultItem.Block = ItemBlockData{}
+
+	if len(tag) == 0 {
+		return
+	}
+
 	pages, _ := tag["pages"].([]any)
 	for _, page := range pages {
 		content, ok := page.(string)
@@ -27,6 +37,7 @@ func (b *Book) parse(tag map[string]any) {
 		}
 		b.NBT.Pages = append(b.NBT.Pages, content)
 	}
+
 	b.NBT.Author, _ = tag["author"].(string)
 	b.NBT.Title, _ = tag["title"].(string)
 }
@@ -37,13 +48,8 @@ func (b *Book) ParseNormal(nbtMap map[string]any) error {
 		return fmt.Errorf("ParseNormal: %v", err)
 	}
 
-	b.DefaultItem.Enhance.EnchList = nil
-	b.DefaultItem.Block = ItemBlockData{}
-
 	tag, _ := nbtMap["tag"].(map[string]any)
-	if len(tag) > 0 {
-		b.parse(tag)
-	}
+	b.parse(tag)
 
 	return nil
 }
@@ -53,14 +59,7 @@ func (b *Book) ParseNetwork(item protocol.ItemStack, itemNetworkIDToName map[int
 	if err != nil {
 		return fmt.Errorf("ParseNetwork: %v", err)
 	}
-
-	b.DefaultItem.Enhance.EnchList = nil
-	b.DefaultItem.Block = ItemBlockData{}
-
-	if item.NBTData != nil {
-		b.parse(item.NBTData)
-	}
-
+	b.parse(item.NBTData)
 	return nil
 }
 

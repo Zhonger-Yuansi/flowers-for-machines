@@ -28,6 +28,10 @@ type Sign struct {
 }
 
 func (s *Sign) NeedSpecialHandle() bool {
+	if s.NBT.IsWaxed == 1 {
+		return true
+	}
+
 	texts := []SignText{s.NBT.FrontText, s.NBT.BackText}
 	for _, value := range texts {
 		if len(value.Text) > 0 {
@@ -40,7 +44,8 @@ func (s *Sign) NeedSpecialHandle() bool {
 			return true
 		}
 	}
-	return (s.NBT.IsWaxed == 1)
+
+	return false
 }
 
 func (s Sign) NeedCheckCompletely() bool {

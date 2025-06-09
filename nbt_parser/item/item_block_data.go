@@ -6,71 +6,24 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
 	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 	"github.com/TriM-Organization/bedrock-world-operator/block"
 	"github.com/df-mc/worldupgrader/blockupgrader"
 )
 
-type ItemEnhanceData struct {
-	ItemComponent utils.ItemComponent
-	DisplayName   string
-	EnchList      []SingleItemEnch
-}
-
-// Marshal ..
-func (i *ItemEnhanceData) Marshal(io protocol.IO) {
-	protocol.Single(io, &i.ItemComponent)
-	io.String(&i.DisplayName)
-	protocol.SliceUint16Length(io, &i.EnchList)
-}
-
-func ParseItemEnhance(nbtMap map[string]any) (result ItemEnhanceData, err error) {
-	result.ItemComponent = utils.ParseItemComponent(nbtMap)
-
-	result.EnchList, err = ParseItemEnchList(nbtMap)
-	if err != nil {
-		return result, fmt.Errorf("ParseItemEnhance: %v", err)
-	}
-
-	tag, ok := nbtMap["tag"].(map[string]any)
-	if !ok {
-		return
-	}
-	display, ok := tag["display"].(map[string]any)
-	if !ok {
-		return
-	}
-	result.DisplayName, _ = display["Name"].(string)
-
-	return
-}
-
-func ParseItemEnhanceNetwork(item protocol.ItemStack) (result ItemEnhanceData, err error) {
-	result.ItemComponent = utils.ParseItemComponentNetwork(item)
-
-	result.EnchList, err = ParseItemEnchListNetwork(item)
-	if err != nil {
-		return result, fmt.Errorf("ParseItemEnhanceNetwork: %v", err)
-	}
-
-	if item.NBTData == nil {
-		return
-	}
-	display, ok := item.NBTData["display"].(map[string]any)
-	if !ok {
-		return
-	}
-	result.DisplayName, _ = display["Name"].(string)
-
-	return
-}
-
+// ItemBlockData 指示该物品是一个方块，
+// 或该物品可以作为一个方块进行放置
 type ItemBlockData struct {
-	Name     string
-	States   map[string]any
+	// Name 是这个方块的名称
+	Name string
+	// States 是这个方块的方块状态
+	States map[string]any
+	// SubBlock 是这个方块的附加数据。
+	// 如果这个方块是已被支持的 NBT 方块，
+	// 且 NBT 字段存在，则 SubBlock 非空
 	SubBlock nbt_parser_interface.Block
 }
 
+// ParseItemBlock ..
 func ParseItemBlock(itemName string, nbtMap map[string]any) (result ItemBlockData, err error) {
 	var blockMap map[string]any
 	var haveBlock bool
@@ -127,6 +80,7 @@ func ParseItemBlock(itemName string, nbtMap map[string]any) (result ItemBlockDat
 	return
 }
 
+// ParseItemBlockNetwork ..
 func ParseItemBlockNetwork(itemName string, item protocol.ItemStack) (result ItemBlockData, err error) {
 	if item.BlockRuntimeID == 0 {
 		name, states, found := block.RuntimeIDToState(uint32(item.BlockRuntimeID))

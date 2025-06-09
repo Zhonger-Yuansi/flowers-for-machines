@@ -8,12 +8,14 @@ import (
 	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
 )
 
-func ParseNBTItemNormal(nbtMap map[string]any) (item nbt_parser_interface.Item, err error) {
+// ParseItemNormal 从 nbtMap 解析一个 NBT 物品。
+// nbtMap 是含有这个物品 tag 标签的父复合标签
+func ParseItemNormal(nbtMap map[string]any) (item nbt_parser_interface.Item, err error) {
 	var defaultItem DefaultItem
 
 	err = defaultItem.ParseNormal(nbtMap)
 	if err != nil {
-		return nil, fmt.Errorf("ParseNBTItemNormal: %v", err)
+		return nil, fmt.Errorf("ParseItemNormal: %v", err)
 	}
 
 	itemType, ok := mapping.SupportItemsPool[defaultItem.ItemName()]
@@ -29,22 +31,24 @@ func ParseNBTItemNormal(nbtMap map[string]any) (item nbt_parser_interface.Item, 
 	case mapping.SupportNBTItemTypeShield:
 		item = &Shield{DefaultItem: defaultItem}
 	default:
-		panic("ParseNBTItemNormal: Should nerver happened")
+		panic("ParseItemNormal: Should nerver happened")
 	}
 
 	err = item.ParseNormal(nbtMap)
 	if err != nil {
-		return nil, fmt.Errorf("ParseNBTItemNormal: %v", err)
+		return nil, fmt.Errorf("ParseItemNormal: %v", err)
 	}
 	return item, nil
 }
 
-func ParseNBTItemNetwork(itemStack protocol.ItemStack, itemNetworkIDToName map[int32]string) (item nbt_parser_interface.Item, err error) {
+// ParseItemNetwork 解析网络传输上的物品堆栈实例 item。
+// itemName 是这个物品堆栈实例的名称
+func ParseItemNetwork(itemStack protocol.ItemStack, itemName string) (item nbt_parser_interface.Item, err error) {
 	var defaultItem DefaultItem
 
-	err = defaultItem.ParseNetwork(itemStack, itemNetworkIDToName)
+	err = defaultItem.ParseNetwork(itemStack, itemName)
 	if err != nil {
-		return nil, fmt.Errorf("ParseNBTItemNetwork: %v", err)
+		return nil, fmt.Errorf("ParseItemNetwork: %v", err)
 	}
 
 	itemType, ok := mapping.SupportItemsPool[defaultItem.ItemName()]
@@ -60,17 +64,17 @@ func ParseNBTItemNetwork(itemStack protocol.ItemStack, itemNetworkIDToName map[i
 	case mapping.SupportNBTItemTypeShield:
 		item = &Shield{DefaultItem: defaultItem}
 	default:
-		panic("ParseNBTItemNetwork: Should nerver happened")
+		panic("ParseItemNetwork: Should nerver happened")
 	}
 
-	err = item.ParseNetwork(itemStack, itemNetworkIDToName)
+	err = item.ParseNetwork(itemStack, itemName)
 	if err != nil {
-		return nil, fmt.Errorf("ParseNBTItemNetwork: %v", err)
+		return nil, fmt.Errorf("ParseItemNetwork: %v", err)
 	}
 	return item, nil
 }
 
 func init() {
-	nbt_parser_interface.ParseNBTItemNormal = ParseNBTItemNormal
-	nbt_parser_interface.ParseNBTItemNetwork = ParseNBTItemNetwork
+	nbt_parser_interface.ParseItemNormal = ParseItemNormal
+	nbt_parser_interface.ParseItemNetwork = ParseItemNetwork
 }

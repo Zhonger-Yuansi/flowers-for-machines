@@ -14,10 +14,9 @@ var ContainerStorageKey map[string]string = map[string]string{
 	"minecraft:lit_furnace": "Items",
 	// 酿造台
 	"minecraft:brewing_stand": "Items",
-	// 箱子、陷阱箱、讲台、漏洞、发射器、投掷器、唱片机、木桶
+	// 箱子、陷阱箱、漏斗、发射器、投掷器、唱片机、木桶
 	"minecraft:chest":         "Items",
 	"minecraft:trapped_chest": "Items",
-	"minecraft:lectern":       "book",
 	"minecraft:hopper":        "Items",
 	"minecraft:dispenser":     "Items",
 	"minecraft:dropper":       "Items",
@@ -46,6 +45,5 @@ var ContainerStorageKey map[string]string = map[string]string{
 // ContainerCanNotOpen 记载了已支持的容器中，
 // 无法通过方块点击操作打开的容器
 var ContainerCanNotOpen = map[string]bool{
-	"minecraft:lectern": true,
 	"minecraft:jukebox": true,
 }

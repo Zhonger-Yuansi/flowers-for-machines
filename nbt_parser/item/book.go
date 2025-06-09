@@ -47,7 +47,7 @@ func (b *Book) ParseNormal(nbtMap map[string]any) error {
 	return nil
 }
 
-func (b *Book) ParseNetwork(item protocol.ItemStack, itemNetworkIDToName map[int32]string) error {
+func (b *Book) ParseNetwork(item protocol.ItemStack, itemName string) error {
 	b.parse(item.NBTData)
 	return nil
 }

@@ -78,9 +78,9 @@ func (d *DefaultItem) ParseNormal(nbtMap map[string]any) error {
 	return nil
 }
 
-func (d *DefaultItem) ParseNetwork(item protocol.ItemStack, itemNetworkIDToName map[int32]string) error {
+func (d *DefaultItem) ParseNetwork(item protocol.ItemStack, itemName string) error {
 	// Parse basic item data
-	basic, err := ParseItemBasicDataNetwork(item, itemNetworkIDToName)
+	basic, err := ParseItemBasicDataNetwork(item, itemName)
 	if err != nil {
 		return fmt.Errorf("ParseNetwork: %v", err)
 	}

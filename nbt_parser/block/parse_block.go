@@ -9,6 +9,8 @@ import (
 	"github.com/df-mc/worldupgrader/blockupgrader"
 )
 
+// ParseNBTBlock 从方块实体数据 blockNBT 解析一个方块实体。
+// blockName 和 blockStates 分别指示这个方块实体的名称和方块状态
 func ParseNBTBlock(blockName string, blockStates map[string]any, blockNBT map[string]any) (block nbt_parser_interface.Block, err error) {
 	name := strings.ToLower(blockName)
 	if !strings.HasPrefix(name, "minecraft:") {

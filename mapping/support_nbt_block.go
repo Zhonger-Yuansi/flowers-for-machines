@@ -48,7 +48,6 @@ var SupportBlocksPool = map[string]uint8{
 	"minecraft:green_shulker_box":      SupportNBTBlockTypeContainer,
 	"minecraft:red_shulker_box":        SupportNBTBlockTypeContainer,
 	"minecraft:black_shulker_box":      SupportNBTBlockTypeContainer,
-	"minecraft:lectern":                SupportNBTBlockTypeContainer,
 	// 告示牌
 	"minecraft:standing_sign":          SupportNBTBlockTypeSign,
 	"minecraft:spruce_standing_sign":   SupportNBTBlockTypeSign,

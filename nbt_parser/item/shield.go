@@ -60,7 +60,7 @@ func (s *Shield) ParseNormal(nbtMap map[string]any) error {
 	return nil
 }
 
-func (s *Shield) ParseNetwork(item protocol.ItemStack, itemNetworkIDToName map[int32]string) error {
+func (s *Shield) ParseNetwork(item protocol.ItemStack, itemName string) error {
 	err := s.parse(item.NBTData)
 	if err != nil {
 		return fmt.Errorf("ParseNetwork: %v", err)

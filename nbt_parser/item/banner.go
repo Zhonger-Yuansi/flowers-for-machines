@@ -64,7 +64,7 @@ func (b *Banner) ParseNormal(nbtMap map[string]any) error {
 	return nil
 }
 
-func (b *Banner) ParseNetwork(item protocol.ItemStack, itemNetworkIDToName map[int32]string) error {
+func (b *Banner) ParseNetwork(item protocol.ItemStack, itemName string) error {
 	err := b.parse(item.NBTData)
 	if err != nil {
 		return fmt.Errorf("ParseNetwork: %v", err)

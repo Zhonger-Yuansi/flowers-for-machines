@@ -32,10 +32,8 @@ func (c Container) NeedSpecialHandle() bool {
 	if len(c.CustomName) > 0 {
 		return true
 	}
-	for _, item := range c.NBT.Items {
-		if item.Item.NeedSpecialHandle() {
-			return true
-		}
+	if len(c.NBT.Items) > 0 {
+		return true
 	}
 	return false
 }
@@ -120,6 +118,10 @@ func (b Container) StableBytes() []byte {
 }
 
 func (b Container) SetBytes() []byte {
+	if len(b.NBT.Items) == 0 {
+		return nil
+	}
+
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
 

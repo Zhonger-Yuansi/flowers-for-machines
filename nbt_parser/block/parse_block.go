@@ -32,6 +32,12 @@ func ParseNBTBlock(blockName string, blockStates map[string]any, blockNBT map[st
 	switch blockType {
 	case mapping.SupportNBTBlockTypeCommandBlock:
 		block = &CommandBlock{DefaultBlock: defaultBlock}
+	case mapping.SupportNBTBlockTypeSign:
+		block = &Sign{DefaultBlock: defaultBlock}
+	case mapping.SupportNBTBlockTypeStructureBlock:
+		block = &StructureBlock{DefaultBlock: defaultBlock}
+	case mapping.SupportNBTBlockTypeBanner:
+		block = &Banner{DefaultBlock: defaultBlock}
 	default:
 		panic("ParseNBTBlock: Should nerver happened")
 	}

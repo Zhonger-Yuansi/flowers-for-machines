@@ -1,4 +1,4 @@
-package nbt_parser
+package nbt_parser_item
 
 import (
 	"bytes"

@@ -469,8 +469,8 @@ func (i *ItemStackTransaction) LoomingFromInventory(
 // 然后制作相应的物品到背包。
 //
 // recipeNetworkID 是合成配方的网络 ID；
-// resultCount 是合成后所得物品的数量；
 // resultSlotID 是合成后物品应当放置的位置；
+// resultCount 是合成后所得物品的数量；
 // resultItem 是合成后物品的最终数据。
 //
 // 应当确保 consumes 所指示的物品会在合成完成

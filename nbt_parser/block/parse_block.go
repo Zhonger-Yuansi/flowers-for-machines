@@ -36,6 +36,8 @@ func ParseNBTBlock(blockName string, blockStates map[string]any, blockNBT map[st
 		block = &Container{DefaultBlock: defaultBlock}
 	case mapping.SupportNBTBlockTypeSign:
 		block = &Sign{DefaultBlock: defaultBlock}
+	case mapping.SupportNBTBlockTypeFrame:
+		block = &Frame{DefaultBlock: defaultBlock}
 	case mapping.SupportNBTBlockTypeStructureBlock:
 		block = &StructureBlock{DefaultBlock: defaultBlock}
 	case mapping.SupportNBTBlockTypeBanner:

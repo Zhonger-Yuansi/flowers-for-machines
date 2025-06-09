@@ -37,13 +37,10 @@ type Banner struct {
 }
 
 // parse ..
-func (b *Banner) parse(cleanEnch bool, tag map[string]any) error {
-	if cleanEnch {
-		b.DefaultItem.Enhance.EnchList = nil
-	}
-
+func (b *Banner) parse(tag map[string]any) error {
 	b.DefaultItem.Enhance.ItemComponent.LockInInventory = false
 	b.DefaultItem.Enhance.ItemComponent.LockInSlot = false
+	b.DefaultItem.Enhance.EnchList = nil
 	b.DefaultItem.Block = ItemBlockData{}
 
 	if len(tag) == 0 {
@@ -78,7 +75,7 @@ func (b *Banner) ParseNormal(nbtMap map[string]any) error {
 	}
 
 	tag, _ := nbtMap["tag"].(map[string]any)
-	err = b.parse(true, tag)
+	err = b.parse(tag)
 	if err != nil {
 		return fmt.Errorf("ParseNormal: %v", err)
 	}
@@ -92,7 +89,7 @@ func (b *Banner) ParseNetwork(item protocol.ItemStack, itemNetworkIDToName map[i
 		return fmt.Errorf("ParseNetwork: %v", err)
 	}
 
-	err = b.parse(true, item.NBTData)
+	err = b.parse(item.NBTData)
 	if err != nil {
 		return fmt.Errorf("ParseNetwork: %v", err)
 	}

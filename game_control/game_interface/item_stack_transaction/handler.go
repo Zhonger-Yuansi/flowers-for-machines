@@ -167,8 +167,6 @@ func (i *itemStackOperationHandler) handleCreativeItem(
 	op item_stack_operation.CreativeItem,
 	requestID resources_control.ItemStackRequestID,
 ) (result []protocol.StackRequestAction, err error) {
-	var creativeItemNetworkID uint32
-
 	rid, err := i.virtualInventories.loadAndSetStackNetworkID(op.Path, requestID)
 	if err != nil {
 		return nil, fmt.Errorf("handleCreativeItem: %v", err)
@@ -185,19 +183,12 @@ func (i *itemStackOperationHandler) handleCreativeItem(
 		return nil, fmt.Errorf("handleCreativeItem: %v", err)
 	}
 
-	if op.UseCreativeItemNetworkID {
-		creativeItemNetworkID = op.CreativeItemNetworkID
-	}
-	if op.UseNetworkID {
-		creativeItemNetworkID = i.constantPacket.CreativeItemByNI(op.NetworkID).CreativeItemNetworkID
-	}
-
 	return op.Make(
 		item_stack_operation.CreativeItemRuntime{
 			RequestID:             int32(requestID),
 			DstContainerID:        byte(cid),
 			DstItemStackID:        rid,
-			CreativeItemNetworkID: creativeItemNetworkID,
+			CreativeItemNetworkID: op.CINI,
 		},
 	), nil
 }

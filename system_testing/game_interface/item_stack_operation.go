@@ -207,7 +207,7 @@ func SystemTestingItemStackOperation() {
 			LoomingFromInventory("sku", 4, 0, 1, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 1 (5)
 			LoomingFromInventory("sku", 4, 0, 1, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 1 (6)
 			LoomingFromInventory("cbo", 5, 6, 3, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 2 (1)
-			LoomingFromInventory("", 0, 6, 1, resources_control.ExpectedNewItem{NetworkID: -1}).    // Banner 2 (2)
+			LoomingFromInventory("bo", 0, 6, 1, resources_control.ExpectedNewItem{NetworkID: -1}).  // Banner 2 (2)
 			LoomingFromInventory("moj", 2, 6, 7, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 2 (3)
 			LoomingFromInventory("sku", 4, 6, 3, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 2 (4)
 			LoomingFromInventory("cbo", 5, 6, 1, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 2 (5)

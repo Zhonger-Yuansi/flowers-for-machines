@@ -45,8 +45,11 @@ func NewResourcesControl(client *client.Client) *Resources {
 		itemStack: NewItemStackOperationManager(),
 		container: NewContainerManager(),
 		listener:  NewPacketListener(),
-		constant:  NewConstantPacket(),
 	}
+
+	constantPacket := NewConstantPacket()
+	constantPacket.updateByGameData(client.Conn().GameData())
+	resourcesControl.constant = constantPacket
 
 	for {
 		pk := <-resourcesControl.client.CachedPacket()

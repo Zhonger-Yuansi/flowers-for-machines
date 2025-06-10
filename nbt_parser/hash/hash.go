@@ -17,8 +17,8 @@ func NBTItemTypeHash(item nbt_parser_interface.Item) uint64 {
 	return xxhash.Sum64(item.TypeStableBytes())
 }
 
-// ItemItemFullHash 计算 item 的哈希校验和
-func ItemItemFullHash(item nbt_parser_interface.Item) uint64 {
+// NBTItemFullHash 计算 item 的哈希校验和
+func NBTItemFullHash(item nbt_parser_interface.Item) uint64 {
 	return xxhash.Sum64(item.FullStableBytes())
 }
 

@@ -59,8 +59,6 @@ func (l Looming) Make(runtiemData MakingRuntime) []protocol.StackRequestAction {
 			Slot:           byte(l.PatternPath.SlotID),
 			StackNetworkID: data.RequestID,
 		}
-	} else {
-		l.PatternName = "bo"
 	}
 
 	{

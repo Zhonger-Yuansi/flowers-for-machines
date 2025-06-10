@@ -1,0 +1,399 @@
+package nbt_item
+
+import (
+	"fmt"
+	"slices"
+
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
+	nbt_parser_general "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/general"
+	nbt_hash "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/hash"
+	nbt_parser_item "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/item"
+	"github.com/mitchellh/mapstructure"
+)
+
+// 旗帜
+type Banner struct {
+	api   *nbt_console.Console
+	items []nbt_parser_item.Banner
+}
+
+func TestBanner(api *nbt_console.Console, items []nbt_parser_item.Banner) *Banner {
+	return &Banner{
+		api:   api,
+		items: items,
+	}
+}
+
+// planner 计算并给出本次可以制作的旗帜，
+// 以及制作它需要用到的染料和旗帜图案。
+// 保证给出的旗帜列表包含尽可能多的旗帜
+func (b *Banner) planner(maxLimit uint8) (
+	bannerToMake []int,
+	colorToUse []int32,
+	colorToUseMapping map[int32]int,
+	patternToUse []string,
+	patternToUseMapping map[string]int,
+) {
+	// These fields means the banner we can make,
+	// and the color and pattern we needed.
+	usedBannersCount := 0
+	usedBanners := make([]bool, len(b.items))
+	usedColors := make(map[int32]bool)
+	usedPatterns := make(map[string]bool)
+	// Do planning (Algorithm: Greedy)
+	for {
+		// These two fileds holds the best banner for this round
+		bestOneNewColors := make(map[int32]bool)
+		bestOneNewPatterns := make(map[string]bool)
+		// Same as above, but they are numbers
+		bestOneIndex := -1
+		bestOneNewColorsCount := 25
+		bestOneNewPatternsCount := 25
+		// Iter all unfinished banner to get the best one
+		for index, banner := range b.items {
+			// If this banner is used, then we don't need to iter it
+			if usedBanners[index] {
+				continue
+			}
+			// Prepare
+			isOminousBanner := (banner.NBT.Type == nbt_parser_general.BannerTypeOminous)
+			currentNewColors := make(map[int32]bool)
+			currentNewPatterns := make(map[string]bool)
+			// Get new colors and new patterns of current banner
+			for _, pattern := range banner.NBT.Patterns {
+				// Ominous banner check
+				if pattern.Pattern == mapping.BannerPatternOminous {
+					isOminousBanner = true
+					break
+				}
+				// Set new colors
+				if _, ok := usedColors[pattern.Color]; !ok {
+					currentNewColors[pattern.Color] = true
+				}
+				// Set new patterns
+				if _, ok := mapping.BannerPatternToItemName[pattern.Pattern]; !ok {
+					// This pattern don't need pattern item
+					continue
+				}
+				if _, ok := usedPatterns[pattern.Pattern]; !ok {
+					currentNewPatterns[pattern.Pattern] = true
+				}
+			}
+			// Ominous banner is not consider in planner func
+			if isOminousBanner {
+				continue
+			}
+			// Try to find the banner that need new color and patterns at least
+			if len(currentNewColors) < bestOneNewColorsCount && len(currentNewPatterns) < bestOneNewPatternsCount {
+				bestOneIndex = index
+				bestOneNewColorsCount = len(currentNewColors)
+				bestOneNewPatternsCount = len(currentNewPatterns)
+				bestOneNewColors = currentNewColors
+				bestOneNewPatterns = currentNewPatterns
+			}
+		}
+		// bestOneIndex is -1 means all banner is finished
+		if bestOneIndex == -1 {
+			break
+		}
+		// after is the slot count we need in total (include the best banner)
+		after := len(usedColors) + bestOneNewColorsCount     // Colors
+		after += len(usedPatterns) + bestOneNewPatternsCount // Patterns
+		after += usedBannersCount + 1                        // Banners
+		// If after more than maxLimit, then we can not make more banner (also include this best banner)
+		if after > int(maxLimit) {
+			break
+		}
+		// The loop is not break, so we can apply changes, and current best banner can be make
+		for key := range bestOneNewColors {
+			usedColors[key] = true
+		}
+		for key := range bestOneNewPatterns {
+			usedPatterns[key] = true
+		}
+		usedBanners[bestOneIndex] = true
+		usedBannersCount += 1
+	}
+	// Prepare
+	colorToUseMapping = make(map[int32]int)
+	patternToUseMapping = make(map[string]int)
+	// Convert usedColors and usedPatterns to mapping,
+	// and make usedBanners to slice.
+	for index, value := range usedBanners {
+		if value {
+			bannerToMake = append(bannerToMake, index)
+		}
+	}
+	for key := range usedColors {
+		colorToUseMapping[key] = len(colorToUse)
+		colorToUse = append(colorToUse, key)
+	}
+	for key := range usedPatterns {
+		patternToUseMapping[key] = len(patternToUse)
+		patternToUse = append(patternToUse, key)
+	}
+	// Return
+	return
+}
+
+// makeNormal 使用织布机制作不含灾厄旗帜的旗帜。
+// 向 makeNormal 传入的参数应当是 planner 的返回值
+func (b *Banner) makeNormal(
+	bannerToMake []int,
+	colorToUse []int32,
+	colorToUseMapping map[int32]int,
+	patternToUse []string,
+	patternToUseMapping map[string]int,
+) (resultSlot map[uint64]resources_control.SlotID, err error) {
+	api := b.api.API()
+	slot := resources_control.SlotID(0)
+
+	// Make expected new item
+	resultBanners := make([]resources_control.ExpectedNewItem, len(bannerToMake))
+	for idx, index := range bannerToMake {
+		banner := b.items[index]
+		nbtPatterns := make([]any, 0)
+
+		for _, pattern := range banner.NBT.Patterns {
+			var singlePattern map[string]any
+
+			err := mapstructure.Decode(&pattern, &singlePattern)
+			if err != nil {
+				return nil, fmt.Errorf("makeNormal: %v", err)
+			}
+
+			nbtPatterns = append(nbtPatterns, singlePattern)
+		}
+
+		resultBanners[idx] = resources_control.ExpectedNewItem{
+			NetworkID:  -1,
+			UseNBTData: true,
+			NBTData: map[string]any{
+				"Patterns": nbtPatterns,
+			},
+		}
+	}
+
+	// Get all dyes
+	for _, value := range colorToUse {
+		dyeName, ok := mapping.BannerColorToDyeName[value]
+		if !ok {
+			panic("makeNormal: Should nerver happened")
+		}
+
+		err := api.Replaceitem().ReplaceitemInInventory(
+			"@s",
+			game_interface.ReplacePathInventory,
+			game_interface.ReplaceitemInfo{
+				Name:     dyeName,
+				Count:    64,
+				MetaData: 0,
+				Slot:     slot,
+			},
+			"",
+			false,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("makeNormal: %v", err)
+		}
+
+		b.api.UseInventorySlot(nbt_console.RequesterUser, slot, true)
+		slot++
+	}
+	// Get all paterns
+	for _, value := range patternToUse {
+		patternName, ok := mapping.BannerPatternToItemName[value]
+		if !ok {
+			panic("makeNormal: Should nerver happened")
+		}
+
+		err := api.Replaceitem().ReplaceitemInInventory(
+			"@s",
+			game_interface.ReplacePathInventory,
+			game_interface.ReplaceitemInfo{
+				Name:     patternName,
+				Count:    64,
+				MetaData: 0,
+				Slot:     slot,
+			},
+			"",
+			false,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("makeNormal: %v", err)
+		}
+
+		b.api.UseInventorySlot(nbt_console.RequesterUser, slot, true)
+		slot++
+	}
+	// Get all banners
+	for _, index := range bannerToMake {
+		banner := b.items[index].DefaultItem
+
+		err := api.Replaceitem().ReplaceitemInInventory(
+			"@s",
+			game_interface.ReplacePathInventory,
+			game_interface.ReplaceitemInfo{
+				Name:     banner.ItemName(),
+				Count:    1,
+				MetaData: banner.ItemMetadata(),
+				Slot:     slot,
+			},
+			"",
+			false,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("makeNormal: %v", err)
+		}
+
+		b.api.UseInventorySlot(nbt_console.RequesterUser, slot, true)
+		slot++
+	}
+	// Await changes
+	err = api.Commands().AwaitChangesGeneral()
+	if err != nil {
+		return nil, fmt.Errorf("makeNormal: %v", err)
+	}
+
+	// Find or generate new loom
+	index, err := b.api.FindOrGenerateNewLoom()
+	if err != nil {
+		return nil, fmt.Errorf("makeNormal: %v", err)
+	}
+	// Open loom
+	success, err := b.api.OpenContainerByIndex(index)
+	if err != nil {
+		return nil, fmt.Errorf("makeNormal: %v", err)
+	}
+	if !success {
+		return nil, fmt.Errorf("makeNormal: Failed to open the loom block")
+	}
+	defer api.ContainerOpenAndClose().CloseContainer()
+
+	// Open transaction and do operation
+	transaction := api.ItemStackOperation().OpenTransaction()
+	resultSlot = make(map[uint64]resources_control.SlotID)
+	for idx, index := range bannerToMake {
+		// Get banner item
+		banner := b.items[index]
+		// Compute offset and banner slot
+		offsetPattern := len(colorToUse)
+		bannerSlot := resources_control.SlotID(len(colorToUse) + len(patternToUse) + idx)
+		// Update result slot
+		resultSlot[nbt_hash.NBTItemTypeHash(&banner)] = bannerSlot
+		// Add loom operation
+		for _, pattern := range banner.NBT.Patterns {
+			_ = transaction.LoomingFromInventory(
+				pattern.Pattern,
+				resources_control.SlotID(offsetPattern+patternToUseMapping[pattern.Pattern]),
+				bannerSlot,
+				resources_control.SlotID(colorToUseMapping[pattern.Color]),
+				resultBanners[idx],
+			)
+		}
+	}
+
+	// Commit changes
+	success, _, _, err = transaction.Commit()
+	if err != nil {
+		return nil, fmt.Errorf("makeNormal: %v", err)
+	}
+	if !success {
+		return nil, fmt.Errorf("makeNormal: Looming operation rejected by the server")
+	}
+
+	// Return
+	return resultSlot, nil
+}
+
+func (b *Banner) makeOminous() (resultSlot map[uint64]resources_control.SlotID, err error) {
+	api := b.api.API()
+	inventorySlot := b.api.FindInventorySlot(nil)
+
+	err = api.Replaceitem().ReplaceitemInInventory(
+		"@s",
+		game_interface.ReplacePathInventory,
+		game_interface.ReplaceitemInfo{
+			Name:     "minecraft:air",
+			Slot:     inventorySlot,
+			Count:    1,
+			MetaData: 0,
+		},
+		"",
+		true,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("makeOminous: %v", err)
+	}
+	b.api.UseInventorySlot(nbt_console.RequesterUser, inventorySlot, false)
+
+	success, err := api.ContainerOpenAndClose().OpenInventory()
+	if err != nil {
+		return nil, fmt.Errorf("makeOminous: %v", err)
+	}
+	if !success {
+		return nil, fmt.Errorf("makeOminous: Failed to open the inventory")
+	}
+	defer api.ContainerOpenAndClose().CloseContainer()
+
+	cini := uint32(0)
+	banners := api.Resources().ConstantPacket().CreativeItemByName("minecraft:banner")
+	for _, banner := range banners {
+		if banner.Item.NBTData != nil && banner.Item.NBTData["Type"] == int32(1) {
+			cini = banner.CreativeItemNetworkID
+			break
+		}
+	}
+	if cini == 0 {
+		panic("makeOminous: Should nerver happened")
+	}
+
+	success, _, _, err = api.ItemStackOperation().OpenTransaction().
+		GetCreativeItemToInventory(cini, inventorySlot, 1).
+		Commit()
+	if err != nil {
+		return nil, fmt.Errorf("makeOminous: %v", err)
+	}
+	if !success {
+		return nil, fmt.Errorf("makeOminous: Creative item request rejected by the server")
+	}
+	b.api.UseInventorySlot(nbt_console.RequesterUser, inventorySlot, true)
+
+	return map[uint64]resources_control.SlotID{
+		nbt_hash.NBTItemTypeHash(&b.items[0]): inventorySlot,
+	}, nil
+}
+
+func (b *Banner) Make() (resultSlot map[uint64]resources_control.SlotID, err error) {
+	if len(b.items) == 0 {
+		return nil, nil
+	}
+
+	bannerToMake, colorToUse, colorToUseMapping, patternToUse, patternToUseMapping := b.planner(36)
+	if len(bannerToMake) > 0 {
+		resultSlot, err = b.makeNormal(bannerToMake, colorToUse, colorToUseMapping, patternToUse, patternToUseMapping)
+	} else {
+		resultSlot, err = b.makeOminous()
+	}
+	if err != nil {
+		return nil, fmt.Errorf("Make: %v", err)
+	}
+
+	if len(bannerToMake) > 0 {
+		newItems := make([]nbt_parser_item.Banner, 0)
+		for index, value := range b.items {
+			if slices.Contains(bannerToMake, index) {
+				continue
+			}
+			newItems = append(newItems, value)
+		}
+		b.items = newItems
+	} else {
+		b.items = nil
+	}
+
+	return
+}

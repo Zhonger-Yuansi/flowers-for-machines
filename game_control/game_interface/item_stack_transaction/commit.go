@@ -141,7 +141,7 @@ func (i *ItemStackTransaction) Commit() (
 			switch op := operation.(type) {
 			case item_stack_operation.CreativeItem:
 				result, err = handler.handleCreativeItem(op, requestID)
-				newItem := i.api.ConstantPacket().CreativeItemByCNI(op.CreativeItemNetworkID)
+				newItem := i.api.ConstantPacket().CreativeItemByCNI(op.CINI)
 				updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
 				updater[op.Path] = resources_control.ExpectedNewItem{
 					NetworkID:  newItem.Item.NetworkID,

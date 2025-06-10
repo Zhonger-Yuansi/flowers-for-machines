@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
 	nbt_parser_general "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/general"
 	"github.com/mitchellh/mapstructure"
 )
@@ -48,6 +49,10 @@ func (b *Banner) parse(tag map[string]any) error {
 		err := mapstructure.Decode(&val, &pattern)
 		if err != nil {
 			return fmt.Errorf("parse: %v", err)
+		}
+
+		if mapping.BannerPatternUnsupported[pattern.Pattern] {
+			continue
 		}
 
 		b.NBT.Patterns = append(b.NBT.Patterns, pattern)

@@ -7,12 +7,7 @@ import (
 
 // CreativeItem 指示创造物品获取操作
 type CreativeItem struct {
-	UseCreativeItemNetworkID bool
-	CreativeItemNetworkID    uint32
-
-	UseNetworkID bool
-	NetworkID    int32
-
+	CINI  uint32 // CreativeItemNetworkID
 	Path  resources_control.SlotLocation
 	Count uint8
 }

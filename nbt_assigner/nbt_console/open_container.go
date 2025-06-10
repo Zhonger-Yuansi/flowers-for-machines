@@ -9,7 +9,7 @@ import (
 )
 
 // OpenContainerByIndex 打开 index 所指示的操作台方块。
-// 被打开的目标方块必须是容器。应当说明的是，铁砧也是容器。
+// 被打开的目标方块必须是容器、铁砧或织布机。
 // index 可用于 BlockByIndex 或 BlockPosByIndex
 func (c *Console) OpenContainerByIndex(index int) (success bool, err error) {
 	var container block_helper.ContainerBlockHelper
@@ -18,6 +18,9 @@ func (c *Console) OpenContainerByIndex(index int) (success bool, err error) {
 
 	block := c.BlockByIndex(index)
 	_, ok := (*block).(block_helper.AnvilBlockHelper)
+	if !ok {
+		_, ok = (*block).(block_helper.LoomBlockHelper)
+	}
 	if !ok {
 		container, isContainer = (*block).(block_helper.ContainerBlockHelper)
 		if !isContainer {

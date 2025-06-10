@@ -4,6 +4,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface/item_stack_operation"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
 )
 
 // MoveItem 将 source 处的物品移动到 destination 处，
@@ -283,12 +284,9 @@ func (i *ItemStackTransaction) GetCreativeItem(
 	count uint8,
 ) *ItemStackTransaction {
 	i.operations = append(i.operations, item_stack_operation.CreativeItem{
-		UseCreativeItemNetworkID: true,
-		CreativeItemNetworkID:    creativeItemNetworkID,
-		UseNetworkID:             false,
-		NetworkID:                0,
-		Path:                     slot,
-		Count:                    count,
+		CINI:  creativeItemNetworkID,
+		Path:  slot,
+		Count: count,
 	})
 	return i
 }
@@ -306,50 +304,6 @@ func (i *ItemStackTransaction) GetCreativeItemToInventory(
 ) *ItemStackTransaction {
 	return i.GetCreativeItem(
 		creativeItemNetworkID,
-		resources_control.SlotLocation{
-			WindowID: protocol.WindowIDInventory,
-			SlotID:   slot,
-		},
-		count,
-	)
-}
-
-// GetCreativeItemByNetworkID 从创造物品栏获取
-// 网络数字 ID 为 networkID 的物品到 slot 处，
-// 且只移动 count 个物品。
-//
-// 该操作不支持内联，但它仍然可以被紧缩在单个的物
-// 品堆栈操作请求的数据包中
-func (i *ItemStackTransaction) GetCreativeItemByNetworkID(
-	networkID int32,
-	slot resources_control.SlotLocation,
-	count uint8,
-) *ItemStackTransaction {
-	i.operations = append(i.operations, item_stack_operation.CreativeItem{
-		UseCreativeItemNetworkID: false,
-		CreativeItemNetworkID:    0,
-		UseNetworkID:             true,
-		NetworkID:                networkID,
-		Path:                     slot,
-		Count:                    count,
-	})
-	return i
-}
-
-// GetCreativeItemToInventoryByNetworkID
-// 从创造物品栏获取网络数字 ID 为 networkID
-// 的物品到背包中的 slot 处，且只移动 count
-// 个物品。
-//
-// 该操作不支持内联，但它仍然可以被紧缩在单个
-// 的物品堆栈操作请求的数据包中
-func (i *ItemStackTransaction) GetCreativeItemToInventoryByNetworkID(
-	networkID int32,
-	slot resources_control.SlotID,
-	count uint8,
-) *ItemStackTransaction {
-	return i.GetCreativeItemByNetworkID(
-		networkID,
 		resources_control.SlotLocation{
 			WindowID: protocol.WindowIDInventory,
 			SlotID:   slot,
@@ -414,17 +368,17 @@ func (i *ItemStackTransaction) Looming(
 	dyeSlot resources_control.SlotLocation,
 	resultItem resources_control.ExpectedNewItem,
 ) *ItemStackTransaction {
-	if patternName == "bo" {
-		patternName = ""
-	}
+	_, usePattern := mapping.BannerPatternToItemName[patternName]
+
 	i.operations = append(i.operations, item_stack_operation.Looming{
-		UsePattern:  len(patternName) > 0,
+		UsePattern:  usePattern,
 		PatternName: patternName,
 		PatternPath: patternSlot,
 		BannerPath:  bannerSlot,
 		DyePath:     dyeSlot,
 		ResultItem:  resultItem,
 	})
+
 	return i
 }
 

@@ -83,7 +83,7 @@ func (r *Replaceitem) ReplaceitemInInventory(
 		if itemInfo.Slot <= 8 {
 			path = ReplacePathHotbarOnly
 		} else {
-			path = ReplacePathInventory
+			path = ReplacePathInventoryOnly
 			itemInfo.Slot -= 9
 		}
 	}
@@ -91,7 +91,7 @@ func (r *Replaceitem) ReplaceitemInInventory(
 	request := fmt.Sprintf(
 		"replaceitem entity %s %s %d %s %d %d %s",
 		target, path,
-		itemInfo.Slot, itemInfo.Name, itemInfo.Count, itemInfo.Count,
+		itemInfo.Slot, itemInfo.Name, itemInfo.Count, itemInfo.MetaData,
 		method,
 	)
 

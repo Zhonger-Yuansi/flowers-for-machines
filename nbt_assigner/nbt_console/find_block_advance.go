@@ -238,7 +238,11 @@ func (c *Console) FindOrGenerateNewAnvil() (index int, err error) {
 		return
 	}
 
-	index, _, _ = c.FindSpaceToPlaceHelper(false, false)
+	index, _, block = c.FindSpaceToPlaceHelper(false, false)
+	if block == nil {
+		panic("FindOrGenerateNewAnvil: Should nerver happened")
+	}
+
 	nearBlock := c.NearBlockByIndex(index, protocol.BlockPos{0, -1, 0})
 	if _, ok := (*nearBlock).(block_helper.Air); ok {
 		needFloorBlock = true
@@ -257,6 +261,36 @@ func (c *Console) FindOrGenerateNewAnvil() (index int, err error) {
 		}
 		*c.NearBlockByIndex(index, protocol.BlockPos{0, -1, 0}) = floorBlock
 	}
+
+	return index, nil
+}
+
+// FindOrGenerateNewLoom 寻找操作台的 8 个帮助方块中
+// 是否有一个是织布机。如果没有，则生成一个新的织布机。
+// index 指示找到或生成的织布机在操作台上的索引
+func (c *Console) FindOrGenerateNewLoom() (index int, err error) {
+	var block *block_helper.BlockHelper
+
+	index, _, block = c.FindLoom(false)
+	if block != nil {
+		return
+	}
+
+	index, _, block = c.FindSpaceToPlaceHelper(false, false)
+	if block == nil {
+		panic("FindOrGenerateNewLoom: Should nerver happened")
+	}
+
+	loom := block_helper.LoomBlockHelper{}
+	err = c.api.SetBlock().SetBlock(
+		c.BlockPosByIndex(index),
+		loom.BlockName(),
+		loom.BlockStatesString(),
+	)
+	if err != nil {
+		return 0, fmt.Errorf("FindOrGenerateNewLoom: %v", err)
+	}
+	c.UseHelperBlock(RequesterSystemCall, index, loom)
 
 	return index, nil
 }

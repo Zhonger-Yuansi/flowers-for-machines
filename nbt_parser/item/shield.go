@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
 	nbt_parser_general "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/general"
 	"github.com/mitchellh/mapstructure"
 )
@@ -24,6 +25,8 @@ type Shield struct {
 
 // parse ..
 func (s *Shield) parse(tag map[string]any) error {
+	var isOminousShield bool
+
 	s.DefaultItem.Enhance.ItemComponent.LockInInventory = false
 	s.DefaultItem.Enhance.ItemComponent.LockInSlot = false
 	s.DefaultItem.Block = ItemBlockData{}
@@ -46,7 +49,23 @@ func (s *Shield) parse(tag map[string]any) error {
 			return fmt.Errorf("parse: %v", err)
 		}
 
+		if mapping.BannerPatternUnsupported[pattern.Pattern] {
+			continue
+		}
+		if pattern.Pattern == mapping.BannerPatternOminous {
+			isOminousShield = true
+			s.NBT.Patterns = []nbt_parser_general.BannerPattern{
+				pattern,
+			}
+			break
+		}
+
 		s.NBT.Patterns = append(s.NBT.Patterns, pattern)
+	}
+
+	if isOminousShield {
+		s.Basic.Metadata = 0
+		s.Enhance.ItemComponent.KeepOnDeath = false
 	}
 
 	s.NBT.Base, s.NBT.HaveBase = tag["Base"].(int32)

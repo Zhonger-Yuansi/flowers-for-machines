@@ -5,6 +5,7 @@ import (
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
 	nbt_assigner_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/interface"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
 	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
 	nbt_parser_item "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/item"
@@ -19,6 +20,7 @@ func init() {
 
 func MakeNBTItemMethod(
 	console *nbt_console.Console,
+	cache *nbt_cache.NBTCacheSystem,
 	multipleItems ...nbt_parser_interface.Item,
 ) (result nbt_assigner_interface.Item, supported bool) {
 	if len(multipleItems) == 0 {

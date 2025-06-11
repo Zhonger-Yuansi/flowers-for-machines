@@ -135,7 +135,7 @@ func EnchMultiple(
 		}
 
 		for index, originSlotID := range currentRound {
-			item := multipleItems[originSlotID]
+			item := multipleItems[originSlotID-9]
 			defaultItem := (*item).UnderlyingItem().(*nbt_parser_item.DefaultItem)
 
 			currentSlotID := resources_control.SlotID(index)
@@ -152,6 +152,11 @@ func EnchMultiple(
 				if err != nil {
 					return fmt.Errorf("EnchMultiple: %v", err)
 				}
+			}
+
+			err = api.Commands().AwaitChangesGeneral()
+			if err != nil {
+				return fmt.Errorf("EnchMultiple: %v", err)
 			}
 		}
 

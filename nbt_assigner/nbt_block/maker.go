@@ -46,6 +46,7 @@ func PlaceNBTBlock(
 		console: console,
 		cache:   cache,
 	}
+
 	hashNumber := nbt_hash.CompletelyHashNumber{
 		HashNumber:    nbt_hash.NBTBlockHash(nbtBlock),
 		SetHashNumber: nbt_hash.ContainerSetHash(nbtBlock),

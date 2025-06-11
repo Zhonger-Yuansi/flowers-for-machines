@@ -28,8 +28,6 @@ type ContainerBlockOpenInfo struct {
 type ContainerBlockHelper struct {
 	// OpenInfo 提供的信息足以使该容器能被打开
 	OpenInfo ContainerBlockOpenInfo
-	// IsEmpty 指示该容器是否已经全空
-	IsEmpty bool
 }
 
 func (c ContainerBlockHelper) BlockName() string {

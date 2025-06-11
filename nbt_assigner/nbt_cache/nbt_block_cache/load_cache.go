@@ -62,7 +62,6 @@ func (n *NBTBlockCache) LoadCache(hashNumber nbt_hash.CompletelyHashNumber) (
 					ConsiderOpenDirection: container.ConsiderOpenDirection(),
 					ShulkerFacing:         container.NBT.ShulkerFacing,
 				},
-				IsEmpty: len(container.NBT.Items) == 0,
 			},
 		)
 		return structure, hit, isSetHashHit, nil

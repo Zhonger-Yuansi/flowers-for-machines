@@ -24,7 +24,6 @@ func SystemTestingBaseContainerCache() {
 				States:                utils.ParseBlockStatesString(barrelStatesString),
 				ConsiderOpenDirection: false,
 			},
-			IsEmpty: true,
 		}
 		console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, container)
 

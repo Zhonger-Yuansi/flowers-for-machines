@@ -9,6 +9,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
 	nbt_assigner_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/interface"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_item"
 	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
@@ -21,6 +22,20 @@ import (
 type Container struct {
 	NBTBlockBase
 	data nbt_parser_block.Container
+}
+
+func NewContainer(
+	console *nbt_console.Console,
+	cache *nbt_cache.NBTCacheSystem,
+	data nbt_parser_block.Container,
+) *Container {
+	return &Container{
+		NBTBlockBase: NBTBlockBase{
+			console: console,
+			cache:   cache,
+		},
+		data: data,
+	}
 }
 
 func (Container) Offset() protocol.BlockPos {
@@ -41,7 +56,6 @@ func (c *Container) spawnContainer(container nbt_parser_block.Container) error {
 				ConsiderOpenDirection: container.ConsiderOpenDirection(),
 				ShulkerFacing:         container.NBT.ShulkerFacing,
 			},
-			IsEmpty: len(container.NBT.Items) == 0,
 		})
 	}
 
@@ -124,8 +138,14 @@ func (c *Container) spawnContainer(container nbt_parser_block.Container) error {
 			}
 		}
 
+		// 确定放置目标容器时所使用的朝向
+		var facing uint8 = 1
+		if strings.Contains(container.BlockName(), "shulker") {
+			facing = c.data.NBT.ShulkerFacing
+		}
+
 		// 放置目标容器
-		_, offsetPos, err := api.BotClick().PlaceBlockHighLevel(c.console.Center(), c.console.HotbarSlotID(), c.data.NBT.ShulkerFacing)
+		_, offsetPos, err := api.BotClick().PlaceBlockHighLevel(c.console.Center(), c.console.HotbarSlotID(), facing)
 		if err != nil {
 			return fmt.Errorf("Make: %v", err)
 		}
@@ -444,7 +464,7 @@ func (c *Container) Make() error {
 				panic("Make: Should nerver happened")
 			}
 
-			index, _, block := c.console.FindSpaceToPlaceNewContainer(false, true)
+			index, _, block := c.console.FindSpaceToPlaceNewContainer(false)
 			if block == nil {
 				index = nbt_console.ConsoleIndexFirstHelperBlock
 			}
@@ -480,14 +500,9 @@ func (c *Container) Make() error {
 			c.console.UpdateHotbarSlotID(currentSlot)
 		}
 
-		// c.console.API().Commands().AwaitChangesGeneral() // idk ?
-
 		// 现在所有子方块都被 Pick Block 到背包了
 		allItemStack, inventoryExisted := api.Resources().Inventories().GetAllItemStack(0)
 		if !inventoryExisted {
-			panic("Make: Should nerver happened")
-		}
-		if len(allItemStack) != len(allSubBlocks) {
 			panic("Make: Should nerver happened")
 		}
 
@@ -503,6 +518,10 @@ func (c *Container) Make() error {
 		// 将背包中的每个子方块移动到对应的父节点处
 		transaction := api.ItemStackOperation().OpenTransaction()
 		for srcSlot, value := range allItemStack {
+			if value.Stack.NetworkID == 0 || value.Stack.NetworkID == -1 {
+				continue
+			}
+
 			newItem, err := nbt_parser_item.ParseItemNetwork(
 				value.Stack,
 				api.Resources().ConstantPacket().ItemNameByNetworkID(value.Stack.NetworkID),
@@ -594,7 +613,7 @@ func (c *Container) Make() error {
 	// Step 7.1: 检测是否需要物品分裂
 	needItemCopy := false
 	for _, value := range itemGroups {
-		if len(value) > 0 {
+		if len(value) > 1 {
 			needItemCopy = true
 			break
 		}

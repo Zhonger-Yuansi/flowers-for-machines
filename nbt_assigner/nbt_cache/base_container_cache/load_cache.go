@@ -18,20 +18,6 @@ func (b *BaseContainerCache) LoadCache(name string, states map[string]any, custo
 	}
 	hashNumber := container.Hash()
 
-	// Try to find target container from console
-	block := b.console.BlockByIndex(nbt_console.ConsoleIndexCenterBlock)
-	c, ok := (*block).(block_helper.ContainerBlockHelper)
-	if ok && c.IsEmpty {
-		currentContainer := BaseContainer{
-			BlockName:         c.BlockName(),
-			BlockStatesString: utils.MarshalBlockStates(c.BlockStates()),
-			CustomeName:       customName,
-		}
-		if currentContainer.Hash() == hashNumber {
-			return true, nil
-		}
-	}
-
 	// Try to load from internal structure record mapping
 	structure, ok := b.cachedBaseContainer[hashNumber]
 	if !ok {
@@ -50,7 +36,6 @@ func (b *BaseContainerCache) LoadCache(name string, states map[string]any, custo
 	// Update underlying container data
 	newContainer := block_helper.ContainerBlockHelper{
 		OpenInfo: structure.Container,
-		IsEmpty:  true,
 	}
 	b.console.UseHelperBlock(b.uniqueID, nbt_console.ConsoleIndexCenterBlock, newContainer)
 

@@ -263,7 +263,7 @@ func (b *BotClick) PlaceBlock(
 // 否则调用 PlaceBlockHighLevel 将返回错误。
 //
 // 最后，您希望要创建的方块可以是潜影盒，亦可以是旗帜。
-// 另外，此函数不会自动切换物品栏，也不会等待租赁服响应更改
+// 另外，此函数会等待方块放置完成，但不会自动切换物品栏
 func (b *BotClick) PlaceBlockHighLevel(
 	pos protocol.BlockPos,
 	hotBarSlot resources_control.SlotID,
@@ -336,7 +336,8 @@ func (b *BotClick) PlaceBlockHighLevel(
 // 返回的 success 指示操作是否成功；
 // slot 指示物品最终所在的物品栏位置。
 //
-// 此函数不会自动切换物品栏，也不会等待租赁服响应更改
+// 应当说明的是，
+// 手持物品栏会因此切换到 slot 所指示的位置
 func (b *BotClick) PickBlock(
 	pos protocol.BlockPos,
 	assignNBTData bool,
@@ -361,11 +362,15 @@ func (b *BotClick) PickBlock(
 			},
 		)
 
-		b.r.WritePacket(&packet.BlockPickRequest{
+		err = b.r.WritePacket(&packet.BlockPickRequest{
 			Position:    pos,
 			AddBlockNBT: assignNBTData,
 			HotBarSlot:  byte(slot),
 		})
+		if err != nil {
+			packetListener.DestroyListener(uniqueID)
+			return false, 0, fmt.Errorf("PickBlock: %v", err)
+		}
 
 		timer := time.NewTimer(DefaultTimeoutBlockPick)
 		defer timer.Stop()

@@ -9,8 +9,9 @@ import (
 )
 
 // StoreCache 将操作台中心处的方块保存到当前缓存命中系统。
-// 如果该方块不是一个容器，或其中装有物品，则返回错误
-func (b *BaseContainerCache) StoreCache() error {
+// 如果该方块不是一个容器，或其中装有物品，则返回错误。
+// customName 指示这个容器的自定义名称，通常情况下可以置空
+func (b *BaseContainerCache) StoreCache(customName string) error {
 	block := b.console.BlockByIndex(nbt_console.ConsoleIndexCenterBlock)
 	container, ok := (*block).(block_helper.ContainerBlockHelper)
 	if !ok {
@@ -23,6 +24,7 @@ func (b *BaseContainerCache) StoreCache() error {
 	c := BaseContainer{
 		BlockName:         container.OpenInfo.Name,
 		BlockStatesString: utils.MarshalBlockStates(container.OpenInfo.States),
+		CustomeName:       customName,
 	}
 	hashNumber := c.Hash()
 

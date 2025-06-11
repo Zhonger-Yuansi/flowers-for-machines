@@ -15,6 +15,7 @@ type ConstantPacket struct {
 	availableItems       []protocol.ItemEntry
 	itemNetworkIDMapping map[int32]int
 	itemNameMapping      map[string]int
+	itemNameMappingInv   []string
 	// 创造物品
 	creativeContent    []protocol.CreativeItem
 	creativeNIMapping  map[int32][]int // NI: Network ID
@@ -27,6 +28,7 @@ func NewConstantPacket() *ConstantPacket {
 		availableItems:       nil,
 		itemNetworkIDMapping: make(map[int32]int),
 		itemNameMapping:      make(map[string]int),
+		itemNameMappingInv:   nil,
 		creativeContent:      nil,
 		creativeNIMapping:    make(map[int32][]int),
 		creativeCNIMapping:   make(map[uint32]int),
@@ -96,11 +98,18 @@ func (c ConstantPacket) ItemByName(name string) protocol.ItemEntry {
 	return c.availableItems[c.itemNameMapping[name]]
 }
 
+// ItemNameByNetworkID 返回网络 ID 为 networkID 的物品的名称
+func (c ConstantPacket) ItemNameByNetworkID(networkID int32) string {
+	return c.itemNameMappingInv[c.itemNetworkIDMapping[networkID]]
+}
+
 // updateByGameData ..
 func (c *ConstantPacket) updateByGameData(data minecraft.GameData) {
 	c.availableItems = data.Items
+	c.itemNameMappingInv = make([]string, len(c.availableItems))
 	for index, item := range c.availableItems {
 		c.itemNetworkIDMapping[int32(item.RuntimeID)] = index
 		c.itemNameMapping[item.Name] = index
+		c.itemNameMappingInv[index] = item.Name
 	}
 }

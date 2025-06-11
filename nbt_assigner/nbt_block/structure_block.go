@@ -14,6 +14,10 @@ type StructrueBlock struct {
 	data nbt_parser_block.StructureBlock
 }
 
+func (StructrueBlock) Offset() protocol.BlockPos {
+	return protocol.BlockPos{0, 0, 0}
+}
+
 func (s *StructrueBlock) Make() error {
 	api := s.console.API()
 

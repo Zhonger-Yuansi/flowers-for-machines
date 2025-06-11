@@ -15,6 +15,7 @@ import (
 type BaseContainer struct {
 	BlockName         string
 	BlockStatesString string
+	CustomeName       string
 }
 
 // StructureBaseContainer 指示了一个保存在结构中的基容器
@@ -38,6 +39,7 @@ func (b BaseContainer) Hash() uint64 {
 
 	w.String(&name)
 	w.String(&b.BlockStatesString)
+	w.String(&b.CustomeName)
 
 	return xxhash.Sum64(buf.Bytes())
 }

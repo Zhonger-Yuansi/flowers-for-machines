@@ -110,9 +110,6 @@ func (d DefaultItem) NeedEnchOrRename() bool {
 	if len(d.Enhance.DisplayName) > 0 || len(d.Enhance.EnchList) > 0 {
 		return true
 	}
-	if d.Block.SubBlock != nil && d.Block.SubBlock.NeedSpecialHandle() {
-		return true
-	}
 	return false
 }
 

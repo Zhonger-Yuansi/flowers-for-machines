@@ -51,7 +51,7 @@ func (b *Book) Make() (resultSlot map[uint64]resources_control.SlotID, err error
 				game_interface.ReplaceitemInfo{
 					Name:     "minecraft:writable_book",
 					Count:    1,
-					MetaData: 0,
+					MetaData: book.ItemMetadata(),
 					Slot:     inventorySlot,
 				},
 				utils.MarshalItemComponent(book.Enhance.ItemComponent),

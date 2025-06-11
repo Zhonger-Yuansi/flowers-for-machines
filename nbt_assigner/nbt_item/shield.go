@@ -152,7 +152,7 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 			game_interface.ReplaceitemInfo{
 				Name:     "minecraft:shield",
 				Count:    1,
-				MetaData: 0,
+				MetaData: shield.ItemMetadata(),
 				Slot:     inventorySlot,
 			},
 			utils.MarshalItemComponent(shield.Enhance.ItemComponent),

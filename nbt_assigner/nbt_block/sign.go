@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
@@ -42,6 +43,10 @@ func (s *Sign) replaceitem(itemName string, block bool) error {
 	}
 
 	return nil
+}
+
+func (Sign) Offset() protocol.BlockPos {
+	return protocol.BlockPos{0, 0, 0}
 }
 
 func (s *Sign) Make() error {

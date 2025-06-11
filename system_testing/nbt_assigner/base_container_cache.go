@@ -28,7 +28,7 @@ func SystemTestingBaseContainerCache() {
 		}
 		console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, container)
 
-		err := baseContainerCache.StoreCache()
+		err := baseContainerCache.StoreCache("")
 		if err != nil {
 			panic("SystemTestingBaseContainerCache: Failed on test round 1")
 		}
@@ -39,12 +39,12 @@ func SystemTestingBaseContainerCache() {
 		api.SetBlock().SetBlock(console.Center(), "air", "[]")
 		console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.Air{})
 
-		index, hit, _ := baseContainerCache.LoadCache("barrel", utils.ParseBlockStatesString(barrelStatesString))
+		hit, _ := baseContainerCache.LoadCache("barrel", utils.ParseBlockStatesString(barrelStatesString), "")
 		if !hit {
 			panic("SystemTestingBaseContainerCache: Failed on test round 2")
 		}
 
-		success, _ := console.OpenContainerByIndex(index)
+		success, _ := console.OpenContainerByIndex(nbt_console.ConsoleIndexCenterBlock)
 		if !success {
 			panic("SystemTestingBaseContainerCache: Failed on test round 2")
 		}

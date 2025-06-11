@@ -103,17 +103,19 @@ func (s Shield) NeedCheckCompletely() bool {
 	return false
 }
 
-func (s *Shield) TypeStableBytes() []byte {
+func (s Shield) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
 
-	basicInfo := s.DefaultItem.TypeStableBytes()
-	w.ByteSlice(&basicInfo)
 	protocol.SliceUint16Length(w, &s.NBT.Patterns)
 	w.Bool(&s.NBT.HaveBase)
 	w.Varint32(&s.NBT.Base)
 
 	return buf.Bytes()
+}
+
+func (s *Shield) TypeStableBytes() []byte {
+	return append(s.DefaultItem.TypeStableBytes(), s.NBTStableBytes()...)
 }
 
 func (s *Shield) FullStableBytes() []byte {

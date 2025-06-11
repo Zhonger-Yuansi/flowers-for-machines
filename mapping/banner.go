@@ -1,9 +1,7 @@
 package mapping
 
-const (
-	BannerPatternDefault = "bo"  // 旗帜的默认图案 (方框边)
-	BannerPatternOminous = "ill" // 不详旗帜的图案
-)
+// 不详旗帜的图案
+const BannerPatternOminous = "ill"
 
 // 此表描述了当前版本不存在，但未来版本出现的旗帜图案
 var BannerPatternUnsupported = map[string]bool{

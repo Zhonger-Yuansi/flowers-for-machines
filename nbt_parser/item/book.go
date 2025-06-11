@@ -71,17 +71,19 @@ func (d Book) NeedCheckCompletely() bool {
 	return true
 }
 
-func (b *Book) TypeStableBytes() []byte {
+func (b Book) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
 
-	basicInfo := b.DefaultItem.TypeStableBytes()
-	w.ByteSlice(&basicInfo)
 	protocol.FuncSliceUint16Length(w, &b.NBT.Pages, w.String)
 	w.String(&b.NBT.Author)
 	w.String(&b.NBT.Title)
 
 	return buf.Bytes()
+}
+
+func (b *Book) TypeStableBytes() []byte {
+	return append(b.DefaultItem.TypeStableBytes(), b.NBTStableBytes()...)
 }
 
 func (b *Book) FullStableBytes() []byte {

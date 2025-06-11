@@ -1,7 +1,11 @@
 package nbt_hash
 
-// SetHashNumberNotExist 为 0 指示相应的集合哈希校验和是不存在的
-const SetHashNumberNotExist uint64 = 0
+const (
+	// SetHashNumberNotExist 为 0 指示相应的集合哈希校验和是不存在的
+	SetHashNumberNotExist uint64 = 0
+	// NBTHashNumberNotExist 为 0 指示目标 NBT 物品不存在特殊的 NBT 字段
+	NBTHashNumberNotExist uint64 = 0
+)
 
 // CompletelyHashNumber 描述一个物品或方块的哈希校验和
 type CompletelyHashNumber struct {

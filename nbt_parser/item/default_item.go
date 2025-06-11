@@ -125,6 +125,10 @@ func (d DefaultItem) NeedCheckCompletely() bool {
 	return false
 }
 
+func (d DefaultItem) NBTStableBytes() []byte {
+	return nil
+}
+
 func (d *DefaultItem) TypeStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)

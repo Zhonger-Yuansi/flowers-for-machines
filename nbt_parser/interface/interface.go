@@ -64,6 +64,10 @@ type Item interface {
 	// 如果 NeedSpecialHandle 为假，
 	// 则 NeedCheckCompletely 不应被使用
 	NeedCheckCompletely() bool
+	// NBTStableBytes 返回该物品在 NBT 部分的校验和。
+	// NBT 部分的校验和不含物品组件、物品名称和附魔，
+	// 而仅仅对该物品的特定 NBT 字段进行哈希校验和
+	NBTStableBytes() []byte
 	// TypeStableBytes 返回该种物品的种类哈希校验和。
 	// 这意味着，同种的物品具有一致的种类哈希校验和
 	TypeStableBytes() []byte

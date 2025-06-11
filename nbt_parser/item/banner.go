@@ -59,6 +59,10 @@ func (b *Banner) parse(tag map[string]any) error {
 	}
 
 	b.NBT.Type, _ = tag["Type"].(int32)
+	if b.NBT.Type == nbt_parser_general.BannerTypeOminous {
+		b.NBT.Patterns = nil
+	}
+
 	return nil
 }
 
@@ -93,16 +97,18 @@ func (Banner) NeedCheckCompletely() bool {
 	return false
 }
 
-func (b *Banner) TypeStableBytes() []byte {
+func (b Banner) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
 
-	basicInfo := b.DefaultItem.TypeStableBytes()
-	w.ByteSlice(&basicInfo)
 	protocol.SliceUint16Length(w, &b.NBT.Patterns)
 	w.Varint32(&b.NBT.Type)
 
 	return buf.Bytes()
+}
+
+func (b *Banner) TypeStableBytes() []byte {
+	return append(b.DefaultItem.TypeStableBytes(), b.NBTStableBytes()...)
 }
 
 func (b *Banner) FullStableBytes() []byte {

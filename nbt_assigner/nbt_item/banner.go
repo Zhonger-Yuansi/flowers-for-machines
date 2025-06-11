@@ -14,23 +14,35 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+const (
+	// BannerMaxSlotCanUse 指示单次旗帜制作轮次中，
+	// 可以使用的最多的物品栏数量。
+	// 因为一共有 36 个物品栏，所以该值为 36
+	BannerMaxSlotCanUse uint8 = 36
+	// BannerMaxBannerToMake 是在仅制作旗帜时，
+	// 单次能制作的最多的旗帜数量。
+	// 因为一共有 36 个物品栏，所以最终可以制作
+	// 最多 36 个旗帜
+	BannerMaxBannerToMake uint8 = 36
+	// ShieldMaxBannerToMake 是在制作带图案的盾牌时，
+	// 单次能制作的最多的旗帜数量。考虑到旗帜和盾牌各
+	// 占用一格，并且一共 36 个物品栏，所以最终可以制
+	// 作最多 36/2 = 18 个旗帜
+	ShieldMaxBannerToMake uint8 = 18
+)
+
 // 旗帜
 type Banner struct {
-	api   *nbt_console.Console
-	items []nbt_parser_item.Banner
-}
-
-func TestBanner(api *nbt_console.Console, items []nbt_parser_item.Banner) *Banner {
-	return &Banner{
-		api:   api,
-		items: items,
-	}
+	api             *nbt_console.Console
+	items           []nbt_parser_item.Banner
+	maxSlotCanUse   uint8
+	maxBannerToMake uint8
 }
 
 // planner 计算并给出本次可以制作的旗帜，
 // 以及制作它需要用到的染料和旗帜图案。
 // 保证给出的旗帜列表包含尽可能多的旗帜
-func (b *Banner) planner(maxLimit uint8) (
+func (b *Banner) planner() (
 	bannerToMake []int,
 	colorToUse []int32,
 	colorToUseMapping map[int32]int,
@@ -103,8 +115,8 @@ func (b *Banner) planner(maxLimit uint8) (
 		after := len(usedColors) + bestOneNewColorsCount     // Colors
 		after += len(usedPatterns) + bestOneNewPatternsCount // Patterns
 		after += usedBannersCount + 1                        // Banners
-		// If after more than maxLimit, then we can not make more banner (also include this best banner)
-		if after > int(maxLimit) {
+		// Check if we can make more banner or not
+		if after > int(b.maxSlotCanUse) || usedBannersCount+1 > int(b.maxBannerToMake) {
 			break
 		}
 		// The loop is not break, so we can apply changes, and current best banner can be make
@@ -283,7 +295,7 @@ func (b *Banner) makeNormal(
 		offsetPattern := len(colorToUse)
 		bannerSlot := resources_control.SlotID(len(colorToUse) + len(patternToUse) + idx)
 		// Update result slot
-		resultSlot[nbt_hash.NBTItemTypeHash(&banner)] = bannerSlot
+		resultSlot[nbt_hash.NBTItemNBTHash(&banner)] = bannerSlot
 		// Add loom operation
 		for _, pattern := range banner.NBT.Patterns {
 			_ = transaction.LoomingFromInventory(
@@ -309,6 +321,7 @@ func (b *Banner) makeNormal(
 	return resultSlot, nil
 }
 
+// makeOminous 通过创造物品栏制作一个灾厄旗帜
 func (b *Banner) makeOminous() (resultSlot map[uint64]resources_control.SlotID, err error) {
 	api := b.api.API()
 	inventorySlot := b.api.FindInventorySlot(nil)
@@ -363,7 +376,7 @@ func (b *Banner) makeOminous() (resultSlot map[uint64]resources_control.SlotID, 
 	b.api.UseInventorySlot(nbt_console.RequesterUser, inventorySlot, true)
 
 	return map[uint64]resources_control.SlotID{
-		nbt_hash.NBTItemTypeHash(&b.items[0]): inventorySlot,
+		nbt_hash.NBTItemNBTHash(&b.items[0]): inventorySlot,
 	}, nil
 }
 
@@ -372,7 +385,7 @@ func (b *Banner) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 		return nil, nil
 	}
 
-	bannerToMake, colorToUse, colorToUseMapping, patternToUse, patternToUseMapping := b.planner(36)
+	bannerToMake, colorToUse, colorToUseMapping, patternToUse, patternToUseMapping := b.planner()
 	if len(bannerToMake) > 0 {
 		resultSlot, err = b.makeNormal(bannerToMake, colorToUse, colorToUseMapping, patternToUse, patternToUseMapping)
 	} else {

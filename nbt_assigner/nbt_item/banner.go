@@ -319,6 +319,29 @@ func (b *Banner) makeNormal(
 		return nil, fmt.Errorf("makeNormal: Looming operation rejected by the server")
 	}
 
+	// Check hash only
+	for idx, index := range bannerToMake {
+		banner := b.items[index]
+		bannerSlot := resources_control.SlotID(len(colorToUse) + len(patternToUse) + idx)
+
+		bannerWeGet, inventoryExisted := api.Resources().Inventories().GetItemStack(0, bannerSlot)
+		if !inventoryExisted {
+			panic("Make: Should nerver happened")
+		}
+
+		if bannerWeGet.Stack.NetworkID != int32(api.Resources().ConstantPacket().ItemByName("minecraft:banner").RuntimeID) {
+			panic("Make: Should nerver happened")
+		}
+		newBanner, err := nbt_parser_item.ParseItemNetwork(bannerWeGet.Stack, "minecraft:banner")
+		if err != nil {
+			return nil, fmt.Errorf("Make: %v", err)
+		}
+
+		if nbt_hash.NBTItemNBTHash(newBanner) != nbt_hash.NBTItemNBTHash(&banner) {
+			panic("Make: Should nerver happened")
+		}
+	}
+
 	// Return
 	return resultSlot, nil
 }

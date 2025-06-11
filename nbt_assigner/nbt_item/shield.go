@@ -98,8 +98,9 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 		bannerHashes = append(bannerHashes, hashNumber)
 
 		expectedItem := resources_control.ExpectedNewItem{
-			NetworkID: -1,
-			NBTData:   make(map[string]any),
+			NetworkID:  -1,
+			UseNBTData: true,
+			NBTData:    make(map[string]any),
 		}
 
 		banner := bannerItems[bannerNBTHashToIndex[hashNumber]]
@@ -114,7 +115,7 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 				},
 			}
 		} else {
-			expectedItem.NBTData["Base"] = banner.ItemMetadata()
+			expectedItem.NBTData["Base"] = int32(banner.ItemMetadata())
 
 			nbtPatterns := make([]any, 0)
 			for _, pattern := range banner.NBT.Patterns {
@@ -209,6 +210,30 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 		shield := s.items[originItemIndex]
 		resultSlot[nbt_hash.NBTItemNBTHash(&shield)] = shieldSlot
 		finishedShieldIndex[originItemIndex] = true
+	}
+
+	// Setp 8: Check hash only
+	for index, shieldSlot := range shieldSlots {
+		bannerHashNumber := bannerHashes[index]
+		originItemIndex := bannerNBTHashToIndex[bannerHashNumber]
+		shield := s.items[originItemIndex]
+
+		shieldWeGet, inventoryExisted := api.Resources().Inventories().GetItemStack(0, shieldSlot)
+		if !inventoryExisted {
+			panic("Make: Should nerver happened")
+		}
+
+		if shieldWeGet.Stack.NetworkID != int32(api.Resources().ConstantPacket().ItemByName("minecraft:shield").RuntimeID) {
+			panic("Make: Should nerver happened")
+		}
+		newShield, err := nbt_parser_item.ParseItemNetwork(shieldWeGet.Stack, "minecraft:shield")
+		if err != nil {
+			return nil, fmt.Errorf("Make: %v", err)
+		}
+
+		if nbt_hash.NBTItemNBTHash(newShield) != nbt_hash.NBTItemNBTHash(&shield) {
+			panic("Make: Should nerver happened")
+		}
 	}
 
 	// Step 8: Remove the shield we finished

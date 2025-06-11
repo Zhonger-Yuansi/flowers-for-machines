@@ -111,7 +111,10 @@ func (d DefaultItem) NeedEnchOrRename() bool {
 	return false
 }
 
-func (DefaultItem) IsComplex() bool {
+func (d DefaultItem) IsComplex() bool {
+	if d.Block.SubBlock != nil && d.Block.SubBlock.NeedSpecialHandle() {
+		return true
+	}
 	return false
 }
 

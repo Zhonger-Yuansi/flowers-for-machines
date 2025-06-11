@@ -42,6 +42,20 @@ func (Container) Offset() protocol.BlockPos {
 	return protocol.BlockPos{0, 0, 0}
 }
 
+func (c *Container) Make() error {
+	err := c.makeNormal()
+
+	_, _ = c.console.API().Commands().SendWSCommandWithResp("clear")
+	c.console.CleanInventory()
+	_ = c.console.API().BotClick().ChangeSelectedHotbarSlot(nbt_console.DefaultHotbarSlot)
+	c.console.UpdateHotbarSlotID(nbt_console.DefaultHotbarSlot)
+
+	if err != nil {
+		return fmt.Errorf("Make: %v", err)
+	}
+	return nil
+}
+
 // spawnContainer 在操作台中心生成空的 container。
 // 确保这个容器的自定义物品名称也被考虑在内
 func (c *Container) spawnContainer(container nbt_parser_block.Container) error {
@@ -147,7 +161,7 @@ func (c *Container) spawnContainer(container nbt_parser_block.Container) error {
 		// 放置目标容器
 		_, offsetPos, err := api.BotClick().PlaceBlockHighLevel(c.console.Center(), c.console.HotbarSlotID(), facing)
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 		successFunc()
 		c.console.UpdatePosition(c.console.Center())
@@ -158,7 +172,7 @@ func (c *Container) spawnContainer(container nbt_parser_block.Container) error {
 		// 将该容器保存到基容器缓存命中系统
 		err = c.cache.BaseContainerCache().StoreCache(container.CustomName)
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 
 		// 返回值
@@ -296,7 +310,7 @@ func (c *Container) itemTransition(
 	return nil
 }
 
-func (c *Container) Make() error {
+func (c *Container) makeNormal() error {
 	api := c.console.API()
 
 	// Step 1: 检查该容器是否命中集合校验和
@@ -309,22 +323,22 @@ func (c *Container) Make() error {
 			},
 		)
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 		if hit {
-			panic("Make: Should nerver happened")
+			panic("makeNormal: Should nerver happened")
 		}
 
 		// 如果我们命中了集合哈希校验和
 		if isSetHashHit {
 			container, ok := structure.Block.(*nbt_parser_block.Container)
 			if !ok {
-				panic("Make: Should nerver happened")
+				panic("makeNormal: Should nerver happened")
 			}
 
 			err = c.itemTransition(*container, c.data)
 			if err != nil {
-				return fmt.Errorf("Make: %v", err)
+				return fmt.Errorf("makeNormal: %v", err)
 			}
 
 			return nil
@@ -385,7 +399,7 @@ func (c *Container) Make() error {
 
 		wantContainer, ok := underlying.Block.SubBlock.(*nbt_parser_block.Container)
 		if !ok {
-			panic("Make: Should nerver happened")
+			panic("makeNormal: Should nerver happened")
 		}
 
 		structure, _, partHit, err := c.cache.NBTBlockCache().LoadCache(nbt_hash.CompletelyHashNumber{
@@ -393,25 +407,25 @@ func (c *Container) Make() error {
 			SetHashNumber: nbt_hash.ContainerSetHash(wantContainer),
 		})
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 		if !partHit {
-			panic("Make: Should nerver happened")
+			panic("makeNormal: Should nerver happened")
 		}
 
 		container, ok := structure.Block.(*nbt_parser_block.Container)
 		if !ok {
-			panic("Make: Should nerver happened")
+			panic("makeNormal: Should nerver happened")
 		}
 
 		err = c.itemTransition(*container, *wantContainer)
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 
 		err = c.cache.NBTBlockCache().StoreCache(wantContainer, c.console.Center())
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 	}
 
@@ -422,19 +436,19 @@ func (c *Container) Make() error {
 
 		wantContainer, ok := underlying.Block.SubBlock.(*nbt_parser_block.Container)
 		if !ok {
-			panic("Make: Should nerver happened")
+			panic("makeNormal: Should nerver happened")
 		}
 
 		_, _, _, err := nbt_assigner_interface.PlaceNBTBlock(c.console, c.cache, wantContainer)
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 	}
 
 	// Step 4: 生成当前容器
 	err := c.spawnContainer(c.data)
 	if err != nil {
-		return fmt.Errorf("Make: %v", err)
+		return fmt.Errorf("makeNormal: %v", err)
 	}
 
 	// Step 5: 将子方块放入容器
@@ -442,7 +456,7 @@ func (c *Container) Make() error {
 		// 清空物品栏
 		_, err := api.Commands().SendWSCommandWithResp("clear")
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 
 		// 占用所有物品栏，
@@ -461,7 +475,7 @@ func (c *Container) Make() error {
 				SetHashNumber: nbt_hash.ContainerSetHash(subBlock),
 			})
 			if !hit || partHit {
-				panic("Make: Should nerver happened")
+				panic("makeNormal: Should nerver happened")
 			}
 
 			index, _, block := c.console.FindSpaceToPlaceNewContainer(false)
@@ -474,7 +488,7 @@ func (c *Container) Make() error {
 				c.console.BlockPosByIndex(index),
 			)
 			if err != nil {
-				return fmt.Errorf("Make: %v", err)
+				return fmt.Errorf("makeNormal: %v", err)
 			}
 			c.console.UseHelperBlock(nbt_console.RequesterUser, index, block_helper.ComplexBlock{
 				Name:   structure.Block.BlockName(),
@@ -483,7 +497,7 @@ func (c *Container) Make() error {
 
 			err = c.console.CanReachOrMove(c.console.BlockPosByIndex(index))
 			if err != nil {
-				return fmt.Errorf("Make: %v", err)
+				return fmt.Errorf("makeNormal: %v", err)
 			}
 
 			success, currentSlot, err := api.BotClick().PickBlock(c.console.BlockPosByIndex(index), true)
@@ -492,10 +506,10 @@ func (c *Container) Make() error {
 				c.console.UpdateHotbarSlotID(nbt_console.DefaultHotbarSlot)
 			}
 			if err != nil {
-				return fmt.Errorf("Make: %v", err)
+				return fmt.Errorf("makeNormal: %v", err)
 			}
 			if !success {
-				return fmt.Errorf("Make: Failed to get sub block %#v by pick block", subBlock)
+				return fmt.Errorf("makeNormal: Failed to get sub block %#v by pick block", subBlock)
 			}
 			c.console.UpdateHotbarSlotID(currentSlot)
 		}
@@ -503,16 +517,16 @@ func (c *Container) Make() error {
 		// 现在所有子方块都被 Pick Block 到背包了
 		allItemStack, inventoryExisted := api.Resources().Inventories().GetAllItemStack(0)
 		if !inventoryExisted {
-			panic("Make: Should nerver happened")
+			panic("makeNormal: Should nerver happened")
 		}
 
 		// 打开操作台中心处容器
 		success, err := c.console.OpenContainerByIndex(nbt_console.ConsoleIndexCenterBlock)
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 		if !success {
-			return fmt.Errorf("Make: Failed to open the container %#v when move sub block in it", c.data)
+			return fmt.Errorf("makeNormal: Failed to open the container %#v when move sub block in it", c.data)
 		}
 
 		// 将背包中的每个子方块移动到对应的父节点处
@@ -528,7 +542,7 @@ func (c *Container) Make() error {
 			)
 			if err != nil {
 				_ = api.ContainerOpenAndClose().CloseContainer()
-				return fmt.Errorf("Make: %v", err)
+				return fmt.Errorf("makeNormal: %v", err)
 			}
 
 			hashNumber := nbt_hash.NBTItemNBTHash(newItem)
@@ -541,17 +555,17 @@ func (c *Container) Make() error {
 		success, _, _, err = transaction.Commit()
 		if err != nil {
 			_ = api.ContainerOpenAndClose().CloseContainer()
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 		if !success {
 			_ = api.ContainerOpenAndClose().CloseContainer()
-			return fmt.Errorf("Make: The server rejected the stack request action when move sub block in it")
+			return fmt.Errorf("makeNormal: The server rejected the stack request action when move sub block in it")
 		}
 
 		// 关闭容器
 		err = api.ContainerOpenAndClose().CloseContainer()
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 	}
 
@@ -570,7 +584,7 @@ func (c *Container) Make() error {
 		for {
 			resultSlot, err := item.Make()
 			if err != nil {
-				return fmt.Errorf("Make: %v", err)
+				return fmt.Errorf("makeNormal: %v", err)
 			}
 			if len(resultSlot) == 0 {
 				break
@@ -578,10 +592,10 @@ func (c *Container) Make() error {
 
 			success, err := c.console.OpenContainerByIndex(nbt_console.ConsoleIndexCenterBlock)
 			if err != nil {
-				return fmt.Errorf("Make: %v", err)
+				return fmt.Errorf("makeNormal: %v", err)
 			}
 			if !success {
-				return fmt.Errorf("Make: Failed to open the container %#v when make complex item", c.data)
+				return fmt.Errorf("makeNormal: Failed to open the container %#v when make complex item", c.data)
 			}
 
 			transaction := api.ItemStackOperation().OpenTransaction()
@@ -593,11 +607,11 @@ func (c *Container) Make() error {
 			success, _, _, err = transaction.Commit()
 			if err != nil {
 				_ = api.ContainerOpenAndClose().CloseContainer()
-				return fmt.Errorf("Make: %v", err)
+				return fmt.Errorf("makeNormal: %v", err)
 			}
 			if !success {
 				_ = api.ContainerOpenAndClose().CloseContainer()
-				return fmt.Errorf("Make: The server rejected item stack request action when make complex item")
+				return fmt.Errorf("makeNormal: The server rejected item stack request action when make complex item")
 			}
 			for _, slotID := range resultSlot {
 				c.console.UseInventorySlot(nbt_console.RequesterUser, slotID, false)
@@ -605,7 +619,7 @@ func (c *Container) Make() error {
 
 			err = api.ContainerOpenAndClose().CloseContainer()
 			if err != nil {
-				return fmt.Errorf("Make: %v", err)
+				return fmt.Errorf("makeNormal: %v", err)
 			}
 		}
 	}
@@ -628,17 +642,17 @@ func (c *Container) Make() error {
 		// 清理背包
 		_, err = api.Commands().SendWSCommandWithResp("clear")
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 		c.console.CleanInventory()
 
 		// 打开容器
 		success, err := c.console.OpenContainerByIndex(nbt_console.ConsoleIndexCenterBlock)
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 		if !success {
-			return fmt.Errorf("Make: Failed to open the container %#v when do item copy", c.data)
+			return fmt.Errorf("makeNormal: Failed to open the container %#v when do item copy", c.data)
 		}
 
 		// 将容器中现存的所有物品拿回
@@ -655,17 +669,17 @@ func (c *Container) Make() error {
 		success, _, _, err = transaction.Commit()
 		if err != nil {
 			_ = api.ContainerOpenAndClose().CloseContainer()
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 		if !success {
 			_ = api.ContainerOpenAndClose().CloseContainer()
-			return fmt.Errorf("Make: Failed to move item from container %#v when do item copy", c.data)
+			return fmt.Errorf("makeNormal: Failed to move item from container %#v when do item copy", c.data)
 		}
 
 		// 关闭容器
 		err = api.ContainerOpenAndClose().CloseContainer()
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 
 		// 构造基物品
@@ -704,13 +718,13 @@ func (c *Container) Make() error {
 		if err != nil {
 			api.Commands().SendWSCommandWithResp("clear")
 			c.console.CleanInventory()
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 
 		// 清理背包
 		_, err = api.Commands().SendWSCommandWithResp("clear")
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 		c.console.CleanInventory()
 	}
@@ -733,14 +747,14 @@ func (c *Container) Make() error {
 			utils.MarshalItemComponent(underlying.Enhance.ItemComponent),
 		)
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 	}
 
 	// Step 8.2: 等待更改
 	err = api.Commands().AwaitChangesGeneral()
 	if err != nil {
-		return fmt.Errorf("Make: %v", err)
+		return fmt.Errorf("makeNormal: %v", err)
 	}
 
 	// Step 9.1: 找出所有需要修改物品名称或需要附魔的物品
@@ -755,10 +769,10 @@ func (c *Container) Make() error {
 	if len(enchOrRenameList) > 0 {
 		success, err := c.console.OpenContainerByIndex(nbt_console.ConsoleIndexCenterBlock)
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 		if !success {
-			return fmt.Errorf("Make: Failed to open the container %#v when do ench or rename operation", c.data)
+			return fmt.Errorf("makeNormal: Failed to open the container %#v when do ench or rename operation", c.data)
 		}
 
 		transaction := api.ItemStackOperation().OpenTransaction()
@@ -774,16 +788,16 @@ func (c *Container) Make() error {
 		success, _, _, err = transaction.Commit()
 		if err != nil {
 			_ = api.ContainerOpenAndClose().CloseContainer()
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 		if !success {
 			_ = api.ContainerOpenAndClose().CloseContainer()
-			return fmt.Errorf("Make: The server rejected the stack request action when do ench or rename operation")
+			return fmt.Errorf("makeNormal: The server rejected the stack request action when do ench or rename operation")
 		}
 
 		err = api.ContainerOpenAndClose().CloseContainer()
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 	}
 
@@ -796,7 +810,7 @@ func (c *Container) Make() error {
 		}
 		err = nbt_item.EnchAndRenameMultiple(c.console, multipleItems)
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 	}
 
@@ -804,10 +818,10 @@ func (c *Container) Make() error {
 	if len(enchOrRenameList) > 0 {
 		success, err := c.console.OpenContainerByIndex(nbt_console.ConsoleIndexCenterBlock)
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 		if !success {
-			return fmt.Errorf("Make: Failed to open the container %#v when finish ench or rename operation", c.data)
+			return fmt.Errorf("makeNormal: Failed to open the container %#v when finish ench or rename operation", c.data)
 		}
 
 		transaction := api.ItemStackOperation().OpenTransaction()
@@ -823,16 +837,16 @@ func (c *Container) Make() error {
 		success, _, _, err = transaction.Commit()
 		if err != nil {
 			_ = api.ContainerOpenAndClose().CloseContainer()
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 		if !success {
 			_ = api.ContainerOpenAndClose().CloseContainer()
-			return fmt.Errorf("Make: The server rejected the stack request action when finish ench or rename operation")
+			return fmt.Errorf("makeNormal: The server rejected the stack request action when finish ench or rename operation")
 		}
 
 		err = api.ContainerOpenAndClose().CloseContainer()
 		if err != nil {
-			return fmt.Errorf("Make: %v", err)
+			return fmt.Errorf("makeNormal: %v", err)
 		}
 	}
 

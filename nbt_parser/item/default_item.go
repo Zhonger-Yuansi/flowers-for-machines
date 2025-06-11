@@ -128,19 +128,22 @@ func (d DefaultItem) NeedCheckCompletely() bool {
 func (d DefaultItem) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
+	haveBlock := (len(d.Block.Name) > 0)
 
 	// ItemComponent
 	protocol.Single(w, &d.Enhance.ItemComponent)
 
 	// Block
-	if len(d.Block.Name) > 0 {
+	w.Bool(&haveBlock)
+	if haveBlock {
+		blockStatesString := utils.MarshalBlockStates(d.Block.States)
+		haveSubBlock := (d.Block.SubBlock != nil)
+
 		w.String(&d.Block.Name)
-		utils.MarshalNBT(buf, d.Block.States, "")
+		w.String(&blockStatesString)
 
-		exist := (d.Block.SubBlock != nil)
-		w.Bool(&exist)
-
-		if exist {
+		w.Bool(&haveSubBlock)
+		if haveSubBlock {
 			subBlockData := d.Block.SubBlock.StableBytes()
 			w.ByteSlice(&subBlockData)
 		}

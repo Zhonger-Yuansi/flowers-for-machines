@@ -53,6 +53,9 @@ type Item interface {
 	// ParseNormal 从 nbtMap 解析一个 NBT 物品。
 	// nbtMap 是含有这个物品 tag 标签的父复合标签
 	ParseNormal(nbtMap map[string]any) error
+	// UnderlyingItem 返回这个物品的底层实现，
+	// 这意味着返回值可以被断言为 DefaultItem
+	UnderlyingItem() Item
 	// NeedEnchOrRename 指示在导入这个
 	// NBT 物品时是否需要附魔或重命名
 	NeedEnchOrRename() bool

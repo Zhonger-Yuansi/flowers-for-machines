@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 )
 
@@ -99,6 +100,10 @@ func (d *DefaultItem) ParseNetwork(item protocol.ItemStack, itemName string) err
 	d.parse(basic, enhance, block)
 	// Return
 	return nil
+}
+
+func (d *DefaultItem) UnderlyingItem() nbt_parser_interface.Item {
+	return d
 }
 
 func (d DefaultItem) NeedEnchOrRename() bool {

@@ -63,7 +63,7 @@ func (s StructureBlock) NeedSpecialHandle() bool {
 	if s.NBT.Mirror == 1 {
 		return true
 	}
-	if s.NBT.RedstoneSaveMode == 1 {
+	if s.NBT.RedstoneSaveMode != 0 {
 		return true
 	}
 	if s.NBT.RemoveBlocks == 1 {

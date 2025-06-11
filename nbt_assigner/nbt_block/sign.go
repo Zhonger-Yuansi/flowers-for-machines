@@ -34,7 +34,13 @@ func (s *Sign) replaceitem(itemName string, block bool) error {
 	if err != nil {
 		return fmt.Errorf("replaceitem: %v", err)
 	}
-	s.console.UseInventorySlot(nbt_console.RequesterUser, s.console.HotbarSlotID(), false)
+
+	if itemName == "minecraft:air" {
+		s.console.UseInventorySlot(nbt_console.RequesterUser, s.console.HotbarSlotID(), false)
+	} else {
+		s.console.UseInventorySlot(nbt_console.RequesterUser, s.console.HotbarSlotID(), true)
+	}
+
 	return nil
 }
 

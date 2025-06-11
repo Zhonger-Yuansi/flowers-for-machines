@@ -23,7 +23,12 @@ func (c *CommandBlock) Make() error {
 		mode = packet.CommandBlockRepeating
 	}
 
-	err := api.Resources().WritePacket(&packet.CommandBlockUpdate{
+	err := c.console.CanReachOrMove(c.console.Center())
+	if err != nil {
+		return fmt.Errorf("Make: %v", err)
+	}
+
+	err = api.Resources().WritePacket(&packet.CommandBlockUpdate{
 		Block:              true,
 		Position:           c.console.Center(),
 		Mode:               mode,

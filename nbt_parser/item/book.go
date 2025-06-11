@@ -32,7 +32,11 @@ func (b *Book) parse(tag map[string]any) {
 
 	pages, _ := tag["pages"].([]any)
 	for _, page := range pages {
-		content, ok := page.(string)
+		pageMap, ok := page.(map[string]any)
+		if !ok {
+			continue
+		}
+		content, ok := pageMap["text"].(string)
 		if !ok {
 			continue
 		}

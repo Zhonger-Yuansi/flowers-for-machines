@@ -82,7 +82,7 @@ func ParseItemBlock(itemName string, nbtMap map[string]any) (result ItemBlockDat
 
 // ParseItemBlockNetwork ..
 func ParseItemBlockNetwork(itemName string, item protocol.ItemStack) (result ItemBlockData, err error) {
-	if item.BlockRuntimeID == 0 {
+	if item.BlockRuntimeID != 0 {
 		name, states, found := block.RuntimeIDToState(uint32(item.BlockRuntimeID))
 		if !found {
 			panic("ParseItemBlockNetwork: Should nerver happened")

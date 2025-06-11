@@ -10,7 +10,9 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
 	nbt_parser_general "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/general"
 	nbt_hash "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/hash"
+	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
 	nbt_parser_item "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/item"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -18,6 +20,16 @@ import (
 type Shield struct {
 	api   *nbt_console.Console
 	items []nbt_parser_item.Shield
+}
+
+func (s *Shield) Append(item ...nbt_parser_interface.Item) {
+	for _, value := range item {
+		val, ok := value.(*nbt_parser_item.Shield)
+		if !ok {
+			continue
+		}
+		s.items = append(s.items, *val)
+	}
 }
 
 func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err error) {
@@ -125,7 +137,11 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 	occupySlots := slices.Clone(bannerSlots)
 
 	// Step 3.2: Find slot to place shield and do replaceitem
-	for range bannerSlots {
+	for index := range bannerSlots {
+		bannerHashNumber := bannerHashes[index]
+		originItemIndex := bannerNBTHashToIndex[bannerHashNumber]
+		shield := s.items[originItemIndex]
+
 		inventorySlot := s.api.FindInventorySlot(occupySlots)
 		shieldSlots = append(shieldSlots, inventorySlot)
 
@@ -138,7 +154,7 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 				MetaData: 0,
 				Slot:     inventorySlot,
 			},
-			"",
+			utils.MarshalItemComponent(shield.Enhance.ItemComponent),
 			false,
 		)
 		if err != nil {

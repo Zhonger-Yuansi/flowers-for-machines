@@ -10,7 +10,9 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
 	nbt_parser_general "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/general"
 	nbt_hash "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/hash"
+	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
 	nbt_parser_item "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/item"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -254,7 +256,7 @@ func (b *Banner) makeNormal(
 				MetaData: banner.ItemMetadata(),
 				Slot:     slot,
 			},
-			"",
+			utils.MarshalItemComponent(banner.Enhance.ItemComponent),
 			false,
 		)
 		if err != nil {
@@ -378,6 +380,16 @@ func (b *Banner) makeOminous() (resultSlot map[uint64]resources_control.SlotID, 
 	return map[uint64]resources_control.SlotID{
 		nbt_hash.NBTItemNBTHash(&b.items[0]): inventorySlot,
 	}, nil
+}
+
+func (b *Banner) Append(item ...nbt_parser_interface.Item) {
+	for _, value := range item {
+		val, ok := value.(*nbt_parser_item.Banner)
+		if !ok {
+			continue
+		}
+		b.items = append(b.items, *val)
+	}
 }
 
 func (b *Banner) Make() (resultSlot map[uint64]resources_control.SlotID, err error) {

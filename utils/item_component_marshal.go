@@ -134,6 +134,11 @@ func MarshalItemComponent(component ItemComponent) string {
 		c.KeepOnDeath = &struct{}{}
 	}
 
-	result, _ := json.Marshal(c)
-	return string(result)
+	resultBytes, _ := json.Marshal(c)
+	result := string(resultBytes)
+	if result == "{}" {
+		return ""
+	}
+
+	return result
 }

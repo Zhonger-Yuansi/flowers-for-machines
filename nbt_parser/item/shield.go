@@ -103,7 +103,7 @@ func (s Shield) NeedCheckCompletely() bool {
 	return false
 }
 
-func (s Shield) NBTStableBytes() []byte {
+func (s Shield) complexFieldsOnly() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
 
@@ -114,8 +114,12 @@ func (s Shield) NBTStableBytes() []byte {
 	return buf.Bytes()
 }
 
+func (s Shield) NBTStableBytes() []byte {
+	return append(s.DefaultItem.NBTStableBytes(), s.complexFieldsOnly()...)
+}
+
 func (s *Shield) TypeStableBytes() []byte {
-	return append(s.DefaultItem.TypeStableBytes(), s.NBTStableBytes()...)
+	return append(s.DefaultItem.TypeStableBytes(), s.complexFieldsOnly()...)
 }
 
 func (s *Shield) FullStableBytes() []byte {

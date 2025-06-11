@@ -12,18 +12,10 @@ func NBTBlockHash(block nbt_parser_interface.Block) uint64 {
 }
 
 // NBTItemNBTHash 计算 item 的 NBT 哈希校验和。
-//
-// 它校验的范围并不含物品组件、物品名称和附魔数据，
-// 而仅仅对 item 的特定 NBT 字段进行哈希校验和。
-//
-// 如果这个 NBT 物品没有上述的特定 NBT 字段，
-// 则返回 NBTHashNumberNotExist
+// 它校验的范围并不含物品名称和附魔数据，但校验和
+// 的范围包含它的物品组件数据和特定的 NBT 字段
 func NBTItemNBTHash(item nbt_parser_interface.Item) uint64 {
-	stableBytes := item.NBTStableBytes()
-	if len(stableBytes) == 0 {
-		return NBTHashNumberNotExist
-	}
-	return xxhash.Sum64(stableBytes)
+	return xxhash.Sum64(item.NBTStableBytes())
 }
 
 // NBTItemTypeHash 计算 item 的种类哈希校验和。

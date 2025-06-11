@@ -126,20 +126,11 @@ func (d DefaultItem) NeedCheckCompletely() bool {
 }
 
 func (d DefaultItem) NBTStableBytes() []byte {
-	return nil
-}
-
-func (d *DefaultItem) TypeStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
-	name := d.ItemName()
 
-	// Basic
-	w.String(&name)
-	w.Int16(&d.Basic.Metadata)
-
-	// Enhance
-	protocol.Single(w, &d.Enhance)
+	// ItemComponent
+	protocol.Single(w, &d.Enhance.ItemComponent)
 
 	// Block
 	if len(d.Block.Name) > 0 {
@@ -156,6 +147,22 @@ func (d *DefaultItem) TypeStableBytes() []byte {
 	}
 
 	return buf.Bytes()
+}
+
+func (d *DefaultItem) TypeStableBytes() []byte {
+	buf := bytes.NewBuffer(nil)
+	w := protocol.NewWriter(buf, 0)
+	name := d.ItemName()
+
+	// Basic
+	w.String(&name)
+	w.Int16(&d.Basic.Metadata)
+
+	// Enhance (Display Name, Ench List)
+	w.String(&d.Enhance.DisplayName)
+	protocol.SliceUint16Length(w, &d.Enhance.EnchList)
+
+	return append(d.NBTStableBytes(), buf.Bytes()...)
 }
 
 func (d *DefaultItem) FullStableBytes() []byte {

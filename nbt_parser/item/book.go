@@ -71,7 +71,7 @@ func (d Book) NeedCheckCompletely() bool {
 	return true
 }
 
-func (b Book) NBTStableBytes() []byte {
+func (b Book) complexFieldsOnly() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
 
@@ -82,8 +82,12 @@ func (b Book) NBTStableBytes() []byte {
 	return buf.Bytes()
 }
 
+func (b Book) NBTStableBytes() []byte {
+	return append(b.DefaultItem.NBTStableBytes(), b.complexFieldsOnly()...)
+}
+
 func (b *Book) TypeStableBytes() []byte {
-	return append(b.DefaultItem.TypeStableBytes(), b.NBTStableBytes()...)
+	return append(b.DefaultItem.TypeStableBytes(), b.complexFieldsOnly()...)
 }
 
 func (b *Book) FullStableBytes() []byte {

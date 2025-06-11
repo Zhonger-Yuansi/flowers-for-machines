@@ -97,7 +97,7 @@ func (Banner) NeedCheckCompletely() bool {
 	return false
 }
 
-func (b Banner) NBTStableBytes() []byte {
+func (b Banner) complexFieldsOnly() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
 
@@ -107,8 +107,12 @@ func (b Banner) NBTStableBytes() []byte {
 	return buf.Bytes()
 }
 
+func (b Banner) NBTStableBytes() []byte {
+	return append(b.DefaultItem.NBTStableBytes(), b.complexFieldsOnly()...)
+}
+
 func (b *Banner) TypeStableBytes() []byte {
-	return append(b.DefaultItem.TypeStableBytes(), b.NBTStableBytes()...)
+	return append(b.DefaultItem.TypeStableBytes(), b.complexFieldsOnly()...)
 }
 
 func (b *Banner) FullStableBytes() []byte {

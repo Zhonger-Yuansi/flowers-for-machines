@@ -91,13 +91,6 @@ type ItemEnhanceData struct {
 	EnchList []SingleItemEnch
 }
 
-// Marshal ..
-func (i *ItemEnhanceData) Marshal(io protocol.IO) {
-	protocol.Single(io, &i.ItemComponent)
-	io.String(&i.DisplayName)
-	protocol.SliceUint16Length(io, &i.EnchList)
-}
-
 // ParseItemEnhance ..
 func ParseItemEnhance(nbtMap map[string]any) (result ItemEnhanceData, err error) {
 	result.ItemComponent = utils.ParseItemComponent(nbtMap)

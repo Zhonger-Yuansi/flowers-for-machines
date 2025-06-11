@@ -31,13 +31,13 @@ func SystemTestingItemCache() {
 
 		api.Commands().SendSettingsCommand("gamemode 1", true)
 		api.SetBlock().SetBlock(
-			console.BlockPosByIndex(nbt_console.ConsoleIndexCenterBlock),
+			console.Center(),
 			"chest",
 			chestStatesString,
 		)
 
 		api.Replaceitem().ReplaceitemInContainerAsync(
-			console.BlockPosByIndex(nbt_console.ConsoleIndexCenterBlock),
+			console.Center(),
 			game_interface.ReplaceitemInfo{
 				Name:     "apple",
 				Count:    3,
@@ -47,7 +47,7 @@ func SystemTestingItemCache() {
 			"",
 		)
 		api.Replaceitem().ReplaceitemInContainerAsync(
-			console.BlockPosByIndex(nbt_console.ConsoleIndexCenterBlock),
+			console.Center(),
 			game_interface.ReplaceitemInfo{
 				Name:     "diamond_sword",
 				Count:    1,
@@ -226,11 +226,11 @@ func SystemTestingItemCache() {
 		)
 
 		_, offset, _ := api.BotClick().PlaceBlockHighLevel(
-			console.BlockPosByIndex(nbt_console.ConsoleIndexCenterBlock),
+			console.Center(),
 			console.HotbarSlotID(),
 			0,
 		)
-		console.UpdatePosition(console.BlockPosByIndex(nbt_console.ConsoleIndexCenterBlock))
+		console.UpdatePosition(console.Center())
 		var nearBlock block_helper.BlockHelper = block_helper.NearBlock{
 			Name: game_interface.BasePlaceBlock,
 		}
@@ -238,7 +238,7 @@ func SystemTestingItemCache() {
 		api.Commands().AwaitChangesGeneral()
 
 		api.Replaceitem().ReplaceitemInContainerAsync(
-			console.BlockPosByIndex(nbt_console.ConsoleIndexCenterBlock),
+			console.Center(),
 			game_interface.ReplaceitemInfo{
 				Name:     "apple",
 				Count:    1,
@@ -248,7 +248,7 @@ func SystemTestingItemCache() {
 			"",
 		)
 		api.Replaceitem().ReplaceitemInContainerAsync(
-			console.BlockPosByIndex(nbt_console.ConsoleIndexCenterBlock),
+			console.Center(),
 			game_interface.ReplaceitemInfo{
 				Name:     "diamond_sword",
 				Count:    1,

@@ -40,7 +40,7 @@ func (n *NBTBlockCache) LoadCache(hashNumber nbt_hash.CompletelyHashNumber) (
 
 	err = n.console.API().StructureBackup().RevertStructure(
 		structure.UniqueID,
-		n.console.BlockPosByIndex(nbt_console.ConsoleIndexCenterBlock),
+		n.console.Center(),
 	)
 	if err != nil {
 		return protocol.BlockPos{}, false, false, fmt.Errorf("LoadCache: %v", err)

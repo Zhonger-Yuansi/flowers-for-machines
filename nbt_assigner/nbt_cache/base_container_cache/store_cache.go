@@ -31,7 +31,7 @@ func (b *BaseContainerCache) StoreCache() error {
 	}
 
 	uniqueID, err := b.console.API().StructureBackup().BackupStructure(
-		b.console.BlockPosByIndex(nbt_console.ConsoleIndexCenterBlock),
+		b.console.Center(),
 	)
 	if err != nil {
 		return fmt.Errorf("StoreCache: %v", err)

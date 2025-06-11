@@ -18,32 +18,62 @@ func init() {
 	nbt_assigner_interface.EnchAndRenameMultiple = EnchAndRenameMultiple
 }
 
+func NBTItemIsSupported(item nbt_parser_interface.Item) bool {
+	switch item.(type) {
+	case *nbt_parser_item.Book:
+	case *nbt_parser_item.Banner:
+	case *nbt_parser_item.Shield:
+	default:
+		return false
+	}
+	return true
+}
+
 func MakeNBTItemMethod(
 	console *nbt_console.Console,
 	cache *nbt_cache.NBTCacheSystem,
 	multipleItems ...nbt_parser_interface.Item,
-) (result nbt_assigner_interface.Item, supported bool) {
+) (result []nbt_assigner_interface.Item) {
 	if len(multipleItems) == 0 {
-		return nil, false
+		return nil
 	}
 
-	switch multipleItems[0].(type) {
-	case *nbt_parser_item.Book:
-		result = &Book{api: console}
-	case *nbt_parser_item.Banner:
-		result = &Banner{
+	books := make([]nbt_parser_interface.Item, 0)
+	banners := make([]nbt_parser_interface.Item, 0)
+	shields := make([]nbt_parser_interface.Item, 0)
+
+	for _, item := range multipleItems {
+		switch item.(type) {
+		case *nbt_parser_item.Book:
+			books = append(books, item)
+		case *nbt_parser_item.Banner:
+			banners = append(banners, item)
+		case *nbt_parser_item.Shield:
+			shields = append(shields, item)
+		}
+	}
+
+	if len(books) > 0 {
+		element := &Book{api: console}
+		element.Append(books...)
+		result = append(result, element)
+	}
+	if len(banners) > 0 {
+		element := &Banner{
 			api:             console,
 			maxSlotCanUse:   BannerMaxSlotCanUse,
 			maxBannerToMake: BannerMaxBannerToMake,
 		}
-	case *nbt_parser_item.Shield:
-		result = &Shield{api: console}
-	default:
-		return nil, false
+		element.Append(banners...)
+		result = append(result, element)
+	}
+	if len(shields) > 0 {
+		element := &Shield{api: console}
+		element.Append(shields...)
+		result = append(result, element)
 	}
 
-	result.Append(multipleItems...)
-	return result, true
+	return result
 }
 
 func EnchMultiple(

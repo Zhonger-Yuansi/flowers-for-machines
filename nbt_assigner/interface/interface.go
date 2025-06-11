@@ -8,12 +8,8 @@ import (
 )
 
 var (
-	MakeNBTItemMethod func(
-		console *nbt_console.Console,
-		cache *nbt_cache.NBTCacheSystem,
-		multipleItems ...nbt_parser_interface.Item,
-	) (result Item, supported bool)
-
+	NBTItemIsSupported    func(item nbt_parser_interface.Item) bool
+	MakeNBTItemMethod     func(console *nbt_console.Console, cache *nbt_cache.NBTCacheSystem, multipleItems ...nbt_parser_interface.Item) []Item
 	EnchMultiple          func(console *nbt_console.Console, multipleItems [27]*nbt_parser_interface.Item) error
 	RenameMultiple        func(console *nbt_console.Console, multipleItems [27]*nbt_parser_interface.Item) error
 	EnchAndRenameMultiple func(console *nbt_console.Console, multipleItems [27]*nbt_parser_interface.Item) error

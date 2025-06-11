@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
 	nbt_hash "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/hash"
 	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
 )
@@ -30,7 +29,7 @@ func (n *NBTBlockCache) StoreCache(block nbt_parser_interface.Block, offset prot
 	}
 
 	structure.UniqueID, err = n.console.API().StructureBackup().BackupOffset(
-		n.console.BlockPosByIndex(nbt_console.ConsoleIndexCenterBlock),
+		n.console.Center(),
 		structure.Offset,
 	)
 	if err != nil {

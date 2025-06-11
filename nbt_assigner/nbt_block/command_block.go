@@ -25,7 +25,7 @@ func (c *CommandBlock) Make() error {
 
 	err := api.Resources().WritePacket(&packet.CommandBlockUpdate{
 		Block:              true,
-		Position:           c.blockPos,
+		Position:           c.console.Center(),
 		Mode:               mode,
 		NeedsRedstone:      c.data.NBT.Auto == 0,
 		Conditional:        c.data.NBT.ConditionalMode == 1,

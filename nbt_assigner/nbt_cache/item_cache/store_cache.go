@@ -22,7 +22,7 @@ func (i *ItemCache) StoreCache(
 	if _, ok := (*block).(block_helper.ContainerBlockHelper); !ok {
 		return fmt.Errorf(
 			"StoreCache: Center block who at %#v is not a container; *block = %#v",
-			i.console.BlockPosByIndex(nbt_console.ConsoleIndexCenterBlock), *block,
+			i.console.Center(), *block,
 		)
 	}
 

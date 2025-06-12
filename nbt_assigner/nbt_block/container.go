@@ -366,7 +366,7 @@ func (c *Container) makeNormal() error {
 	subBlockNotHit := make([]int, 0)
 	for index, item := range c.data.NBT.Items {
 		underlying := item.Item.UnderlyingItem().(*nbt_parser_item.DefaultItem)
-		if underlying.Block.SubBlock == nil || !underlying.Block.SubBlock.NeedSpecialHandle() {
+		if underlying.Block.SubBlock == nil {
 			continue
 		}
 

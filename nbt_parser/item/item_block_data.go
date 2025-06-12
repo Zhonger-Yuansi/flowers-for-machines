@@ -75,6 +75,9 @@ func ParseItemBlock(itemName string, nbtMap map[string]any) (result ItemBlockDat
 		if err != nil {
 			return ItemBlockData{}, fmt.Errorf("ParseItemBlock: %v", err)
 		}
+		if !result.SubBlock.NeedSpecialHandle() {
+			result.SubBlock = nil
+		}
 	}
 
 	return
@@ -120,6 +123,9 @@ func ParseItemBlockNetwork(itemName string, item protocol.ItemStack) (result Ite
 		result.SubBlock, err = nbt_parser_interface.ParseBlock(result.Name, result.States, item.NBTData)
 		if err != nil {
 			return ItemBlockData{}, fmt.Errorf("ParseItemBlockNetwork: %v", err)
+		}
+		if !result.SubBlock.NeedSpecialHandle() {
+			result.SubBlock = nil
 		}
 	}
 

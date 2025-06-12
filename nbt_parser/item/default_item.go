@@ -40,7 +40,7 @@ func (d *DefaultItem) parse(basic ItemBasicData, enhance ItemEnhanceData, block 
 	if len(block.Name) != 0 {
 		enhance.EnchList = nil
 	}
-	if block.SubBlock != nil && block.SubBlock.NeedSpecialHandle() {
+	if block.SubBlock != nil {
 		shouldCleanItemLock = true
 	}
 	if len(enhance.EnchList) > 0 || len(enhance.DisplayName) > 0 {

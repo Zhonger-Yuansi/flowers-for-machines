@@ -22,7 +22,12 @@ func (StructrueBlock) Offset() protocol.BlockPos {
 func (s *StructrueBlock) Make() error {
 	api := s.console.API()
 
-	err := s.console.CanReachOrMove(s.console.Center())
+	err := s.console.API().SetBlock().SetBlock(s.console.Center(), s.data.BlockName(), s.data.BlockStatesString())
+	if err != nil {
+		return fmt.Errorf("Make: %v", err)
+	}
+
+	err = s.console.CanReachOrMove(s.console.Center())
 	if err != nil {
 		return fmt.Errorf("Make: %v", err)
 	}

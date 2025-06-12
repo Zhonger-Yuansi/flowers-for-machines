@@ -75,7 +75,7 @@ func (s StructureBlock) NeedSpecialHandle() bool {
 	if s.NBT.Seed != 0 {
 		return true
 	}
-	if s.NBT.ShowBoundingBox == 1 {
+	if s.NBT.ShowBoundingBox == 0 {
 		return true
 	}
 	if len(s.NBT.StructureName) > 0 {

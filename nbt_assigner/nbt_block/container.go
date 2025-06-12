@@ -426,13 +426,7 @@ func (c *Container) makeNormal() error {
 	for _, index := range subBlockNotHit {
 		item := c.data.NBT.Items[index]
 		underlying := item.Item.UnderlyingItem().(*nbt_parser_item.DefaultItem)
-
-		wantContainer, ok := underlying.Block.SubBlock.(*nbt_parser_block.Container)
-		if !ok {
-			panic("makeNormal: Should nerver happened")
-		}
-
-		_, _, _, err := nbt_assigner_interface.PlaceNBTBlock(c.console, c.cache, wantContainer)
+		_, _, _, err := nbt_assigner_interface.PlaceNBTBlock(c.console, c.cache, underlying.Block.SubBlock)
 		if err != nil {
 			return fmt.Errorf("makeNormal: %v", err)
 		}

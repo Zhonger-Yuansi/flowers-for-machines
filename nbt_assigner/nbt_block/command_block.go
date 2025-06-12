@@ -29,7 +29,12 @@ func (c *CommandBlock) Make() error {
 		mode = packet.CommandBlockRepeating
 	}
 
-	err := c.console.CanReachOrMove(c.console.Center())
+	err := c.console.API().SetBlock().SetBlock(c.console.Center(), c.data.BlockName(), c.data.BlockStatesString())
+	if err != nil {
+		return fmt.Errorf("Make: %v", err)
+	}
+
+	err = c.console.CanReachOrMove(c.console.Center())
 	if err != nil {
 		return fmt.Errorf("Make: %v", err)
 	}

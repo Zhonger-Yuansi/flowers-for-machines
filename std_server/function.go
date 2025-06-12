@@ -35,6 +35,7 @@ func PlaceNBTBlock(c *gin.Context) {
 			ErrorType: ResponseErrorTypeParseError,
 			ErrorInfo: fmt.Sprintf("Failed to parse request; err = %v", err),
 		})
+		return
 	}
 
 	blockNBTBytes, err := base64.StdEncoding.DecodeString(request.BlockNBTBase64String)
@@ -44,6 +45,7 @@ func PlaceNBTBlock(c *gin.Context) {
 			ErrorType: ResponseErrorTypeParseError,
 			ErrorInfo: fmt.Sprintf("Failed to parse block NBT base64 string; err = %v", err),
 		})
+		return
 	}
 	err = nbt.UnmarshalEncoding(blockNBTBytes, &blockNBT, nbt.LittleEndian)
 	if err != nil {
@@ -52,6 +54,7 @@ func PlaceNBTBlock(c *gin.Context) {
 			ErrorType: ResponseErrorTypeParseError,
 			ErrorInfo: fmt.Sprintf("Block NBT bytes is broken; err = %v", err),
 		})
+		return
 	}
 
 	canFast, uniqueID, offset, err := wrapper.PlaceNBTBlock(
@@ -65,6 +68,7 @@ func PlaceNBTBlock(c *gin.Context) {
 			ErrorType: ResponseErrorTypeRuntimeError,
 			ErrorInfo: fmt.Sprintf("Runtime error: Failed to place NBT block; err = %v", err),
 		})
+		return
 	}
 
 	c.JSON(http.StatusOK, PlaceNBTBlockResponse{

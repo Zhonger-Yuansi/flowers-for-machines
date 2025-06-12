@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"strings"
+	"time"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/client"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
@@ -13,6 +13,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
+	"github.com/pterm/pterm"
 )
 
 var (
@@ -80,6 +81,7 @@ func main() {
 
 	resources = resources_control.NewResourcesControl(mcClient)
 	gameInterface = game_interface.NewGameInterface(resources)
+	requestPermission()
 
 	console, err = nbt_console.NewConsole(
 		gameInterface,
@@ -96,4 +98,24 @@ func main() {
 	wrapper = nbt_assigner.NewNBTAssigner(console, cache)
 
 	RunServer()
+}
+
+func requestPermission() {
+	ticker := time.NewTicker(time.Second * 3)
+	defer ticker.Stop()
+
+	for {
+		resp, err := gameInterface.Commands().SendWSCommandWithResp("querytarget @s")
+		if err != nil {
+			panic(err)
+		}
+
+		if resp.SuccessCount == 0 {
+			pterm.Warning.Printfln("缺少管理员权限，请给予 %s 管理员权限", gameInterface.GetBotInfo().BotName)
+			<-ticker.C
+			continue
+		}
+
+		break
+	}
 }

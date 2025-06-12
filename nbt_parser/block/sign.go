@@ -40,12 +40,6 @@ func (s *Sign) NeedSpecialHandle() bool {
 		if len(value.Text) > 0 {
 			return true
 		}
-		if value.SignTextColor != utils.EncodeVarRGBA(0, 0, 0, 255) {
-			return true
-		}
-		if value.IgnoreLighting == 1 {
-			return true
-		}
 	}
 
 	return false

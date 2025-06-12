@@ -139,7 +139,7 @@ func PlaceNBTBlock(
 		}
 
 		if hashNumber.HashNumber != nbt_hash.NBTBlockHash(newBlock) {
-			return PlaceNBTBlock(console, cache, newBlock)
+			return PlaceNBTBlock(console, cache, nbtBlock)
 		}
 	}
 

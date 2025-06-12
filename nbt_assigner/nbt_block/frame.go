@@ -41,7 +41,7 @@ func (f *Frame) processComplex() (canUseCommand bool, resultSlot resources_contr
 			return false, 0, fmt.Errorf("processComplex: %v", err)
 		}
 
-		_, err = f.console.API().Commands().SendPlayerCommandWithResp("clear")
+		_, err = f.console.API().Commands().SendWSCommandWithResp("clear")
 		if err != nil {
 			return false, 0, fmt.Errorf("processComplex: %v", err)
 		}

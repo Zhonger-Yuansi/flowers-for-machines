@@ -15,7 +15,7 @@ type LecternNBT struct {
 	Book         nbt_parser_interface.Item
 }
 
-// 物品展示框
+// 讲台
 type Lectern struct {
 	DefaultBlock
 	NBT LecternNBT
@@ -25,7 +25,7 @@ func (l Lectern) NeedSpecialHandle() bool {
 	return l.NBT.HaveBook
 }
 
-func (l Lectern) NeedCheckCompletely() bool {
+func (Lectern) NeedCheckCompletely() bool {
 	return true
 }
 

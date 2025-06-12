@@ -81,4 +81,5 @@ var SubBlocksPool = map[uint8]bool{
 	SupportNBTBlockTypeSign:           true,
 	SupportNBTBlockTypeStructureBlock: true,
 	SupportNBTBlockTypeLectern:        true,
+	SupportNBTBlockTypeJukeBox:        true,
 }

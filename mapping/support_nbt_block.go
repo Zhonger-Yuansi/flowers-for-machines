@@ -8,6 +8,7 @@ const (
 	SupportNBTBlockTypeStructureBlock
 	SupportNBTBlockTypeBanner
 	SupportNBTBlockTypeLectern
+	SupportNBTBlockTypeJukeBox
 )
 
 // 此表描述了现阶段已经支持了的方块实体。
@@ -92,4 +93,6 @@ var SupportBlocksPool = map[string]uint8{
 	"minecraft:wall_banner":     SupportNBTBlockTypeBanner,
 	// 讲台
 	"minecraft:lectern": SupportNBTBlockTypeLectern,
+	// 唱片机
+	"minecraft:jukebox": SupportNBTBlockTypeJukeBox,
 }

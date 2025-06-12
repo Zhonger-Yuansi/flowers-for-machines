@@ -41,6 +41,12 @@ func (f *Frame) processComplex() (canUseCommand bool, resultSlot resources_contr
 			return false, 0, fmt.Errorf("processComplex: %v", err)
 		}
 
+		_, err = f.console.API().Commands().SendPlayerCommandWithResp("clear")
+		if err != nil {
+			return false, 0, fmt.Errorf("processComplex: %v", err)
+		}
+		f.console.CleanInventory()
+
 		success, currentSlot, err := api.BotClick().PickBlock(f.console.Center(), true)
 		if err != nil || !success {
 			_ = api.BotClick().ChangeSelectedHotbarSlot(nbt_console.DefaultHotbarSlot)
@@ -53,6 +59,7 @@ func (f *Frame) processComplex() (canUseCommand bool, resultSlot resources_contr
 			return false, 0, fmt.Errorf("processComplex: Failed to pick block due to unknown reason")
 		}
 		f.console.UpdateHotbarSlotID(currentSlot)
+		f.console.UseInventorySlot(nbt_console.RequesterUser, currentSlot, true)
 
 		return false, currentSlot, nil
 	}

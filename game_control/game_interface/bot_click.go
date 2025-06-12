@@ -293,15 +293,15 @@ func (b *BotClick) PlaceBlockHighLevel(
 		pos[2] + offsetPos[2],
 	}
 
-	err = b.s.SetBlockAsync(pos, "air", "[]")
-	if err != nil {
-		return clickPos, offsetPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
-	}
-	err = b.s.SetBlockAsync(clickPos, BasePlaceBlock, "[]")
+	err = b.s.SetBlock(pos, "air", "[]")
 	if err != nil {
 		return clickPos, offsetPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
 	}
 	err = b.c.SendSettingsCommand(fmt.Sprintf("tp %d %d %d", pos[0], pos[1], pos[2]), true)
+	if err != nil {
+		return clickPos, offsetPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
+	}
+	err = b.s.SetBlock(clickPos, BasePlaceBlock, "[]")
 	if err != nil {
 		return clickPos, offsetPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
 	}

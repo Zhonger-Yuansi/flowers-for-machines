@@ -8,6 +8,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
 	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
@@ -15,8 +16,8 @@ import (
 )
 
 type Sign struct {
-	NBTBlockBase
-	data nbt_parser_block.Sign
+	console *nbt_console.Console
+	data    nbt_parser_block.Sign
 }
 
 func (s *Sign) replaceitem(itemName string, block bool) error {
@@ -80,10 +81,15 @@ func (s *Sign) Make() error {
 	if err != nil {
 		return fmt.Errorf("Make: %v", err)
 	}
+	s.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.Air{})
 	err = s.console.API().SetBlock().SetBlock(s.console.Center(), helperSignBlock, helperBlockStates)
 	if err != nil {
 		return fmt.Errorf("Make: %v", err)
 	}
+	s.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
+		Name:   helperSignBlock,
+		States: utils.ParseBlockStatesString(helperBlockStates),
+	})
 
 	// 打开告示牌
 	err = s.console.CanReachOrMove(s.console.Center())
@@ -195,6 +201,10 @@ func (s *Sign) Make() error {
 	if err != nil {
 		return fmt.Errorf("Make: %v", err)
 	}
+	s.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
+		Name:   s.data.BlockName(),
+		States: s.data.BlockStates(),
+	})
 
 	return nil
 }

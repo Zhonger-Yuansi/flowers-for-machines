@@ -5,13 +5,14 @@ import (
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
 	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
 	"github.com/go-gl/mathgl/mgl32"
 )
 
 type StructrueBlock struct {
-	NBTBlockBase
-	data nbt_parser_block.StructureBlock
+	console *nbt_console.Console
+	data    nbt_parser_block.StructureBlock
 }
 
 func (StructrueBlock) Offset() protocol.BlockPos {

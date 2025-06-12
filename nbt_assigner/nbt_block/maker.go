@@ -24,6 +24,7 @@ func NBTBlockIsSupported(block nbt_parser_interface.Block) bool {
 	case *nbt_parser_block.Sign:
 	case *nbt_parser_block.StructureBlock:
 	case *nbt_parser_block.Container:
+	case *nbt_parser_block.Banner:
 	default:
 		return false
 	}
@@ -42,11 +43,6 @@ func PlaceNBTBlock(
 ) {
 	// 初始化
 	var method nbt_assigner_interface.Block
-	nbtBlockBase := NBTBlockBase{
-		console: console,
-		cache:   cache,
-	}
-
 	hashNumber := nbt_hash.CompletelyHashNumber{
 		HashNumber:    nbt_hash.NBTBlockHash(nbtBlock),
 		SetHashNumber: nbt_hash.ContainerSetHash(nbtBlock),
@@ -67,23 +63,30 @@ func PlaceNBTBlock(
 	switch block := nbtBlock.(type) {
 	case *nbt_parser_block.CommandBlock:
 		method = &CommandBlock{
-			NBTBlockBase: nbtBlockBase,
-			data:         *block,
+			console: console,
+			data:    *block,
 		}
 	case *nbt_parser_block.Sign:
 		method = &Sign{
-			NBTBlockBase: nbtBlockBase,
-			data:         *block,
+			console: console,
+			data:    *block,
 		}
 	case *nbt_parser_block.StructureBlock:
 		method = &StructrueBlock{
-			NBTBlockBase: nbtBlockBase,
-			data:         *block,
+			console: console,
+			data:    *block,
 		}
 	case *nbt_parser_block.Container:
 		method = &Container{
-			NBTBlockBase: nbtBlockBase,
-			data:         *block,
+			console: console,
+			cache:   cache,
+			data:    *block,
+		}
+	case *nbt_parser_block.Banner:
+		method = &Banner{
+			console: console,
+			cache:   cache,
+			data:    *block,
 		}
 	}
 

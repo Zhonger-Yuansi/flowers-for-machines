@@ -5,12 +5,13 @@ import (
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
 	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
 )
 
 type CommandBlock struct {
-	NBTBlockBase
-	data nbt_parser_block.CommandBlock
+	console *nbt_console.Console
+	data    nbt_parser_block.CommandBlock
 }
 
 func (CommandBlock) Offset() protocol.BlockPos {

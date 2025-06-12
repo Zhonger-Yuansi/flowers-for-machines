@@ -20,22 +20,9 @@ import (
 )
 
 type Container struct {
-	NBTBlockBase
-	data nbt_parser_block.Container
-}
-
-func NewContainer(
-	console *nbt_console.Console,
-	cache *nbt_cache.NBTCacheSystem,
-	data nbt_parser_block.Container,
-) *Container {
-	return &Container{
-		NBTBlockBase: NBTBlockBase{
-			console: console,
-			cache:   cache,
-		},
-		data: data,
-	}
+	console *nbt_console.Console
+	cache   *nbt_cache.NBTCacheSystem
+	data    nbt_parser_block.Container
 }
 
 func (Container) Offset() protocol.BlockPos {

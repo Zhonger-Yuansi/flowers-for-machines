@@ -116,12 +116,10 @@ func (s *StructureBlock) Parse(nbtMap map[string]any) error {
 	return nil
 }
 
-func (s StructureBlock) StableBytes() []byte {
+func (s StructureBlock) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
-	basicInfo := s.DefaultBlock.StableBytes()
 
-	w.ByteSlice(&basicInfo)
 	w.Uint8(&s.NBT.AnimationMode)
 	w.Float32(&s.NBT.AnimationSeconds)
 	w.Varint32(&s.NBT.Data)
@@ -144,4 +142,8 @@ func (s StructureBlock) StableBytes() []byte {
 	w.Varint32(&s.NBT.ZStructureSize)
 
 	return buf.Bytes()
+}
+
+func (s *StructureBlock) FullStableBytes() []byte {
+	return append(s.DefaultBlock.FullStableBytes(), s.NBTStableBytes()...)
 }

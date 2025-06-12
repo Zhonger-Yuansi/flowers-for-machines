@@ -56,7 +56,7 @@ func PlaceNBTBlock(
 	// 初始化
 	var method nbt_assigner_interface.Block
 	hashNumber := nbt_hash.CompletelyHashNumber{
-		HashNumber:    nbt_hash.NBTBlockHash(nbtBlock),
+		HashNumber:    nbt_hash.NBTBlockFullHash(nbtBlock),
 		SetHashNumber: nbt_hash.ContainerSetHash(nbtBlock),
 	}
 
@@ -138,7 +138,7 @@ func PlaceNBTBlock(
 			return false, uuid.UUID{}, protocol.BlockPos{}, fmt.Errorf("PlaceNBTBlock: %v", err)
 		}
 
-		if hashNumber.HashNumber != nbt_hash.NBTBlockHash(newBlock) {
+		if hashNumber.HashNumber != nbt_hash.NBTBlockFullHash(newBlock) {
 			return PlaceNBTBlock(console, cache, nbtBlock)
 		}
 	}

@@ -92,13 +92,9 @@ func (s *Sign) Parse(nbtMap map[string]any) error {
 	return nil
 }
 
-func (s Sign) StableBytes() []byte {
+func (s Sign) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
-
-	basicInfo := s.DefaultBlock.StableBytes()
-	w.ByteSlice(&basicInfo)
-	w.Uint8(&s.NBT.IsWaxed)
 
 	texts := []SignText{s.NBT.FrontText, s.NBT.BackText}
 	for _, value := range texts {
@@ -106,6 +102,11 @@ func (s Sign) StableBytes() []byte {
 		w.Int32(&value.SignTextColor)
 		w.Uint8(&value.IgnoreLighting)
 	}
+	w.Uint8(&s.NBT.IsWaxed)
 
 	return buf.Bytes()
+}
+
+func (s *Sign) FullStableBytes() []byte {
+	return append(s.DefaultBlock.FullStableBytes(), s.NBTStableBytes()...)
 }

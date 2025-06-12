@@ -73,12 +73,10 @@ func (c *CommandBlock) Parse(nbtMap map[string]any) error {
 	return nil
 }
 
-func (c CommandBlock) StableBytes() []byte {
+func (c CommandBlock) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
-	basicInfo := c.DefaultBlock.StableBytes()
 
-	w.ByteSlice(&basicInfo)
 	w.String(&c.NBT.Command)
 	w.String(&c.NBT.CustomName)
 	w.Varint32(&c.NBT.TickDelay)
@@ -86,4 +84,8 @@ func (c CommandBlock) StableBytes() []byte {
 	w.Uint8(&c.NBT.Auto)
 
 	return buf.Bytes()
+}
+
+func (c *CommandBlock) FullStableBytes() []byte {
+	return append(c.DefaultBlock.FullStableBytes(), c.NBTStableBytes()...)
 }

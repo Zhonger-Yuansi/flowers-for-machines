@@ -129,10 +129,11 @@ func (d DefaultItem) NeedCheckCompletely() bool {
 	return false
 }
 
-func (d DefaultItem) NBTStableBytes() []byte {
+func (d *DefaultItem) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
 
+	itemName := d.ItemName()
 	haveBlock := (len(d.Block.Name) > 0)
 	haveSubBlock := (d.Block.SubBlock != nil)
 
@@ -142,10 +143,10 @@ func (d DefaultItem) NBTStableBytes() []byte {
 	// Block
 	w.Bool(&haveBlock)
 	if haveBlock {
-		w.String(&d.Block.Name)
+		w.String(&itemName)
 		w.Bool(&haveSubBlock)
 		if haveSubBlock {
-			subBlockData := d.Block.SubBlock.StableBytes()
+			subBlockData := d.Block.SubBlock.NBTStableBytes()
 			w.ByteSlice(&subBlockData)
 		}
 	}

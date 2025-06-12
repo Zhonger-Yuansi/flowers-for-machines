@@ -47,12 +47,9 @@ func (f *Frame) Parse(nbtMap map[string]any) error {
 	return nil
 }
 
-func (f Frame) StableBytes() []byte {
+func (f Frame) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
-
-	basicInfo := f.DefaultBlock.StableBytes()
-	w.ByteSlice(&basicInfo)
 
 	w.Bool(&f.NBT.HaveItem)
 	if f.NBT.HaveItem {
@@ -61,4 +58,8 @@ func (f Frame) StableBytes() []byte {
 	}
 
 	return buf.Bytes()
+}
+
+func (f *Frame) FullStableBytes() []byte {
+	return append(f.DefaultBlock.FullStableBytes(), f.NBTStableBytes()...)
 }

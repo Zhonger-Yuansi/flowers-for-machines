@@ -78,15 +78,17 @@ func (b *Banner) Parse(nbtMap map[string]any) error {
 	return nil
 }
 
-func (b Banner) StableBytes() []byte {
+func (b Banner) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
-	basicInfo := b.DefaultBlock.StableBytes()
 
-	w.ByteSlice(&basicInfo)
 	w.Varint32(&b.NBT.Base)
 	protocol.SliceUint16Length(w, &b.NBT.Patterns)
 	w.Varint32(&b.NBT.Type)
 
 	return buf.Bytes()
+}
+
+func (b *Banner) FullStableBytes() []byte {
+	return append(b.DefaultBlock.FullStableBytes(), b.NBTStableBytes()...)
 }

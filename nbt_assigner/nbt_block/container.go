@@ -316,7 +316,7 @@ func (c *Container) makeNormal() error {
 		// 尝试从底层缓存命中系统加载
 		structure, hit, isSetHashHit, err := c.cache.NBTBlockCache().LoadCache(
 			nbt_hash.CompletelyHashNumber{
-				HashNumber:    nbt_hash.NBTBlockHash(&c.data),
+				HashNumber:    nbt_hash.NBTBlockFullHash(&c.data),
 				SetHashNumber: nbt_hash.ContainerSetHash(&c.data),
 			},
 		)
@@ -377,7 +377,7 @@ func (c *Container) makeNormal() error {
 		allSubBlocksSet[hashNumber] = true
 
 		_, hit, partHit := c.cache.NBTBlockCache().CheckCache(nbt_hash.CompletelyHashNumber{
-			HashNumber:    nbt_hash.NBTBlockHash(underlying.Block.SubBlock),
+			HashNumber:    nbt_hash.NBTBlockFullHash(underlying.Block.SubBlock),
 			SetHashNumber: nbt_hash.ContainerSetHash(underlying.Block.SubBlock),
 		})
 
@@ -401,7 +401,7 @@ func (c *Container) makeNormal() error {
 		}
 
 		structure, _, partHit, err := c.cache.NBTBlockCache().LoadCache(nbt_hash.CompletelyHashNumber{
-			HashNumber:    nbt_hash.NBTBlockHash(wantContainer),
+			HashNumber:    nbt_hash.NBTBlockFullHash(wantContainer),
 			SetHashNumber: nbt_hash.ContainerSetHash(wantContainer),
 		})
 		if err != nil {
@@ -463,7 +463,7 @@ func (c *Container) makeNormal() error {
 			subBlock := underlying.(*nbt_parser_item.DefaultItem).Block.SubBlock
 
 			structure, hit, partHit := c.cache.NBTBlockCache().CheckCache(nbt_hash.CompletelyHashNumber{
-				HashNumber:    nbt_hash.NBTBlockHash(subBlock),
+				HashNumber:    nbt_hash.NBTBlockFullHash(subBlock),
 				SetHashNumber: nbt_hash.ContainerSetHash(subBlock),
 			})
 			if !hit || partHit {

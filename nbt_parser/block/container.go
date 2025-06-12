@@ -102,22 +102,20 @@ func (c *Container) Parse(nbtMap map[string]any) error {
 	return nil
 }
 
-func (b *Container) StableBytes() []byte {
+func (c Container) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
-	isShulkerBox := strings.Contains(b.BlockName(), "shulker")
-	basicInfo := b.DefaultBlock.StableBytes()
+	isShulkerBox := strings.Contains(c.BlockName(), "shulker")
 
-	w.ByteSlice(&basicInfo)
-	w.String(&b.CustomName)
+	w.String(&c.CustomName)
 	w.Bool(&isShulkerBox)
 	if isShulkerBox {
-		w.Uint8(&b.NBT.ShulkerFacing)
+		w.Uint8(&c.NBT.ShulkerFacing)
 	}
 
 	itemMapping := make(map[uint8]ItemWithSlot)
 	slots := make([]uint8, 0)
-	for _, value := range b.NBT.Items {
+	for _, value := range c.NBT.Items {
 		itemMapping[value.Slot] = value
 		slots = append(slots, value.Slot)
 	}
@@ -135,8 +133,12 @@ func (b *Container) StableBytes() []byte {
 	return buf.Bytes()
 }
 
-func (b Container) SetBytes() []byte {
-	if len(b.NBT.Items) == 0 {
+func (c *Container) FullStableBytes() []byte {
+	return append(c.DefaultBlock.FullStableBytes(), c.NBTStableBytes()...)
+}
+
+func (c Container) SetBytes() []byte {
+	if len(c.NBT.Items) == 0 {
 		return nil
 	}
 
@@ -144,7 +146,7 @@ func (b Container) SetBytes() []byte {
 	w := protocol.NewWriter(buf, 0)
 
 	itemMapping := make(map[uint64]uint16)
-	for _, value := range b.NBT.Items {
+	for _, value := range c.NBT.Items {
 		setHashNumber := xxhash.Sum64(value.Item.TypeStableBytes())
 		itemMapping[setHashNumber] += uint16(value.Item.ItemCount())
 	}

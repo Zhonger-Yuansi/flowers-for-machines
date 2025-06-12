@@ -16,7 +16,7 @@ func (n *NBTBlockCache) StoreCache(block nbt_parser_interface.Block, offset prot
 
 	structure := StructureNBTBlock{
 		HashNumber: nbt_hash.CompletelyHashNumber{
-			HashNumber:    nbt_hash.NBTBlockHash(block),
+			HashNumber:    nbt_hash.NBTBlockFullHash(block),
 			SetHashNumber: nbt_hash.ContainerSetHash(block),
 		},
 		Offset: offset,

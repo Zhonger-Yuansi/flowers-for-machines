@@ -42,7 +42,11 @@ func (DefaultBlock) NeedCheckCompletely() bool {
 	return false
 }
 
-func (d DefaultBlock) StableBytes() []byte {
+func (DefaultBlock) NBTStableBytes() []byte {
+	return nil
+}
+
+func (d DefaultBlock) FullStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
 

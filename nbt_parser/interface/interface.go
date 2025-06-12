@@ -34,9 +34,13 @@ type Block interface {
 	// 如果 NeedSpecialHandle 为假，
 	// 则 NeedCheckCompletely 不应被使用
 	NeedCheckCompletely() bool
-	// StableBytes 返回这个方块实体的数据
-	// 的稳定唯一表示
-	StableBytes() []byte
+	// NBTStableBytes 返回这个方块实体在特定
+	// 字段上的稳定唯一表示
+	NBTStableBytes() []byte
+	// FullStableBytes 返回这个方块实体的数据
+	// 的稳定唯一表示。其与 NBTStableBytes 的
+	// 区别在于它还会考虑方块的名称和方块状态
+	FullStableBytes() []byte
 }
 
 // Item 是所有已实现的 NBT 物品的统称

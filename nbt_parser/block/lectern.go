@@ -42,12 +42,9 @@ func (l *Lectern) Parse(nbtMap map[string]any) error {
 	return nil
 }
 
-func (l Lectern) StableBytes() []byte {
+func (l Lectern) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
-
-	basicInfo := l.DefaultBlock.StableBytes()
-	w.ByteSlice(&basicInfo)
 
 	w.Bool(&l.NBT.HaveBook)
 	if l.NBT.HaveBook {
@@ -56,4 +53,8 @@ func (l Lectern) StableBytes() []byte {
 	}
 
 	return buf.Bytes()
+}
+
+func (l *Lectern) FullStableBytes() []byte {
+	return append(l.DefaultBlock.FullStableBytes(), l.NBTStableBytes()...)
 }

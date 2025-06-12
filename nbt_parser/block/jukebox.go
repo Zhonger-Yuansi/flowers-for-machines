@@ -42,12 +42,9 @@ func (j *JukeBox) Parse(nbtMap map[string]any) error {
 	return nil
 }
 
-func (j JukeBox) StableBytes() []byte {
+func (j JukeBox) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
-
-	basicInfo := j.DefaultBlock.StableBytes()
-	w.ByteSlice(&basicInfo)
 
 	w.Bool(&j.NBT.HaveDisc)
 	if j.NBT.HaveDisc {
@@ -56,4 +53,8 @@ func (j JukeBox) StableBytes() []byte {
 	}
 
 	return buf.Bytes()
+}
+
+func (j *JukeBox) FullStableBytes() []byte {
+	return append(j.DefaultBlock.FullStableBytes(), j.NBTStableBytes()...)
 }

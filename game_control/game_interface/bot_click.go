@@ -249,8 +249,8 @@ func (b *BotClick) PlaceBlock(
 // 它通过方块点击的方式，直接在 pos 处创建朝向为 facing
 // 的方块。其中 hotBarSlot 指代要放置的方块在快捷栏的位置。
 //
-// 应当说明的是，在调用 PlaceBlockHighLevel 后，机器人会
-// 出现在 pos 所指示的位置。
+// 应当说明的是，PlaceBlockHighLevel 的调用者有义务保证
+// 调用 PlaceBlockHighLevel 前，机器人以及出现在 pos 所指示的位置。
 //
 // clickPos 指示为了生成目标方块而使用的基方块，它与 pos 是不等价的，
 // 但可以确保 clickPos 和 pos 是相邻的。
@@ -294,10 +294,6 @@ func (b *BotClick) PlaceBlockHighLevel(
 	}
 
 	err = b.s.SetBlock(pos, "air", "[]")
-	if err != nil {
-		return clickPos, offsetPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
-	}
-	err = b.c.SendSettingsCommand(fmt.Sprintf("tp %d %d %d", pos[0], pos[1], pos[2]), true)
 	if err != nil {
 		return clickPos, offsetPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
 	}

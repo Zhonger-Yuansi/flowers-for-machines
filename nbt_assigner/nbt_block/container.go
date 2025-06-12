@@ -145,13 +145,18 @@ func (c *Container) spawnContainer(container nbt_parser_block.Container) error {
 			facing = c.data.NBT.ShulkerFacing
 		}
 
+		// 移动机器人到操作台中心
+		err = c.console.CanReachOrMove(c.console.Center())
+		if err != nil {
+			return fmt.Errorf("makeNormal: %v", err)
+		}
+
 		// 放置目标容器
 		_, offsetPos, err := api.BotClick().PlaceBlockHighLevel(c.console.Center(), c.console.HotbarSlotID(), facing)
 		if err != nil {
 			return fmt.Errorf("makeNormal: %v", err)
 		}
 		successFunc()
-		c.console.UpdatePosition(c.console.Center())
 		*c.console.NearBlockByIndex(nbt_console.ConsoleIndexCenterBlock, offsetPos) = block_helper.NearBlock{
 			Name: game_interface.BasePlaceBlock,
 		}

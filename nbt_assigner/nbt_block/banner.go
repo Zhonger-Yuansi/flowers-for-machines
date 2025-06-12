@@ -145,7 +145,6 @@ func (b *Banner) Make() error {
 	if err != nil {
 		return fmt.Errorf("Make: %v", err)
 	}
-	b.console.UpdatePosition(b.console.Center())
 	b.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
 		Name:   helperBannerBlock,
 		States: utils.ParseBlockStatesString(helperBlockStates),

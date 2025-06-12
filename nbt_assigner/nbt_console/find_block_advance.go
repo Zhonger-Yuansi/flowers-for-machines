@@ -109,8 +109,8 @@ func (c Console) FindNonAnvilAndNonLoom(includeCenter bool) (index int, offset p
 	}
 
 	index = rand.Intn(len(idxs))
-	offset = helperBlockMapping[index]
-	block = c.helperBlocks[index]
+	offset = helperBlockMapping[idxs[index]]
+	block = c.helperBlocks[idxs[index]]
 
 	return
 }

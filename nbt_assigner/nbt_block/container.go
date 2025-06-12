@@ -759,6 +759,12 @@ func (c *Container) makeNormal() error {
 
 	// Step 9.2: 将需要修改物品名称或需要附魔的物品移动到背包
 	if len(enchOrRenameList) > 0 {
+		_, err = api.Commands().SendWSCommandWithResp("clear")
+		if err != nil {
+			return fmt.Errorf("makeNormal: %v", err)
+		}
+		c.console.CleanInventory()
+
 		success, err := c.console.OpenContainerByIndex(nbt_console.ConsoleIndexCenterBlock)
 		if err != nil {
 			return fmt.Errorf("makeNormal: %v", err)

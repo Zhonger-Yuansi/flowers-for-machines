@@ -157,7 +157,7 @@ position 不一定需要是真实的，
 该函数在通常情况下被用于十分精细的操作，
 例如为告示牌的特定面附加发光效果。
 
-此函数不会自动切换物品栏，也不会等待租赁服响应更改
+此函数不会自动切换物品栏，但会等待租赁服响应更改
 */
 func (b *BotClick) ClickBlockWitchPosition(
 	request UseItemOnBlocks,
@@ -178,7 +178,7 @@ func (b *BotClick) ClickBlockWitchPosition(
 你亦可以对物品展示框使用这样的操作，
 这会使得物品被放入或令展示框内的物品旋转。
 
-此函数不会自动切换物品栏，也不会等待租赁服响应更改
+此函数不会自动切换物品栏，但会等待租赁服响应更改
 */
 func (b *BotClick) ClickBlock(request UseItemOnBlocks) error {
 	err := b.clickBlock(request, 0, mgl32.Vec3{})
@@ -189,7 +189,7 @@ func (b *BotClick) ClickBlock(request UseItemOnBlocks) error {
 }
 
 // 使用快捷栏 hotbarSlotID 进行一次空点击操作。
-// 此函数不会自动切换物品栏，也不会等待租赁服响应更改
+// 此函数不会自动切换物品栏，但会等待租赁服响应更改
 func (b *BotClick) ClickAir(hotbarSlot resources_control.SlotID) error {
 	// Step 1: 获取手持物品栏物品数据信息
 	item, inventoryExisted := b.r.Inventories().GetItemStack(0, hotbarSlot)
@@ -231,7 +231,7 @@ request 指代实际被点击的方块，但这并不代表新方块被创建的
 我们通过点击 request 处的方块，并指定点击的面为 blockFace ，
 然后租赁服根据这些信息，在另外相应的位置创建这些新的方块。
 
-此函数不会自动切换物品栏，也不会等待租赁服响应更改
+此函数不会自动切换物品栏，但会等待租赁服响应更改
 */
 func (b *BotClick) PlaceBlock(
 	request UseItemOnBlocks,

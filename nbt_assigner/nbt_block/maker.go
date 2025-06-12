@@ -25,6 +25,7 @@ func NBTBlockIsSupported(block nbt_parser_interface.Block) bool {
 	case *nbt_parser_block.StructureBlock:
 	case *nbt_parser_block.Container:
 	case *nbt_parser_block.Banner:
+	case *nbt_parser_block.Frame:
 	default:
 		return false
 	}
@@ -54,8 +55,8 @@ func PlaceNBTBlock(
 	}
 
 	// 检查 NBT 缓存命中系统
-	structure, hit, _ := cache.NBTBlockCache().CheckCache(hashNumber)
-	if hit {
+	structure, hit, partHit := cache.NBTBlockCache().CheckCache(hashNumber)
+	if hit && !partHit {
 		return false, structure.UniqueID, structure.Offset, nil
 	}
 
@@ -84,6 +85,12 @@ func PlaceNBTBlock(
 		}
 	case *nbt_parser_block.Banner:
 		method = &Banner{
+			console: console,
+			cache:   cache,
+			data:    *block,
+		}
+	case *nbt_parser_block.Frame:
+		method = &Frame{
 			console: console,
 			cache:   cache,
 			data:    *block,

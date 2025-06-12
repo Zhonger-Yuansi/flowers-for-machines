@@ -109,7 +109,7 @@ func (b *Banner) Make() error {
 		}
 
 		success, _, _, err = api.ItemStackOperation().OpenTransaction().
-			MoveBetweenInventory(resultSlotID, resultSlotID, uint8(b.console.HotbarSlotID())).
+			MoveBetweenInventory(resultSlotID, b.console.HotbarSlotID(), 1).
 			Commit()
 		if err != nil {
 			_ = api.ContainerOpenAndClose().CloseContainer()

@@ -191,6 +191,12 @@ func (c *Container) itemTransition(
 	}
 	c.console.CleanInventory()
 
+	// 占用所有物品栏，
+	// 因为我们无法确保数据匹配
+	for index := range 36 {
+		c.console.UseInventorySlot(nbt_console.RequesterUser, resources_control.SlotID(index), true)
+	}
+
 	// 打开加载好的容器
 	success, err := c.console.OpenContainerByIndex(nbt_console.ConsoleIndexCenterBlock)
 	if err != nil {
@@ -250,7 +256,7 @@ func (c *Container) itemTransition(
 	dst := make([]game_interface.ItemInfoWithSlot, 0)
 
 	// 处理源
-	for _, item := range srcContainer.NBT.Items {
+	for index, item := range srcContainer.NBT.Items {
 		hashNumber := nbt_hash.NBTItemTypeHash(item.Item)
 
 		if _, ok := itemTypeMapping[hashNumber]; !ok {
@@ -259,7 +265,7 @@ func (c *Container) itemTransition(
 		}
 
 		src = append(src, game_interface.ItemInfoWithSlot{
-			Slot: resources_control.SlotID(item.Slot),
+			Slot: resources_control.SlotID(index),
 			ItemInfo: game_interface.ItemInfo{
 				Count:    item.Item.ItemCount(),
 				ItemType: itemTypeMapping[hashNumber],
@@ -312,7 +318,7 @@ func (c *Container) makeNormal() error {
 		if err != nil {
 			return fmt.Errorf("makeNormal: %v", err)
 		}
-		if hit {
+		if hit && !isSetHashHit {
 			panic("makeNormal: Should nerver happened")
 		}
 

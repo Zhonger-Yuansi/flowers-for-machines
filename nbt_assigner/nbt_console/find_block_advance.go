@@ -200,7 +200,8 @@ func (c *Console) FindOrGenerateNewAnvil() (index int, err error) {
 	}
 
 	nearBlock := c.NearBlockByIndex(index, protocol.BlockPos{0, -1, 0})
-	if _, ok := (*nearBlock).(block_helper.Air); ok {
+	switch (*nearBlock).(type) {
+	case block_helper.Air, block_helper.ComplexBlock:
 		needFloorBlock = true
 	}
 

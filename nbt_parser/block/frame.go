@@ -38,8 +38,10 @@ func (f *Frame) Parse(nbtMap map[string]any) error {
 		if err != nil {
 			return fmt.Errorf("Parse: %v", err)
 		}
-		f.NBT.HaveItem = true
-		f.NBT.Item = item
+		if item.ItemName() != "minecraft:filled_map" {
+			f.NBT.HaveItem = true
+			f.NBT.Item = item
+		}
 	}
 
 	return nil

@@ -2,6 +2,7 @@ package nbt_console
 
 import (
 	"fmt"
+	"math/rand"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
@@ -74,9 +75,10 @@ func (c Console) FindLoom(includeCenter bool) (index int, offset protocol.BlockP
 	return 0, protocol.BlockPos{}, nil
 }
 
-// FindNonAnvil 从操作台的帮助方块中寻找一
-// 个非铁砧方块。这意味目标方块将可以是空气、
-// 容器，或织布机。
+// FindNonAnvilAndNonLoom 从操作台的帮助方块
+// 中寻找一个既不是铁砧，也不是织布机的方块。
+//
+// 这意味目标方块将可以是空气、容器或其他方块。
 //
 // includeCenter 指示要查找的方块是否也包括操
 // 作台中心处的方块。
@@ -84,51 +86,38 @@ func (c Console) FindLoom(includeCenter bool) (index int, offset protocol.BlockP
 // 返回的 index 可用于 BlockByIndex，
 // 而返回的 offset 可用于 BlockByOffset。
 //
-// 如果返回的 block 不为空，则说明找到，
-// 否则没有找到。找到的方块可以通过修改
-// 其指向的值从而将它变成其他方块
-func (c Console) FindNonAnvil(includeCenter bool) (index int, offset protocol.BlockPos, block *block_helper.BlockHelper) {
-	for index, value := range c.helperBlocks {
-		if !includeCenter && index == 0 {
-			continue
-		}
-		if _, ok := (*value).(block_helper.AnvilBlockHelper); !ok {
-			return index, helperBlockMapping[index], value
-		}
-	}
-	return 0, protocol.BlockPos{}, nil
-}
+// FindNonAnvilAndNonLoom 在设计上认为一定
+// 可以找到目标的方块。
+//
+// 找到的方块可以通过修改其指向的值从而将它变成其他方块
+func (c Console) FindNonAnvilAndNonLoom(includeCenter bool) (index int, offset protocol.BlockPos, block *block_helper.BlockHelper) {
+	idxs := make([]int, 0)
 
-// FindNonContainerAndNonAnvil 从操作台的帮
-// 助方块中寻找一个不是容器且也不是铁砧的方块。
-// 这意味目标方块将可以是空气或织布机。
-//
-// includeCenter 指示要查找的方块是否也包括操
-// 作台中心处的方块。
-//
-// 返回的 index 可用于 BlockByIndex，
-// 而返回的 offset 可用于 BlockByOffset。
-//
-// 如果返回的 block 不为空，则说明找到，
-// 否则没有找到。找到的方块可以通过修改
-// 其指向的值从而将它变成其他方块
-func (c Console) FindNonContainerAndNonAnvil(includeCenter bool) (index int, offset protocol.BlockPos, block *block_helper.BlockHelper) {
 	for index, value := range c.helperBlocks {
 		if !includeCenter && index == 0 {
 			continue
 		}
 		switch (*value).(type) {
-		case block_helper.ContainerBlockHelper:
-		case block_helper.AnvilBlockHelper:
+		case block_helper.AnvilBlockHelper, block_helper.LoomBlockHelper:
 		default:
-			return index, helperBlockMapping[index], value
+			idxs = append(idxs, index)
 		}
 	}
-	return 0, protocol.BlockPos{}, nil
+
+	if len(idxs) == 0 {
+		panic("FindNonAnvilAndNonLoom: Should nerver happened")
+	}
+
+	index = rand.Intn(len(idxs))
+	offset = helperBlockMapping[index]
+	block = c.helperBlocks[index]
+
+	return
 }
 
-// FindSpaceToPlaceNewContainer 尝试从操作台
-// 找到一个位置以便于使用者在该处放置新容器。
+// FindSpaceToPlaceNewBlock 尝试从操作台
+// 找到一个位置以便于使用者放置一个新的方块。
+// 它可以是帮助方块、容器，或者其他方块。
 //
 // includeCenter 指示要查找的方块是否也包括操
 // 作台中心处的方块。
@@ -136,10 +125,11 @@ func (c Console) FindNonContainerAndNonAnvil(includeCenter bool) (index int, off
 // 返回的 index 可用于 BlockByIndex，
 // 而返回的 offset 可用于 BlockByOffset。
 //
-// 如果返回的 block 不为空，则说明目标方块被
-// 找到，否则没有找到。找到的方块可以通过修改
-// 其指向的值从而将它变成其他方块
-func (c Console) FindSpaceToPlaceNewContainer(includeCenter bool) (
+// FindSpaceToPlaceNewBlock 在设计上认为
+// 一定可以找到目标的方块。
+//
+// 找到的方块可以通过修改其指向的值从而将它变成其他方块
+func (c Console) FindSpaceToPlaceNewBlock(includeCenter bool) (
 	index int,
 	offset protocol.BlockPos,
 	block *block_helper.BlockHelper,
@@ -149,34 +139,9 @@ func (c Console) FindSpaceToPlaceNewContainer(includeCenter bool) (
 		return
 	}
 
-	index, offset, block = c.FindNonContainerAndNonAnvil(includeCenter)
-	return
-}
-
-// FindSpaceToPlaceHelper 尝试从操作台找到一个位置以便于使用者
-// 在该处放置帮助方块。帮助方块应当是铁砧或织布机。
-//
-// 对于容器，应当使用 FindSpaceToPlaceNewContainer 进行查找。
-// includeCenter 指示要查找的方块是否也包括操作台中心处的方块。
-//
-// 返回的 index 可用于 BlockByIndex，
-// 而返回的 offset 可用于 BlockByOffset。
-//
-// 可以保证在正确使用操作台的情况下一定可以找到需要的方块。
-// 另外，找到的方块可以通过修改其指向的值从而将它变成其他方块
-func (c Console) FindSpaceToPlaceHelper(includeCenter bool) (
-	index int,
-	offset protocol.BlockPos,
-	block *block_helper.BlockHelper,
-) {
-	index, offset, block = c.FindAir(includeCenter)
-	if block != nil {
-		return
-	}
-
-	index, offset, block = c.FindNonAnvil(includeCenter)
+	index, offset, block = c.FindNonAnvilAndNonLoom(includeCenter)
 	if block == nil {
-		panic("FindSpaceToPlaceHelper: Should nerver happend")
+		panic("FindSpaceToPlaceNewBlock: Should nerver happened")
 	}
 
 	return
@@ -194,7 +159,7 @@ func (c *Console) FindOrGenerateNewAnvil() (index int, err error) {
 		return
 	}
 
-	index, _, block = c.FindSpaceToPlaceHelper(false)
+	index, _, block = c.FindSpaceToPlaceNewBlock(false)
 	if block == nil {
 		panic("FindOrGenerateNewAnvil: Should nerver happened")
 	}
@@ -233,7 +198,7 @@ func (c *Console) FindOrGenerateNewLoom() (index int, err error) {
 		return
 	}
 
-	index, _, block = c.FindSpaceToPlaceHelper(false)
+	index, _, block = c.FindSpaceToPlaceNewBlock(false)
 	if block == nil {
 		panic("FindOrGenerateNewLoom: Should nerver happened")
 	}

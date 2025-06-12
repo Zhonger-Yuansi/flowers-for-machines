@@ -470,9 +470,9 @@ func (c *Container) makeNormal() error {
 				panic("makeNormal: Should nerver happened")
 			}
 
-			index, _, block := c.console.FindSpaceToPlaceNewContainer(false)
+			index, _, block := c.console.FindSpaceToPlaceNewBlock(false)
 			if block == nil {
-				index = nbt_console.ConsoleIndexFirstHelperBlock
+				panic("makeNormal: Should nerver happened")
 			}
 
 			err = api.StructureBackup().RevertStructure(

@@ -27,6 +27,7 @@ func NBTBlockIsSupported(block nbt_parser_interface.Block) bool {
 	case *nbt_parser_block.Container:
 	case *nbt_parser_block.Banner:
 	case *nbt_parser_block.Frame:
+	case *nbt_parser_block.Lectern:
 	default:
 		return false
 	}
@@ -100,6 +101,12 @@ func PlaceNBTBlock(
 		}
 	case *nbt_parser_block.Frame:
 		method = &Frame{
+			console: console,
+			cache:   cache,
+			data:    *block,
+		}
+	case *nbt_parser_block.Lectern:
+		method = &Lectern{
 			console: console,
 			cache:   cache,
 			data:    *block,

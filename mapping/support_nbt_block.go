@@ -7,6 +7,7 @@ const (
 	SupportNBTBlockTypeFrame
 	SupportNBTBlockTypeStructureBlock
 	SupportNBTBlockTypeBanner
+	SupportNBTBlockTypeLectern
 )
 
 // 此表描述了现阶段已经支持了的方块实体。
@@ -29,7 +30,6 @@ var SupportBlocksPool = map[string]uint8{
 	"minecraft:hopper":                 SupportNBTBlockTypeContainer,
 	"minecraft:dispenser":              SupportNBTBlockTypeContainer,
 	"minecraft:dropper":                SupportNBTBlockTypeContainer,
-	"minecraft:jukebox":                SupportNBTBlockTypeContainer,
 	"minecraft:brewing_stand":          SupportNBTBlockTypeContainer,
 	"minecraft:undyed_shulker_box":     SupportNBTBlockTypeContainer,
 	"minecraft:white_shulker_box":      SupportNBTBlockTypeContainer,
@@ -90,4 +90,6 @@ var SupportBlocksPool = map[string]uint8{
 	// 旗帜
 	"minecraft:standing_banner": SupportNBTBlockTypeBanner,
 	"minecraft:wall_banner":     SupportNBTBlockTypeBanner,
+	// 讲台
+	"minecraft:lectern": SupportNBTBlockTypeLectern,
 }

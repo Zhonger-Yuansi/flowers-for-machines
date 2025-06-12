@@ -1,0 +1,147 @@
+package nbt_block
+
+import (
+	"fmt"
+
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+	nbt_assigner_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/interface"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
+	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
+	nbt_parser_item "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/item"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
+)
+
+type Lectern struct {
+	console *nbt_console.Console
+	cache   *nbt_cache.NBTCacheSystem
+	data    nbt_parser_block.Lectern
+}
+
+func (Lectern) Offset() protocol.BlockPos {
+	return protocol.BlockPos{0, 0, 0}
+}
+
+func (l *Lectern) Make() error {
+	var targetSlot resources_control.SlotID
+	api := l.console.API()
+
+	// 生成讲台
+	err := api.SetBlock().SetBlock(l.console.Center(), l.data.BlockName(), l.data.BlockStatesString())
+	if err != nil {
+		return fmt.Errorf("Make: %v", err)
+	}
+
+	// 如果书可以直接使用命令放置
+	if !l.data.NBT.Book.IsComplex() && !l.data.NBT.Book.NeedEnchOrRename() {
+		underlying := l.data.NBT.Book.UnderlyingItem()
+		defaultItem := underlying.(*nbt_parser_item.DefaultItem)
+
+		err = api.Replaceitem().ReplaceitemInContainerAsync(
+			l.console.Center(),
+			game_interface.ReplaceitemInfo{
+				Name:     l.data.NBT.Book.ItemName(),
+				Count:    l.data.NBT.Book.ItemCount(),
+				MetaData: l.data.NBT.Book.ItemMetadata(),
+				Slot:     0,
+			},
+			utils.MarshalItemComponent(defaultItem.Enhance.ItemComponent),
+		)
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
+
+		err = api.Commands().AwaitChangesGeneral()
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
+
+		return nil
+	}
+
+	// 制作成书
+	methods := nbt_assigner_interface.MakeNBTItemMethod(l.console, l.cache, l.data.NBT.Book)
+	if len(methods) != 1 {
+		panic("Make: Should nerver happened")
+	}
+	resultSlot, err := methods[0].Make()
+	if err != nil {
+		return fmt.Errorf("Make: %v", err)
+	}
+	if len(resultSlot) != 1 {
+		panic("Make: Should nerver happened")
+	}
+	for _, slotID := range resultSlot {
+		targetSlot = slotID
+	}
+
+	// 如果成书具有自定义物品名称
+	if l.data.NBT.Book.NeedEnchOrRename() {
+		underlying := l.data.NBT.Book.UnderlyingItem()
+		defaultItem := underlying.(*nbt_parser_item.DefaultItem)
+
+		if len(defaultItem.Enhance.DisplayName) == 0 {
+			panic("Make: Should nerver happened")
+		}
+
+		index, err := l.console.FindOrGenerateNewAnvil()
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
+
+		success, err := l.console.OpenContainerByIndex(index)
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
+		if !success {
+			return fmt.Errorf("Make: Failed to open the anvil")
+		}
+
+		success, _, _, err = api.ItemStackOperation().OpenTransaction().
+			RenameInventoryItem(targetSlot, defaultItem.Enhance.DisplayName).
+			Commit()
+		if err != nil {
+			_ = api.ContainerOpenAndClose().CloseContainer()
+			return fmt.Errorf("Make: %v", err)
+		}
+		if !success {
+			_ = api.ContainerOpenAndClose().CloseContainer()
+			return fmt.Errorf("Make: The server rejected the renaming operation")
+		}
+
+		err = api.ContainerOpenAndClose().CloseContainer()
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
+	}
+
+	// 切换手持物品栏
+	if targetSlot != l.console.HotbarSlotID() {
+		err = api.BotClick().ChangeSelectedHotbarSlot(targetSlot)
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
+		l.console.UpdateHotbarSlotID(targetSlot)
+	}
+
+	// 传送到操作台中心
+	err = l.console.CanReachOrMove(l.console.Center())
+	if err != nil {
+		return fmt.Errorf("Make: %v", err)
+	}
+
+	// 放置成书
+	err = api.BotClick().ClickBlock(game_interface.UseItemOnBlocks{
+		HotbarSlotID: l.console.HotbarSlotID(),
+		BlockPos:     l.console.Center(),
+		BlockName:    l.data.BlockName(),
+		BlockStates:  l.data.BlockStates(),
+	})
+	if err != nil {
+		return fmt.Errorf("Make: %v", err)
+	}
+
+	return nil
+}

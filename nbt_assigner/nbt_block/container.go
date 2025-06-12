@@ -11,7 +11,6 @@ import (
 	nbt_assigner_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_item"
 	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
 	nbt_hash "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/hash"
 	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
@@ -800,7 +799,7 @@ func (c *Container) makeNormal() error {
 			item := c.data.NBT.Items[index]
 			multipleItems[item.Slot] = &item.Item
 		}
-		err = nbt_item.EnchAndRenameMultiple(c.console, multipleItems)
+		err = nbt_assigner_interface.EnchAndRenameMultiple(c.console, multipleItems)
 		if err != nil {
 			return fmt.Errorf("makeNormal: %v", err)
 		}

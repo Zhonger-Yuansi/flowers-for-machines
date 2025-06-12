@@ -28,7 +28,6 @@ type ContainerNBT struct {
 // 容器
 type Container struct {
 	DefaultBlock
-	CanOpen    bool
 	CustomName string
 	NBT        ContainerNBT
 }
@@ -61,9 +60,6 @@ func (c *Container) ConsiderOpenDirection() bool {
 func (c *Container) Parse(nbtMap map[string]any) error {
 	itemList := make([]map[string]any, 0)
 
-	if !mapping.ContainerCanNotOpen[c.BlockName()] {
-		c.CanOpen = true
-	}
 	key, ok := mapping.ContainerStorageKey[c.BlockName()]
 	if !ok {
 		panic("Parse: Should nerver happened")

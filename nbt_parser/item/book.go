@@ -21,6 +21,7 @@ type Book struct {
 
 // parse ..
 func (b *Book) parse(tag map[string]any) {
+	b.DefaultItem.Basic.Metadata = 0
 	b.DefaultItem.Enhance.ItemComponent.LockInInventory = false
 	b.DefaultItem.Enhance.ItemComponent.LockInSlot = false
 	b.DefaultItem.Enhance.EnchList = nil

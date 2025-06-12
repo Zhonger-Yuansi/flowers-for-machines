@@ -20,7 +20,6 @@ var ContainerStorageKey map[string]string = map[string]string{
 	"minecraft:hopper":        "Items",
 	"minecraft:dispenser":     "Items",
 	"minecraft:dropper":       "Items",
-	"minecraft:jukebox":       "RecordItem",
 	"minecraft:barrel":        "Items",
 	// 各种颜色或未被染色的潜影盒
 	"minecraft:undyed_shulker_box":     "Items",
@@ -40,10 +39,4 @@ var ContainerStorageKey map[string]string = map[string]string{
 	"minecraft:green_shulker_box":      "Items",
 	"minecraft:red_shulker_box":        "Items",
 	"minecraft:black_shulker_box":      "Items",
-}
-
-// ContainerCanNotOpen 记载了已支持的容器中，
-// 无法通过方块点击操作打开的容器
-var ContainerCanNotOpen = map[string]bool{
-	"minecraft:jukebox": true,
 }

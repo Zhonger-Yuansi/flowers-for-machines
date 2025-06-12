@@ -32,6 +32,21 @@ type Container struct {
 	NBT        ContainerNBT
 }
 
+// SetShulkerBoxFacing 将 container 的潜影盒朝向设置为 facing。
+// SetShulkerBoxFacing 假定 container 可以被断言为 Container。
+// 如果不是 Container，则 SetShulkerBoxFacing 将不执行任何操作
+func SetShulkerBoxFacing(container nbt_parser_interface.Block, facing uint8) {
+	c, ok := container.(*Container)
+	if !ok {
+		return
+	}
+	c.NBT.ShulkerFacing = facing
+}
+
+func init() {
+	nbt_parser_interface.SetShulkerBoxFacing = SetShulkerBoxFacing
+}
+
 func (c Container) NeedSpecialHandle() bool {
 	if len(c.CustomName) > 0 {
 		return true

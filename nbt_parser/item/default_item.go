@@ -119,16 +119,6 @@ func (d DefaultItem) IsComplex() bool {
 	return false
 }
 
-func (d DefaultItem) NeedCheckCompletely() bool {
-	if len(d.Enhance.EnchList) > 0 {
-		return true
-	}
-	if d.Block.SubBlock != nil && d.Block.SubBlock.NeedCheckCompletely() {
-		return true
-	}
-	return false
-}
-
 func (d *DefaultItem) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
@@ -157,10 +147,8 @@ func (d *DefaultItem) NBTStableBytes() []byte {
 func (d *DefaultItem) TypeStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
-	name := d.ItemName()
 
 	// Basic
-	w.String(&name)
 	w.Int16(&d.Basic.Metadata)
 
 	// Enhance (Display Name, Ench List)

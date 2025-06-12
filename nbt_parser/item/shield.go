@@ -99,10 +99,6 @@ func (s Shield) IsComplex() bool {
 	return false
 }
 
-func (s Shield) NeedCheckCompletely() bool {
-	return false
-}
-
 func (s Shield) complexFieldsOnly() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)

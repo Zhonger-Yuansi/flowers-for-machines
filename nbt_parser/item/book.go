@@ -72,10 +72,6 @@ func (b *Book) IsComplex() bool {
 	return false
 }
 
-func (d Book) NeedCheckCompletely() bool {
-	return true
-}
-
 func (b Book) complexFieldsOnly() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)

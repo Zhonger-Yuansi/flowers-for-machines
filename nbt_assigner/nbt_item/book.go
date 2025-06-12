@@ -129,10 +129,6 @@ func (b *Book) Make() (resultSlot map[uint64]resources_control.SlotID, err error
 
 		// Check completely
 		for index, book := range currentRound {
-			if !book.NeedCheckCompletely() {
-				continue
-			}
-
 			item, inventoryExisted := api.Resources().Inventories().GetItemStack(0, bookSlots[index])
 			if !inventoryExisted {
 				panic("Make: Should nerver happened")

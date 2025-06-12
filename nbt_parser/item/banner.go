@@ -93,10 +93,6 @@ func (b Banner) IsComplex() bool {
 	return false
 }
 
-func (Banner) NeedCheckCompletely() bool {
-	return false
-}
-
 func (b Banner) complexFieldsOnly() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)

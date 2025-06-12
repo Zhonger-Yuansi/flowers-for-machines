@@ -6,7 +6,6 @@ import (
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
-	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
 	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
 	"github.com/TriM-Organization/bedrock-world-operator/block"
 	"github.com/df-mc/worldupgrader/blockupgrader"
@@ -85,7 +84,7 @@ func ParseItemBlock(itemName string, nbtMap map[string]any) (result ItemBlockDat
 		}
 		if subBlock.NeedSpecialHandle() {
 			if strings.Contains(subBlock.BlockName(), "shulker") {
-				subBlock.(*nbt_parser_block.Container).NBT.ShulkerFacing = 1
+				nbt_parser_interface.SetShulkerBoxFacing(subBlock, 1)
 			}
 			result.SubBlock = subBlock
 		}
@@ -137,7 +136,7 @@ func ParseItemBlockNetwork(itemName string, item protocol.ItemStack) (result Ite
 		}
 		if subBlock.NeedSpecialHandle() {
 			if strings.Contains(subBlock.BlockName(), "shulker") {
-				subBlock.(*nbt_parser_block.Container).NBT.ShulkerFacing = 1
+				nbt_parser_interface.SetShulkerBoxFacing(subBlock, 1)
 			}
 			result.SubBlock = subBlock
 		}

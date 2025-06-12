@@ -14,6 +14,11 @@ var (
 	ParseItemNetwork func(itemStack protocol.ItemStack, itemName string) (item Item, err error)
 )
 
+// SetShulkerBoxFacing 将 container 的潜影盒朝向设置为 facing。
+// SetShulkerBoxFacing 假定 container 可以被断言为 Container。
+// 如果不是 Container，则 SetShulkerBoxFacing 将不执行任何操作
+var SetShulkerBoxFacing func(container Block, facing uint8)
+
 // Block 是所有已实现的 NBT 方块的统称
 type Block interface {
 	// BlockName 返回这个方块的名称
@@ -66,11 +71,6 @@ type Item interface {
 	// IsComplex 指示这个物品是否
 	// 需要进一步的特殊处理才能得到
 	IsComplex() bool
-	// NeedCheckCompletely 指示在完成这个
-	// NBT 物品的导入后是否需要检查其完整性。
-	// 如果 NeedSpecialHandle 为假，
-	// 则 NeedCheckCompletely 不应被使用
-	NeedCheckCompletely() bool
 	// NBTStableBytes 返回该物品在 NBT 部分的校验和。
 	// NBT 的部分不包含物品名称和附魔数据，但包括物品
 	// 组件和这个物品特定的一些 NBT 字段

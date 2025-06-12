@@ -18,6 +18,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 )
 
+// 容器
 type Container struct {
 	console *nbt_console.Console
 	cache   *nbt_cache.NBTCacheSystem

@@ -10,6 +10,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
+// 结构方块
 type StructrueBlock struct {
 	console *nbt_console.Console
 	data    nbt_parser_block.StructureBlock

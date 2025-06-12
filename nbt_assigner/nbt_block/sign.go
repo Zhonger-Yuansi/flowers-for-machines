@@ -15,6 +15,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
+// 告示牌
 type Sign struct {
 	console *nbt_console.Console
 	data    nbt_parser_block.Sign

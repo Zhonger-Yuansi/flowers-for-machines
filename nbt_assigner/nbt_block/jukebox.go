@@ -12,6 +12,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 )
 
+// 唱片机
 type JukeBox struct {
 	console *nbt_console.Console
 	cache   *nbt_cache.NBTCacheSystem

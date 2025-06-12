@@ -108,9 +108,10 @@ func (c Console) FindNonAnvilAndNonLoom(includeCenter bool) (index int, offset p
 		panic("FindNonAnvilAndNonLoom: Should nerver happened")
 	}
 
-	index = rand.Intn(len(idxs))
-	offset = helperBlockMapping[idxs[index]]
-	block = c.helperBlocks[idxs[index]]
+	randIndex := rand.Intn(len(idxs))
+	index = idxs[randIndex]
+	offset = helperBlockMapping[index]
+	block = c.helperBlocks[index]
 
 	return
 }

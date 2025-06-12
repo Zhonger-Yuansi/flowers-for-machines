@@ -7,7 +7,6 @@ import (
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 )
 
 // 默认 NBT 物品
@@ -133,7 +132,9 @@ func (d DefaultItem) NeedCheckCompletely() bool {
 func (d DefaultItem) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
+
 	haveBlock := (len(d.Block.Name) > 0)
+	haveSubBlock := (d.Block.SubBlock != nil)
 
 	// ItemComponent
 	protocol.Single(w, &d.Enhance.ItemComponent)
@@ -141,12 +142,7 @@ func (d DefaultItem) NBTStableBytes() []byte {
 	// Block
 	w.Bool(&haveBlock)
 	if haveBlock {
-		blockStatesString := utils.MarshalBlockStates(d.Block.States)
-		haveSubBlock := (d.Block.SubBlock != nil)
-
 		w.String(&d.Block.Name)
-		w.String(&blockStatesString)
-
 		w.Bool(&haveSubBlock)
 		if haveSubBlock {
 			subBlockData := d.Block.SubBlock.StableBytes()

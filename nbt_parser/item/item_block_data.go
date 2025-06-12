@@ -18,8 +18,14 @@ type ItemBlockData struct {
 	// States 是这个方块的方块状态
 	States map[string]any
 	// SubBlock 是这个方块的附加数据。
+	//
 	// 如果这个方块是已被支持的 NBT 方块，
-	// 且 NBT 字段存在，则 SubBlock 非空
+	// 且已被确认是需要进行特殊处理的子方块，
+	// 则 SubBlock 非空。
+	//
+	// 这意味着，纵使这个物品是一个带有 NBT
+	// 数据的容器，但如果被判定为不需要特殊
+	// 处理，则 SubBlock 仍然解析为空
 	SubBlock nbt_parser_interface.Block
 }
 

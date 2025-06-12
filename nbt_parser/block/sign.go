@@ -86,6 +86,13 @@ func (s *Sign) Parse(nbtMap map[string]any) error {
 	bestColor = utils.SearchForBestColor(rgb, mapping.DefaultDyeColor)
 	s.NBT.BackText.SignTextColor = utils.EncodeVarRGBA(bestColor[0], bestColor[1], bestColor[2], 255)
 
+	if len(s.NBT.FrontText.Text) == 0 {
+		s.NBT.FrontText.SignTextColor = utils.EncodeVarRGBA(0, 0, 0, 255)
+	}
+	if len(s.NBT.BackText.Text) == 0 {
+		s.NBT.BackText.SignTextColor = utils.EncodeVarRGBA(0, 0, 0, 255)
+	}
+
 	return nil
 }
 

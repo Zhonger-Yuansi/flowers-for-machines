@@ -18,6 +18,7 @@ func init() {
 	nbt_assigner_interface.PlaceNBTBlock = PlaceNBTBlock
 }
 
+// NBTBlockIsSupported 检查 block 是否是受支持的 NBT 方块
 func NBTBlockIsSupported(block nbt_parser_interface.Block) bool {
 	switch block.(type) {
 	case *nbt_parser_block.CommandBlock:
@@ -32,6 +33,14 @@ func NBTBlockIsSupported(block nbt_parser_interface.Block) bool {
 	return true
 }
 
+// PlaceNBTBlock 根据传入的操作台和缓存命中系统，
+// 在操作台的中心方块处制作一个 NBT 方块 nbtBlock。
+//
+// canFast 指示目标方块是否可以直接通过 setblock 放置。
+//
+// 如果不能通过 setblock 放置，那么 uniqueID 指示目标
+// 方块所在结构的唯一标识，并且 offset 指示其相邻的可能
+// 的方块，例如床的尾方块相对于头方块的偏移
 func PlaceNBTBlock(
 	console *nbt_console.Console,
 	cache *nbt_cache.NBTCacheSystem,

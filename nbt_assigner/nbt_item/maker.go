@@ -18,6 +18,7 @@ func init() {
 	nbt_assigner_interface.EnchAndRenameMultiple = EnchAndRenameMultiple
 }
 
+// NBTItemIsSupported 检查 item 是否是受支持的复杂物品
 func NBTItemIsSupported(item nbt_parser_interface.Item) bool {
 	switch item.(type) {
 	case *nbt_parser_item.Book:
@@ -29,6 +30,9 @@ func NBTItemIsSupported(item nbt_parser_interface.Item) bool {
 	return true
 }
 
+// MakeNBTItemMethod 根据传入的操作台、缓存命中系统和多个物品，
+// 将它们归类为每种复杂物品。对于 result 中的每个元素，可以使用
+// Make 制作它们
 func MakeNBTItemMethod(
 	console *nbt_console.Console,
 	cache *nbt_cache.NBTCacheSystem,
@@ -76,6 +80,9 @@ func MakeNBTItemMethod(
 	return result
 }
 
+// EnchMultiple 根据操作台 console 和已放入背包的多个物品 multipleItems，
+// 将它们进行一一附魔处理。应当说明的是，这些物品应当置于非快捷栏的物品栏，
+// 并且对于无需处理的物品，应当简单的置为 nil
 func EnchMultiple(
 	console *nbt_console.Console,
 	multipleItems [27]*nbt_parser_interface.Item,
@@ -187,6 +194,9 @@ func EnchMultiple(
 	return nil
 }
 
+// RenameMultiple 根据操作台 console 和已放入背包的多个物品 multipleItems，
+// 将它们进行集中性物品改名处理。应当说明的是，这些物品应当置于非快捷栏的物品栏，
+// 并且对于无需处理的物品，应当简单的置为 nil
 func RenameMultiple(
 	console *nbt_console.Console,
 	multipleItems [27]*nbt_parser_interface.Item,
@@ -248,6 +258,9 @@ func RenameMultiple(
 	return nil
 }
 
+// EnchAndRenameMultiple 根据操作台 console 和已放入背包的多个物品 multipleItems，
+// 将它们进行集中性的物品附魔和物品改名处理。应当说明的是，这些物品应当置于非快捷栏的物品栏，
+// 并且对于无需处理的物品，应当简单的置为 nil
 func EnchAndRenameMultiple(
 	console *nbt_console.Console,
 	multipleItems [27]*nbt_parser_interface.Item,

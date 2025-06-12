@@ -24,7 +24,9 @@ type NBTAssigner struct {
 	cache   *nbt_cache.NBTCacheSystem
 }
 
-// NewNBTAssigner 基于操作台和缓存命中系统创建并返回一个新的 NBTAssigner
+// NewNBTAssigner 基于操作台和缓存命中系统创建并返回一个新的 NBT 方块放置实现。
+// 您应当确保 NewNBTAssigner 只被调用一次，然后随后使用同一个 NewNBTAssigner
+// 调用 PlaceNBTBlock 来放置 NBT 方块
 func NewNBTAssigner(
 	console *nbt_console.Console,
 	cache *nbt_cache.NBTCacheSystem,

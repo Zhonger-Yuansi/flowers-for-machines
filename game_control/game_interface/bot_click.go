@@ -305,10 +305,6 @@ func (b *BotClick) PlaceBlockHighLevel(
 	if err != nil {
 		return clickPos, offsetPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
 	}
-	err = b.c.AwaitChangesGeneral()
-	if err != nil {
-		return clickPos, offsetPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
-	}
 
 	err = b.PlaceBlock(
 		UseItemOnBlocks{

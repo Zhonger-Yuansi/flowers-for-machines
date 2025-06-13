@@ -43,7 +43,10 @@ func SetShulkerBoxFacing(container nbt_parser_interface.Block, facing uint8) {
 	c.NBT.ShulkerFacing = facing
 }
 
-func (c Container) NeedSpecialHandle() bool {
+func (c *Container) NeedSpecialHandle() bool {
+	if strings.Contains(c.BlockName(), "shulker") && c.NBT.ShulkerFacing != 1 {
+		return true
+	}
 	if len(c.CustomName) > 0 {
 		return true
 	}

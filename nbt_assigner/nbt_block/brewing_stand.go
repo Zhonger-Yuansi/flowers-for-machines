@@ -261,6 +261,7 @@ func (b *BrewingStand) Make() error {
 
 	// 移动已改名物品到酿造台
 	for _, item := range b.data.NBT.Items {
+		var fuelAddCount uint8 = 0
 		if !item.Item.NeedEnchOrRename() {
 			continue
 		}
@@ -272,12 +273,14 @@ func (b *BrewingStand) Make() error {
 			brewingStandStates["brewing_stand_slot_b_bit"] = byte(1)
 		case 3:
 			brewingStandStates["brewing_stand_slot_c_bit"] = byte(1)
+		case 4:
+			fuelAddCount = 1
 		}
 
 		_ = transaction.MoveToContainer(
 			resources_control.SlotID(item.Slot),
 			resources_control.SlotID(item.Slot),
-			item.Item.ItemCount(),
+			item.Item.ItemCount()+fuelAddCount,
 		)
 	}
 

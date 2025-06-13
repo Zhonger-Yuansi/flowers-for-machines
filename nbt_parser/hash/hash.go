@@ -7,7 +7,10 @@ import (
 )
 
 // NBTBlockNBTHash 计算 block 的 NBT 字段的哈希校验和，
-// 这意味着校验和的范围不会包含这个 NBT 方块的名称和方块状态
+// 这意味着校验和的范围不会包含这个 NBT 方块的名称和方块状态。
+//
+// 如果这个方块不存在特定的 NBT 字段，则该方块不存在 NBT 字段
+// 的哈希校验和。这意味着调用该函数后将返回 NBTHashNumberNotExist (0)
 func NBTBlockNBTHash(block nbt_parser_interface.Block) uint64 {
 	result := block.NBTStableBytes()
 	if len(result) == 0 {

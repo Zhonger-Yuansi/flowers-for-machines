@@ -11,6 +11,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
 	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
+	nbt_hash "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/hash"
 	nbt_parser_item "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/item"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 )
@@ -40,6 +41,17 @@ func (f *Frame) processComplex() (canUseCommand bool, resultSlot resources_contr
 		_, _, _, err = nbt_assigner_interface.PlaceNBTBlock(f.console, f.cache, defaultBlock.Block.SubBlock)
 		if err != nil {
 			return false, 0, fmt.Errorf("processComplex: %v", err)
+		}
+
+		_, hit, partHit, err := f.cache.NBTBlockCache().LoadCache(nbt_hash.CompletelyHashNumber{
+			HashNumber:    nbt_hash.NBTBlockFullHash(defaultBlock.Block.SubBlock),
+			SetHashNumber: nbt_hash.ContainerSetHash(defaultBlock.Block.SubBlock),
+		})
+		if err != nil {
+			return false, 0, fmt.Errorf("processComplex: %v", err)
+		}
+		if !hit || partHit {
+			panic("processComplex: Should nerver happened")
 		}
 
 		_, err = f.console.API().Commands().SendWSCommandWithResp("clear")

@@ -44,7 +44,11 @@ func (c *Container) Make() error {
 }
 
 // spawnContainer 在操作台中心生成空的 container。
-// 确保这个容器的自定义物品名称也被考虑在内
+// 确保这个容器的自定义物品名称也被考虑在内。
+//
+// spawnContainer 因为可能需要通过点击放置容器，
+// 因此快捷栏的槽位可能会被重用。调用者有责任确保
+// 快捷栏的物品不会因此而被意外使用
 func (c *Container) spawnContainer(container nbt_parser_block.Container) error {
 	// 准备
 	api := c.console.API()
@@ -211,12 +215,12 @@ func (c *Container) itemTransition(
 		return fmt.Errorf("itemTransition: Failed to open the container for %#v (stage 1)", srcContainer)
 	}
 
-	// 将该容器内的物品移动到背包
+	// 将该容器内的物品移动到背包 (置于第 10 到第 36 格)
 	transaction := api.ItemStackOperation().OpenTransaction()
 	for index, item := range srcContainer.NBT.Items {
 		_ = transaction.MoveToInventory(
 			resources_control.SlotID(item.Slot),
-			resources_control.SlotID(index),
+			resources_control.SlotID(index+9),
 			item.Item.ItemCount(),
 		)
 	}
@@ -270,7 +274,7 @@ func (c *Container) itemTransition(
 		}
 
 		src = append(src, game_interface.ItemInfoWithSlot{
-			Slot: resources_control.SlotID(index),
+			Slot: resources_control.SlotID(index + 9),
 			ItemInfo: game_interface.ItemInfo{
 				Count:    item.Item.ItemCount(),
 				ItemType: itemTypeMapping[hashNumber],

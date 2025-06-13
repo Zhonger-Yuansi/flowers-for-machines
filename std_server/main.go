@@ -101,9 +101,15 @@ func main() {
 }
 
 func requestPermission() {
+	api := gameInterface.Commands()
+
+	err := api.SendSettingsCommand("deop @s", true)
+	if err != nil {
+		panic(err)
+	}
+
 	ticker := time.NewTicker(time.Second * 3)
 	defer ticker.Stop()
-
 	for {
 		resp, err := gameInterface.Commands().SendWSCommandWithResp("querytarget @s")
 		if err != nil {

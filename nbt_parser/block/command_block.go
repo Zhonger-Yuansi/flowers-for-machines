@@ -65,11 +65,18 @@ func (c CommandBlock) NeedCheckCompletely() bool {
 
 func (c *CommandBlock) Parse(nbtMap map[string]any) error {
 	var result CommandBlockNBT
+
 	err := mapstructure.Decode(&nbtMap, &result)
 	if err != nil {
 		return fmt.Errorf("Parse: %v", err)
 	}
 	c.NBT = result
+
+	conditionalBit, _ := c.BlockStates()["conditional_bit"].(byte)
+	if conditionalBit == 1 {
+		c.NBT.ConditionalMode = 1
+	}
+
 	return nil
 }
 

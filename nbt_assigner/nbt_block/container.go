@@ -78,7 +78,12 @@ func (c *Container) spawnContainer(container nbt_parser_block.Container) error {
 	}
 
 	// 尝试基容器缓存
-	hit, err := c.cache.BaseContainerCache().LoadCache(container.BlockName(), container.BlockStates(), container.CustomName)
+	hit, err := c.cache.BaseContainerCache().LoadCache(
+		container.BlockName(),
+		container.BlockStates(),
+		container.CustomName,
+		container.NBT.ShulkerFacing,
+	)
 	if err != nil {
 		return fmt.Errorf("spawnContainer: %v", err)
 	}
@@ -94,11 +99,11 @@ func (c *Container) spawnContainer(container nbt_parser_block.Container) error {
 	c.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.Air{})
 
 	// 检查是否需要复杂的工序来放置容器
-	if len(c.data.CustomName) > 0 {
+	if len(container.CustomName) > 0 {
 		useCommandToPlaceBlock = false
 	}
-	if strings.Contains(c.data.BlockName(), "shulker") {
-		if c.data.NBT.ShulkerFacing != 1 {
+	if strings.Contains(container.BlockName(), "shulker") {
+		if container.NBT.ShulkerFacing != 1 {
 			useCommandToPlaceBlock = false
 		}
 	}
@@ -110,7 +115,7 @@ func (c *Container) spawnContainer(container nbt_parser_block.Container) error {
 			"@s",
 			game_interface.ReplacePathHotbarOnly,
 			game_interface.ReplaceitemInfo{
-				Name:     c.data.BlockName(),
+				Name:     container.BlockName(),
 				Count:    1,
 				MetaData: 0,
 				Slot:     c.console.HotbarSlotID(),
@@ -124,7 +129,7 @@ func (c *Container) spawnContainer(container nbt_parser_block.Container) error {
 		c.console.UseInventorySlot(nbt_console.RequesterUser, c.console.HotbarSlotID(), true)
 
 		// 这个容器具有自定义的物品名称，需要进一步特殊处理
-		if len(c.data.CustomName) > 0 {
+		if len(container.CustomName) > 0 {
 			index, err := c.console.FindOrGenerateNewAnvil()
 			if err != nil {
 				return fmt.Errorf("spawnContainer: %v", err)
@@ -139,7 +144,7 @@ func (c *Container) spawnContainer(container nbt_parser_block.Container) error {
 			}
 
 			success, _, _, err = api.ItemStackOperation().OpenTransaction().
-				RenameInventoryItem(c.console.HotbarSlotID(), c.data.CustomName).
+				RenameInventoryItem(c.console.HotbarSlotID(), container.CustomName).
 				Commit()
 			if err != nil {
 				_ = api.ContainerOpenAndClose().CloseContainer()
@@ -159,7 +164,7 @@ func (c *Container) spawnContainer(container nbt_parser_block.Container) error {
 		// 确定放置目标容器时所使用的朝向
 		var facing uint8 = 1
 		if strings.Contains(container.BlockName(), "shulker") {
-			facing = c.data.NBT.ShulkerFacing
+			facing = container.NBT.ShulkerFacing
 		}
 
 		// 移动机器人到操作台中心
@@ -179,7 +184,7 @@ func (c *Container) spawnContainer(container nbt_parser_block.Container) error {
 		}
 
 		// 将该容器保存到基容器缓存命中系统
-		err = c.cache.BaseContainerCache().StoreCache(container.CustomName)
+		err = c.cache.BaseContainerCache().StoreCache(container.CustomName, container.NBT.ShulkerFacing)
 		if err != nil {
 			return fmt.Errorf("makeNormal: %v", err)
 		}

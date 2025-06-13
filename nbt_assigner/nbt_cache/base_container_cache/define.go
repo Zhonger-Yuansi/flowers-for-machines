@@ -16,6 +16,7 @@ type BaseContainer struct {
 	BlockName         string
 	BlockStatesString string
 	CustomeName       string
+	ShulkerFacing     uint8
 }
 
 // StructureBaseContainer 指示了一个保存在结构中的基容器
@@ -40,6 +41,7 @@ func (b BaseContainer) Hash() uint64 {
 	w.String(&name)
 	w.String(&b.BlockStatesString)
 	w.String(&b.CustomeName)
+	w.Uint8(&b.ShulkerFacing)
 
 	return xxhash.Sum64(buf.Bytes())
 }

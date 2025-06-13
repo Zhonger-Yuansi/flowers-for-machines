@@ -14,15 +14,9 @@ var (
 	ParseItemNetwork func(itemStack protocol.ItemStack, itemName string) (item Item, err error)
 )
 
-var (
-	// SetShulkerBoxFacing 将 container 的潜影盒朝向设置为 facing。
-	// SetShulkerBoxFacing 假定 container 可以被断言为 Container。
-	// 如果不是 Container，则 SetShulkerBoxFacing 将不执行任何操作
-	SetShulkerBoxFacing func(container Block, facing uint8)
-	// SetItemCount 设置 item 的物品数量为 count。
-	// 它目前是对酿造台中烈焰粉所在槽位的特殊处理
-	SetItemCount func(item Item, count uint8)
-)
+// SetItemCount 设置 item 的物品数量为 count。
+// 它目前是对酿造台中烈焰粉所在槽位的特殊处理
+var SetItemCount func(item Item, count uint8)
 
 // Block 是所有已实现的 NBT 方块的统称
 type Block interface {

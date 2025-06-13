@@ -10,8 +10,11 @@ import (
 
 // StoreCache 将操作台中心处的方块保存到当前缓存命中系统。
 // StoreCache 将会假定操作台中心处的方块是一个空容器。
-// customName 指示这个容器的自定义名称，通常情况下可以置空
-func (b *BaseContainerCache) StoreCache(customName string) error {
+//
+// customName 指示这个容器的自定义名称，通常情况下可以置空；
+// shulkerFacing 指示潜影盒的朝向，如果该容器不是潜影盒，则
+// 可以置为默认的零值
+func (b *BaseContainerCache) StoreCache(customName string, shulkerFacing uint8) error {
 	block := b.console.BlockByIndex(nbt_console.ConsoleIndexCenterBlock)
 	container, ok := (*block).(block_helper.ContainerBlockHelper)
 	if !ok {
@@ -22,6 +25,7 @@ func (b *BaseContainerCache) StoreCache(customName string) error {
 		BlockName:         container.OpenInfo.Name,
 		BlockStatesString: utils.MarshalBlockStates(container.OpenInfo.States),
 		CustomeName:       customName,
+		ShulkerFacing:     shulkerFacing,
 	}
 	hashNumber := c.Hash()
 

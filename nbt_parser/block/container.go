@@ -32,10 +32,6 @@ type Container struct {
 	NBT        ContainerNBT
 }
 
-func init() {
-	nbt_parser_interface.SetShulkerBoxFacing = SetShulkerBoxFacing
-}
-
 // SetShulkerBoxFacing 将 container 的潜影盒朝向设置为 facing。
 // SetShulkerBoxFacing 假定 container 可以被断言为 Container。
 // 如果不是 Container，则 SetShulkerBoxFacing 将不执行任何操作

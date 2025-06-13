@@ -7,14 +7,25 @@ import (
 )
 
 // LoadCache 加载名为 name 且方块状态为 states 的基容器。
+//
 // customName 指示基容器的自定义名称，它通常情况下为空。
-// 如果没有找到，则尝试从已保存的结构中加载。
+// shulkerFacing 指示潜影盒的朝向。如果该容器不是潜影盒，
+// 则可以置为默认的零值。
+//
+// 如果目标基容器没有找到，则尝试从已保存的结构中加载。
 // 应当说明的是，基容器会在操作台的中心处被加载
-func (b *BaseContainerCache) LoadCache(name string, states map[string]any, customName string) (hit bool, err error) {
+func (b *BaseContainerCache) LoadCache(
+	name string,
+	states map[string]any,
+	customName string,
+	shulkerFacing uint8,
+) (hit bool, err error) {
 	// Compute hash number
 	container := BaseContainer{
 		BlockName:         name,
 		BlockStatesString: utils.MarshalBlockStates(states),
+		CustomeName:       customName,
+		ShulkerFacing:     shulkerFacing,
 	}
 	hashNumber := container.Hash()
 

@@ -2,6 +2,7 @@ package nbt_console
 
 import (
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
@@ -77,6 +78,13 @@ func NewConsole(api *game_interface.GameInterface, center protocol.BlockPos) (re
 		nearBlocks:           [9][6]*block_helper.BlockHelper{},
 		inventoryUseCallback: nil,
 		blocksUseCallback:    nil,
+	}
+
+	deltaX := int(math.Abs(float64(center[0])))
+	deltaY := int(math.Abs(float64(center[1])))
+	deltaZ := int(math.Abs(float64(center[2])))
+	if deltaX*deltaX+deltaY*deltaY+deltaZ*deltaZ <= 900 {
+		return nil, fmt.Errorf("NewConsole: The bot can not appear around position (0,0,0) and it must be at least 30 blocks away from here")
 	}
 
 	for index := range 9 {

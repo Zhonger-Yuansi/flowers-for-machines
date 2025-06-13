@@ -56,13 +56,13 @@ func (s *Sign) Parse(nbtMap map[string]any) error {
 	if _, ok := nbtMap["IsWaxed"]; ok {
 		err := mapstructure.Decode(&nbtMap, &result)
 		if err != nil {
-			return fmt.Errorf("(s *Sign) Parse: %v", err)
+			return fmt.Errorf("Parse: %v", err)
 		}
 		s.NBT = result
 	} else {
 		err := mapstructure.Decode(&nbtMap, &legacy)
 		if err != nil {
-			return fmt.Errorf("(s *Sign) Parse: %v", err)
+			return fmt.Errorf("Parse: %v", err)
 		}
 		s.NBT.FrontText = legacy
 		s.NBT.BackText = SignText{

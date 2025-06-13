@@ -92,38 +92,34 @@ func (s *Sign) Make() error {
 		States: utils.ParseBlockStatesString(helperBlockStates),
 	})
 
-	// 打开告示牌
-	err = s.console.CanReachOrMove(s.console.Center())
-	if err != nil {
-		return fmt.Errorf("Make: %v", err)
-	}
-	err = api.BotClick().ClickBlock(blockAction)
-	if err != nil {
-		return fmt.Errorf("Make: %v", err)
-	}
+	// 打开告示牌并写入文本数据
+	if len(s.data.NBT.FrontText.Text) > 0 || len(s.data.NBT.BackText.Text) > 0 {
+		// 打开告示牌
+		err = s.console.CanReachOrMove(s.console.Center())
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
+		err = api.BotClick().ClickBlock(blockAction)
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
 
-	// 写入告示牌数据
-	{
-		haveTextData := false
-
+		// 确定告示牌 NBT 数据
 		nbtMap := make(map[string]any)
 		if len(s.data.NBT.FrontText.Text) > 0 {
 			nbtMap["FrontText"] = map[string]any{"Text": s.data.NBT.FrontText.Text}
-			haveTextData = true
 		}
 		if len(s.data.NBT.BackText.Text) > 0 {
 			nbtMap["BackText"] = map[string]any{"Text": s.data.NBT.BackText.Text}
-			haveTextData = true
 		}
 
-		if haveTextData {
-			err = api.Resources().WritePacket(&packet.BlockActorData{
-				Position: s.console.Center(),
-				NBTData:  nbtMap,
-			})
-			if err != nil {
-				return fmt.Errorf("Make: %v", err)
-			}
+		// 写入告示牌 NBT 数据
+		err = api.Resources().WritePacket(&packet.BlockActorData{
+			Position: s.console.Center(),
+			NBTData:  nbtMap,
+		})
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
 		}
 	}
 

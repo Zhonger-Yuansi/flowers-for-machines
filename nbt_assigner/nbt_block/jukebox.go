@@ -5,7 +5,7 @@ import (
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
 	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
 	nbt_parser_item "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/item"
@@ -15,7 +15,6 @@ import (
 // 唱片机
 type JukeBox struct {
 	console *nbt_console.Console
-	cache   *nbt_cache.NBTCacheSystem
 	data    nbt_parser_block.JukeBox
 }
 
@@ -33,6 +32,10 @@ func (j *JukeBox) Make() error {
 	if err != nil {
 		return fmt.Errorf("Make: %v", err)
 	}
+	j.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
+		Name:   j.data.BlockName(),
+		States: j.data.BlockStates(),
+	})
 
 	// 如果唱片可以直接使用命令放置
 	if !j.data.NBT.Disc.NeedEnchOrRename() {

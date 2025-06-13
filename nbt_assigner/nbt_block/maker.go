@@ -29,6 +29,7 @@ func NBTBlockIsSupported(block nbt_parser_interface.Block) bool {
 	case *nbt_parser_block.Frame:
 	case *nbt_parser_block.Lectern:
 	case *nbt_parser_block.JukeBox:
+	case *nbt_parser_block.BrewingStand:
 	default:
 		return false
 	}
@@ -115,7 +116,11 @@ func PlaceNBTBlock(
 	case *nbt_parser_block.JukeBox:
 		method = &JukeBox{
 			console: console,
-			cache:   cache,
+			data:    *block,
+		}
+	case *nbt_parser_block.BrewingStand:
+		method = &BrewingStand{
+			console: console,
 			data:    *block,
 		}
 	}

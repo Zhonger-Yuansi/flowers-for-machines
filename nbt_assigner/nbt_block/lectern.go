@@ -6,6 +6,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
 	nbt_assigner_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
@@ -34,6 +35,10 @@ func (l *Lectern) Make() error {
 	if err != nil {
 		return fmt.Errorf("Make: %v", err)
 	}
+	l.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
+		Name:   l.data.BlockName(),
+		States: l.data.BlockStates(),
+	})
 
 	// 如果书可以直接使用命令放置
 	if !l.data.NBT.Book.IsComplex() && !l.data.NBT.Book.NeedEnchOrRename() {

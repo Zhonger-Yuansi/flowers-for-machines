@@ -5,6 +5,7 @@ import (
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
 	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
 )
@@ -34,6 +35,10 @@ func (c *CommandBlock) Make() error {
 	if err != nil {
 		return fmt.Errorf("Make: %v", err)
 	}
+	c.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
+		Name:   c.data.BlockName(),
+		States: c.data.BlockStates(),
+	})
 
 	err = c.console.CanReachOrMove(c.console.Center())
 	if err != nil {

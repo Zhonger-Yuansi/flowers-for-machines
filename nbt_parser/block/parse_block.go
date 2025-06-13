@@ -48,6 +48,8 @@ func ParseNBTBlock(blockName string, blockStates map[string]any, blockNBT map[st
 		block = &Lectern{DefaultBlock: defaultBlock}
 	case mapping.SupportNBTBlockTypeJukeBox:
 		block = &JukeBox{DefaultBlock: defaultBlock}
+	case mapping.SupportNBTBlockTypeBrewingStand:
+		block = &BrewingStand{DefaultBlock: defaultBlock}
 	default:
 		panic("ParseNBTBlock: Should nerver happened")
 	}

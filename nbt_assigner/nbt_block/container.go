@@ -40,6 +40,19 @@ func (c *Container) Make() error {
 	if err != nil {
 		return fmt.Errorf("Make: %v", err)
 	}
+
+	c.console.UseHelperBlock(
+		nbt_console.RequesterUser,
+		nbt_console.ConsoleIndexCenterBlock,
+		block_helper.ContainerBlockHelper{
+			OpenInfo: block_helper.ContainerBlockOpenInfo{
+				Name:                  c.data.BlockName(),
+				States:                c.data.BlockStates(),
+				ConsiderOpenDirection: c.data.ConsiderOpenDirection(),
+				ShulkerFacing:         c.data.NBT.ShulkerFacing,
+			},
+		},
+	)
 	return nil
 }
 

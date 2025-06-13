@@ -5,6 +5,7 @@ import (
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
 	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
 	"github.com/go-gl/mathgl/mgl32"
@@ -27,6 +28,10 @@ func (s *StructrueBlock) Make() error {
 	if err != nil {
 		return fmt.Errorf("Make: %v", err)
 	}
+	s.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
+		Name:   s.data.BlockName(),
+		States: s.data.BlockStates(),
+	})
 
 	err = s.console.CanReachOrMove(s.console.Center())
 	if err != nil {

@@ -385,7 +385,7 @@ func (c *Container) makeNormal() error {
 			SetHashNumber: nbt_hash.ContainerSetHash(underlying.Block.SubBlock),
 		})
 
-		if !hit && partHit {
+		if hit && partHit {
 			subBlockPartHit = append(subBlockPartHit, index)
 		}
 		if !hit && !partHit {
@@ -425,7 +425,7 @@ func (c *Container) makeNormal() error {
 			return fmt.Errorf("makeNormal: %v", err)
 		}
 
-		err = c.cache.NBTBlockCache().StoreCache(wantContainer, c.console.Center())
+		err = c.cache.NBTBlockCache().StoreCache(wantContainer, protocol.BlockPos{0, 0, 0})
 		if err != nil {
 			return fmt.Errorf("makeNormal: %v", err)
 		}

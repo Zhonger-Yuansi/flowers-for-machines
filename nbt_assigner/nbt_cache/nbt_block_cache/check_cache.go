@@ -23,7 +23,7 @@ func (n *NBTBlockCache) CheckCache(hashNumber nbt_hash.CompletelyHashNumber) (
 
 	for _, value := range n.cachedNBTBlock {
 		if hashNumber.SetHashNumber == value.HashNumber.SetHashNumber {
-			return structure, true, true
+			return value, true, true
 		}
 	}
 

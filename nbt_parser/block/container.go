@@ -13,6 +13,9 @@ import (
 	"github.com/cespare/xxhash/v2"
 )
 
+// BrewingStandFuelSlotID 是酿造台放置烈焰粉的槽位索引
+const BrewingStandFuelSlotID uint8 = 4
+
 // ItemWithSlot ..
 type ItemWithSlot struct {
 	Item nbt_parser_interface.Item
@@ -32,6 +35,10 @@ type Container struct {
 	NBT        ContainerNBT
 }
 
+func init() {
+	nbt_parser_interface.SetShulkerBoxFacing = SetShulkerBoxFacing
+}
+
 // SetShulkerBoxFacing 将 container 的潜影盒朝向设置为 facing。
 // SetShulkerBoxFacing 假定 container 可以被断言为 Container。
 // 如果不是 Container，则 SetShulkerBoxFacing 将不执行任何操作
@@ -41,10 +48,6 @@ func SetShulkerBoxFacing(container nbt_parser_interface.Block, facing uint8) {
 		return
 	}
 	c.NBT.ShulkerFacing = facing
-}
-
-func init() {
-	nbt_parser_interface.SetShulkerBoxFacing = SetShulkerBoxFacing
 }
 
 func (c Container) NeedSpecialHandle() bool {
@@ -70,6 +73,31 @@ func (c *Container) ConsiderOpenDirection() bool {
 		return true
 	}
 	return false
+}
+
+func (c *Container) brewingStandSpecialProcess() {
+	if c.BlockName() != "minecraft:brewing_stand" {
+		return
+	}
+
+	for _, item := range c.NBT.Items {
+		if item.Slot != BrewingStandFuelSlotID {
+			continue
+		}
+		if item.Item.ItemName() == "minecraft:air" {
+			continue
+		}
+
+		if item.Item.ItemName() != "minecraft:blaze_powder" {
+			panic("brewingStandSpecialProcess: Should nerver happened")
+		}
+		if item.Item.ItemCount() >= 64 {
+			panic("brewingStandSpecialProcess: Should nerver happened")
+		}
+
+		nbt_parser_interface.SetItemCount(item.Item, item.Item.ItemCount()+1)
+		break
+	}
 }
 
 func (c *Container) Parse(nbtMap map[string]any) error {
@@ -114,6 +142,8 @@ func (c *Container) Parse(nbtMap map[string]any) error {
 
 	c.CustomName, _ = nbtMap["CustomName"].(string)
 	c.NBT.ShulkerFacing, _ = nbtMap["facing"].(byte)
+	c.brewingStandSpecialProcess()
+
 	return nil
 }
 
@@ -141,6 +171,17 @@ func (c Container) NBTStableBytes() []byte {
 
 	for _, slot := range slots {
 		item := itemMapping[slot]
+		// 针对酿造台的特殊处理，
+		// 因为它会消耗放入的烈焰粉。
+		//
+		// 为了方便，我们不对烈焰粉
+		// 的数量进行校验
+		if c.BlockName() == "minecraft:brewing_stand" && slot == 4 {
+			stableItemBytes := append(item.Item.TypeStableBytes(), item.Slot)
+			w.ByteSlice(&stableItemBytes)
+			continue
+		}
+		// 其他情况应当同时校验物品数量
 		stableItemBytes := append(item.Item.FullStableBytes(), item.Slot)
 		w.ByteSlice(&stableItemBytes)
 	}
@@ -152,8 +193,15 @@ func (c *Container) FullStableBytes() []byte {
 	return append(c.DefaultBlock.FullStableBytes(), c.NBTStableBytes()...)
 }
 
-func (c Container) SetBytes() []byte {
+func (c *Container) SetBytes() []byte {
 	if len(c.NBT.Items) == 0 {
+		return nil
+	}
+
+	// 酿造台因其烈焰粉槽位的消耗问题，
+	// 我们考虑酿造台不存在稳定集合表示，
+	// 这意味着酿造台将不存在集合哈希校验和
+	if c.BlockName() == "minecraft:brewing_stand" {
 		return nil
 	}
 

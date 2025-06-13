@@ -16,6 +16,16 @@ type DefaultItem struct {
 	Block   ItemBlockData
 }
 
+func init() {
+	nbt_parser_interface.SetItemCount = SetItemCount
+}
+
+// SetItemCount 设置 item 的物品数量为 count。
+// 它目前是对酿造台中烈焰粉所在槽位的特殊处理
+func SetItemCount(item nbt_parser_interface.Item, count uint8) {
+	item.UnderlyingItem().(*DefaultItem).Basic.Count = count
+}
+
 func (d *DefaultItem) ItemName() string {
 	d.Basic.Name = strings.ToLower(d.Basic.Name)
 	if !strings.HasPrefix(d.Basic.Name, "minecraft:") {

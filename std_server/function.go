@@ -17,6 +17,7 @@ func CheckAlive(c *gin.Context) {
 }
 
 func ProcessExist(c *gin.Context) {
+	_, _ = gameInterface.Commands().SendWSCommandWithResp("deop @s")
 	_ = mcClient.Conn().Close()
 	go func() {
 		time.Sleep(time.Second)

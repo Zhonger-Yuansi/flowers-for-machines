@@ -23,7 +23,6 @@ var ItemNameToBlockName = map[string]string{
 	"minecraft:dispenser":              "minecraft:dispenser",
 	"minecraft:dropper":                "minecraft:dropper",
 	"minecraft:jukebox":                "minecraft:jukebox",
-	"minecraft:brewing_stand":          "minecraft:brewing_stand",
 	"minecraft:undyed_shulker_box":     "minecraft:undyed_shulker_box",
 	"minecraft:white_shulker_box":      "minecraft:white_shulker_box",
 	"minecraft:orange_shulker_box":     "minecraft:orange_shulker_box",

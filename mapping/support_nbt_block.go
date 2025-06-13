@@ -31,7 +31,6 @@ var SupportBlocksPool = map[string]uint8{
 	"minecraft:hopper":                 SupportNBTBlockTypeContainer,
 	"minecraft:dispenser":              SupportNBTBlockTypeContainer,
 	"minecraft:dropper":                SupportNBTBlockTypeContainer,
-	"minecraft:brewing_stand":          SupportNBTBlockTypeContainer,
 	"minecraft:undyed_shulker_box":     SupportNBTBlockTypeContainer,
 	"minecraft:white_shulker_box":      SupportNBTBlockTypeContainer,
 	"minecraft:orange_shulker_box":     SupportNBTBlockTypeContainer,

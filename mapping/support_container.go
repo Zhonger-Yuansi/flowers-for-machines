@@ -12,8 +12,6 @@ var ContainerStorageKey map[string]string = map[string]string{
 	// 熔炉(发光的熔炉)
 	"minecraft:furnace":     "Items",
 	"minecraft:lit_furnace": "Items",
-	// 酿造台
-	"minecraft:brewing_stand": "Items",
 	// 箱子、陷阱箱、漏斗、发射器、投掷器、唱片机、木桶
 	"minecraft:chest":         "Items",
 	"minecraft:trapped_chest": "Items",

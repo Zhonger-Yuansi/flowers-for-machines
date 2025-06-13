@@ -26,6 +26,10 @@ func ParseItemBasicData(nbtMap map[string]any) (result ItemBasicData, err error)
 		Name: result.Name,
 		Meta: result.Metadata,
 	})
+	if newItem.Name == "minecraft:npc_spawn_egg" {
+		newItem.Name = "minecraft:spawn_egg"
+		newItem.Meta = 51
+	}
 	result.Name = newItem.Name
 	result.Metadata = newItem.Meta
 
@@ -44,6 +48,10 @@ func ParseItemBasicDataNetwork(item protocol.ItemStack, itemName string) (result
 	result.Name = strings.ToLower(itemName)
 	if !strings.HasPrefix(result.Name, "minecraft:") {
 		result.Name = "minecraft:" + result.Name
+	}
+	if result.Name == "minecraft:npc_spawn_egg" {
+		result.Name = "minecraft:spawn_egg"
+		result.Metadata = 51
 	}
 
 	result.Count = uint8(item.Count)

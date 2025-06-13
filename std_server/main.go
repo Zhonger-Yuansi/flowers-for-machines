@@ -103,7 +103,7 @@ func main() {
 func requestPermission() {
 	api := gameInterface.Commands()
 
-	err := api.SendSettingsCommand("deop @s", true)
+	_, err := api.SendWSCommandWithResp("deop @s")
 	if err != nil {
 		panic(err)
 	}

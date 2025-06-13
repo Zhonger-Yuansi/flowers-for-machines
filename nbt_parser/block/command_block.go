@@ -88,6 +88,7 @@ func (c CommandBlock) NBTStableBytes() []byte {
 	w.String(&c.NBT.CustomName)
 	w.Varint32(&c.NBT.TickDelay)
 	w.Uint8(&c.NBT.ExecuteOnFirstTick)
+	w.Uint8(&c.NBT.ConditionalMode)
 	w.Uint8(&c.NBT.Auto)
 
 	return buf.Bytes()

@@ -27,7 +27,12 @@ type CommandBlock struct {
 }
 
 func (c *CommandBlock) NeedSpecialHandle() bool {
+	conditionalBit, _ := c.BlockStates()["conditional_bit"].(byte)
+
 	if len(c.NBT.Command) > 0 || len(c.NBT.CustomName) > 0 {
+		return true
+	}
+	if conditionalBit != c.NBT.ConditionalMode {
 		return true
 	}
 	if c.NBT.TickDelay != 0 {

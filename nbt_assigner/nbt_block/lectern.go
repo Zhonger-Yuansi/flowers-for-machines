@@ -45,6 +45,11 @@ func (l *Lectern) Make() error {
 		return fmt.Errorf("Make: %v", err)
 	}
 
+	// 如果讲台上没有书，则应当直接返回值
+	if !l.data.NBT.HaveBook {
+		return nil
+	}
+
 	// 如果书可以直接使用命令放置
 	if !l.data.NBT.Book.IsComplex() && !l.data.NBT.Book.NeedEnchOrRename() {
 		underlying := l.data.NBT.Book.UnderlyingItem()

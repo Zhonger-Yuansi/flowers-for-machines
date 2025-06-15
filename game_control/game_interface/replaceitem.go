@@ -61,7 +61,7 @@ func (r *Replaceitem) ReplaceitemInContainerAsync(
 	return nil
 }
 
-// eplaceItemInInventory 向背包填充物品。
+// ReplaceitemInInventory 向背包填充物品。
 //
 // target 指代被填充物品的目标，是一个目标选择器；
 // path 指代该物品所处的槽位类型，一个例子是"slot.hotbar"；

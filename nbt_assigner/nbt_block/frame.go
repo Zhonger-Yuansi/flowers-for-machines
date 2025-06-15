@@ -326,6 +326,3 @@ func (f *Frame) Make() error {
 
 	return nil
 }
-
-// 1. Set Hash Number -> map
-// 2. Current: Custom Name for blocks

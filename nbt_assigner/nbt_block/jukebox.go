@@ -25,9 +25,8 @@ func (JukeBox) Offset() protocol.BlockPos {
 }
 
 func (j *JukeBox) Make() error {
+	var defaultItem *nbt_parser_item.DefaultItem
 	api := j.console.API()
-	underlying := j.data.NBT.Disc.UnderlyingItem()
-	defaultItem := underlying.(*nbt_parser_item.DefaultItem)
 
 	// 生成唱片机
 	err := nbt_assigner_utils.SpawnNewEmptyBlock(
@@ -42,6 +41,14 @@ func (j *JukeBox) Make() error {
 	)
 	if err != nil {
 		return fmt.Errorf("Make: %v", err)
+	}
+
+	// 如果唱片机中没有唱片，则应当直接返回值
+	if j.data.NBT.HaveDisc {
+		underlying := j.data.NBT.Disc.UnderlyingItem()
+		defaultItem = underlying.(*nbt_parser_item.DefaultItem)
+	} else {
+		return nil
 	}
 
 	// 如果唱片可以直接使用命令放置

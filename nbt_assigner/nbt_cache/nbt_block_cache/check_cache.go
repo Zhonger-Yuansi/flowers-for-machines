@@ -12,19 +12,18 @@ func (n *NBTBlockCache) CheckCache(hashNumber nbt_hash.CompletelyHashNumber) (
 	hit bool,
 	isSetHashHit bool,
 ) {
-	structure, ok := n.cachedNBTBlock[hashNumber.HashNumber]
+	cache, ok := n.completelyCache[hashNumber.HashNumber]
 	if ok {
-		return structure, true, false
+		return *cache, true, false
 	}
 
 	if hashNumber.SetHashNumber == nbt_hash.SetHashNumberNotExist {
 		return StructureNBTBlock{}, false, false
 	}
 
-	for _, value := range n.cachedNBTBlock {
-		if hashNumber.SetHashNumber == value.HashNumber.SetHashNumber {
-			return value, true, true
-		}
+	cache, ok = n.setHashCache[hashNumber.HashNumber]
+	if ok {
+		return *cache, true, false
 	}
 
 	return StructureNBTBlock{}, false, false

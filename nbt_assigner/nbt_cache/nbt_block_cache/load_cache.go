@@ -19,19 +19,8 @@ func (n *NBTBlockCache) LoadCache(hashNumber nbt_hash.CompletelyHashNumber) (
 	isSetHashHit bool,
 	err error,
 ) {
-	structure, hit = n.cachedNBTBlock[hashNumber.HashNumber]
-	if !hit {
-		if hashNumber.SetHashNumber == nbt_hash.SetHashNumberNotExist {
-			return StructureNBTBlock{}, false, false, nil
-		}
-		for _, value := range n.cachedNBTBlock {
-			if value.HashNumber.SetHashNumber == hashNumber.SetHashNumber {
-				hit, isSetHashHit, structure = true, true, value
-				break
-			}
-		}
-	}
-	if !hit {
+	structure, hit, isSetHashHit = n.CheckCache(hashNumber)
+	if !hit && !isSetHashHit {
 		return StructureNBTBlock{}, false, false, nil
 	}
 

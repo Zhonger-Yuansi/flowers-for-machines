@@ -23,7 +23,7 @@ func (n *NBTBlockCache) StoreCache(block nbt_parser_interface.Block, offset prot
 		Block:  block,
 	}
 
-	_, ok := n.cachedNBTBlock[structure.HashNumber.HashNumber]
+	_, ok := n.completelyCache[structure.HashNumber.HashNumber]
 	if ok {
 		return nil
 	}
@@ -36,7 +36,14 @@ func (n *NBTBlockCache) StoreCache(block nbt_parser_interface.Block, offset prot
 		return fmt.Errorf("StoreCache: %v", err)
 	}
 
-	n.cachedNBTBlock[structure.HashNumber.HashNumber] = structure
+	n.completelyCache[structure.HashNumber.HashNumber] = &structure
+	if structure.HashNumber.SetHashNumber == nbt_hash.SetHashNumberNotExist {
+		return nil
+	}
+
+	if _, ok := n.setHashCache[structure.HashNumber.SetHashNumber]; !ok {
+		n.setHashCache[structure.HashNumber.SetHashNumber] = &structure
+	}
 	return nil
 }
 
@@ -44,9 +51,10 @@ func (n *NBTBlockCache) StoreCache(block nbt_parser_interface.Block, offset prot
 func (n *NBTBlockCache) CleanCache() {
 	api := n.console.API().StructureBackup()
 
-	for _, value := range n.cachedNBTBlock {
+	for _, value := range n.completelyCache {
 		_ = api.DeleteStructure(value.UniqueID)
 	}
 
-	n.cachedNBTBlock = make(map[uint64]StructureNBTBlock)
+	n.completelyCache = make(map[uint64]*StructureNBTBlock)
+	n.setHashCache = make(map[uint64]*StructureNBTBlock)
 }

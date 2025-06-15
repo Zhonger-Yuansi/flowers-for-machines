@@ -10,9 +10,9 @@ import (
 
 // LecternNBT ..
 type LecternNBT struct {
-	ItemRotation float32
-	HaveBook     bool
-	Book         nbt_parser_interface.Item
+	CustomName string
+	HaveBook   bool
+	Book       nbt_parser_interface.Item
 }
 
 // 讲台
@@ -22,7 +22,13 @@ type Lectern struct {
 }
 
 func (l Lectern) NeedSpecialHandle() bool {
-	return l.NBT.HaveBook
+	if len(l.NBT.CustomName) > 0 {
+		return true
+	}
+	if l.NBT.HaveBook {
+		return true
+	}
+	return false
 }
 
 func (Lectern) NeedCheckCompletely() bool {
@@ -30,6 +36,7 @@ func (Lectern) NeedCheckCompletely() bool {
 }
 
 func (l *Lectern) Parse(nbtMap map[string]any) error {
+	l.NBT.CustomName, _ = nbtMap["CustomName"].(string)
 	bookMap, ok := nbtMap["book"].(map[string]any)
 	if ok {
 		book, err := nbt_parser_interface.ParseItemNormal(bookMap)
@@ -46,6 +53,7 @@ func (l Lectern) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
 
+	w.String(&l.NBT.CustomName)
 	w.Bool(&l.NBT.HaveBook)
 	if l.NBT.HaveBook {
 		bookStableBytes := l.NBT.Book.TypeStableBytes()

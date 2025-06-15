@@ -6,7 +6,9 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
+	nbt_assigner_utils "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/utils"
 	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
 	nbt_parser_item "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/item"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
@@ -15,6 +17,7 @@ import (
 // 唱片机
 type JukeBox struct {
 	console *nbt_console.Console
+	cache   *nbt_cache.NBTCacheSystem
 	data    nbt_parser_block.JukeBox
 }
 
@@ -28,18 +31,34 @@ func (j *JukeBox) Make() error {
 	defaultItem := underlying.(*nbt_parser_item.DefaultItem)
 
 	// 生成唱片机
-	err := api.SetBlock().SetBlock(j.console.Center(), j.data.BlockName(), j.data.BlockStatesString())
-	if err != nil {
-		return fmt.Errorf("Make: %v", err)
+	if len(j.data.NBT.CustomName) == 0 {
+		err := api.SetBlock().SetBlock(j.console.Center(), j.data.BlockName(), j.data.BlockStatesString())
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
+		j.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
+			Name:   j.data.BlockName(),
+			States: j.data.BlockStates(),
+		})
+	} else {
+		err := nbt_assigner_utils.SpawnNewEmptyBlock(
+			j.console,
+			j.cache,
+			nbt_assigner_utils.EmptyBlockData{
+				Name:               j.data.BlockName(),
+				States:             j.data.BlockStates(),
+				IsCanOpenConatiner: false,
+				BlockCustomName:    j.data.NBT.CustomName,
+			},
+		)
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
 	}
-	j.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
-		Name:   j.data.BlockName(),
-		States: j.data.BlockStates(),
-	})
 
 	// 如果唱片可以直接使用命令放置
 	if !j.data.NBT.Disc.NeedEnchOrRename() {
-		err = api.Replaceitem().ReplaceitemInContainerAsync(
+		err := api.Replaceitem().ReplaceitemInContainerAsync(
 			j.console.Center(),
 			game_interface.ReplaceitemInfo{
 				Name:     j.data.NBT.Disc.ItemName(),
@@ -62,7 +81,7 @@ func (j *JukeBox) Make() error {
 	}
 
 	// 获取唱片到物品栏
-	err = api.Replaceitem().ReplaceitemInInventory(
+	err := api.Replaceitem().ReplaceitemInInventory(
 		"@s",
 		game_interface.ReplacePathHotbarOnly,
 		game_interface.ReplaceitemInfo{

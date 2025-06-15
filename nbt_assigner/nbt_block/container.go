@@ -186,7 +186,18 @@ func (c *Container) makeNormal() error {
 	}
 
 	// Step 4: 生成当前容器
-	err := nbt_assigner_utils.SpawnContainer(c.console, c.cache, c.data)
+	err := nbt_assigner_utils.SpawnNewEmptyBlock(
+		c.console,
+		c.cache,
+		nbt_assigner_utils.EmptyBlockData{
+			Name:                  c.data.BlockName(),
+			States:                c.data.BlockStates(),
+			IsCanOpenConatiner:    true,
+			ConsiderOpenDirection: c.data.ConsiderOpenDirection(),
+			ShulkerFacing:         c.data.NBT.ShulkerFacing,
+			BlockCustomName:       c.data.CustomName,
+		},
+	)
 	if err != nil {
 		return fmt.Errorf("makeNormal: %v", err)
 	}

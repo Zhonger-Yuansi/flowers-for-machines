@@ -7,7 +7,9 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
+	nbt_assigner_utils "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/utils"
 	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
 	nbt_parser_item "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/item"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
@@ -16,6 +18,7 @@ import (
 // 酿造台
 type BrewingStand struct {
 	console *nbt_console.Console
+	cache   *nbt_cache.NBTCacheSystem
 	data    nbt_parser_block.BrewingStand
 }
 
@@ -58,69 +61,26 @@ func (b *BrewingStand) Make() error {
 		if err != nil {
 			return fmt.Errorf("Make: %v", err)
 		}
+		updateBlockStates()
 	} else {
 		// 这个酿造台具有自定义物品名称，
 		// 需要进一步特殊处理
-		err = b.console.API().Replaceitem().ReplaceitemInInventory(
-			"@s",
-			game_interface.ReplacePathHotbarOnly,
-			game_interface.ReplaceitemInfo{
-				Name:     "minecraft:brewing_stand",
-				Count:    1,
-				MetaData: 0,
-				Slot:     b.console.HotbarSlotID(),
+		err = nbt_assigner_utils.SpawnNewEmptyBlock(
+			b.console,
+			b.cache,
+			nbt_assigner_utils.EmptyBlockData{
+				Name:                  b.data.BlockName(),
+				States:                brewingStandStates,
+				IsCanOpenConatiner:    true,
+				ConsiderOpenDirection: false,
+				ShulkerFacing:         0,
+				BlockCustomName:       b.data.NBT.CustomName,
 			},
-			"",
-			false,
 		)
 		if err != nil {
 			return fmt.Errorf("Make: %v", err)
 		}
-		b.console.UseInventorySlot(nbt_console.RequesterUser, b.console.HotbarSlotID(), true)
-		// 打开铁砧
-		index, err := b.console.FindOrGenerateNewAnvil()
-		if err != nil {
-			return fmt.Errorf("Make: %v", err)
-		}
-		success, err := b.console.OpenContainerByIndex(index)
-		if err != nil {
-			return fmt.Errorf("Make: %v", err)
-		}
-		if !success {
-			return fmt.Errorf("Make: Failed to open the anvil in setblock stage")
-		}
-		// 物品改名
-		success, _, _, err = api.ItemStackOperation().OpenTransaction().
-			RenameInventoryItem(b.console.HotbarSlotID(), b.data.NBT.CustomName).
-			Commit()
-		if err != nil {
-			_ = api.ContainerOpenAndClose().CloseContainer()
-			return fmt.Errorf("Make: %v", err)
-		}
-		if !success {
-			_ = api.ContainerOpenAndClose().CloseContainer()
-			return fmt.Errorf("Make: The server rejected the renaming operation (setblock stage)")
-		}
-		// 关闭铁砧
-		err = api.ContainerOpenAndClose().CloseContainer()
-		if err != nil {
-			return fmt.Errorf("Make: %v", err)
-		}
-		// 前往操作台中心处
-		err = b.console.CanReachOrMove(b.console.Center())
-		if err != nil {
-			return fmt.Errorf("Make: %v", err)
-		}
-		// 点击地板以放置酿造台
-		_, _, err = api.BotClick().PlaceBlockHighLevel(b.console.Center(), b.console.HotbarSlotID(), 1)
-		if err != nil {
-			return fmt.Errorf("Make: %v", err)
-		}
-		*b.console.NearBlockByIndex(nbt_console.ConsoleIndexCenterBlock, protocol.BlockPos{0, -1, 0}) = block_helper.NearBlock{
-			Name: game_interface.BasePlaceBlock,
-		}
 	}
-	updateBlockStates()
 
 	// 处理可以直接 Replaceitem 处理的物品
 	for _, item := range b.data.NBT.Items {
@@ -262,18 +222,11 @@ func (b *BrewingStand) Make() error {
 	// 移动已改名物品到酿造台
 	for _, item := range b.data.NBT.Items {
 		var fuelAddCount uint8 = 0
+
 		if !item.Item.NeedEnchOrRename() {
 			continue
 		}
-
-		switch item.Slot {
-		case 1:
-			brewingStandStates["brewing_stand_slot_a_bit"] = byte(1)
-		case 2:
-			brewingStandStates["brewing_stand_slot_b_bit"] = byte(1)
-		case 3:
-			brewingStandStates["brewing_stand_slot_c_bit"] = byte(1)
-		case 4:
+		if item.Slot == 4 {
 			fuelAddCount = 1
 		}
 

@@ -71,7 +71,18 @@ func ItemTransition(
 	}
 
 	// 生成新容器
-	err = SpawnContainer(console, cache, dstContainer)
+	err = SpawnNewEmptyBlock(
+		console,
+		cache,
+		EmptyBlockData{
+			Name:                  dstContainer.BlockName(),
+			States:                dstContainer.BlockStates(),
+			IsCanOpenConatiner:    true,
+			ConsiderOpenDirection: dstContainer.ConsiderOpenDirection(),
+			ShulkerFacing:         dstContainer.NBT.ShulkerFacing,
+			BlockCustomName:       dstContainer.CustomName,
+		},
+	)
 	if err != nil {
 		return fmt.Errorf("ItemTransition: %v", err)
 	}

@@ -10,6 +10,7 @@ import (
 	nbt_assigner_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
+	nbt_assigner_utils "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/utils"
 	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
 	nbt_parser_item "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/item"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
@@ -31,21 +32,37 @@ func (l *Lectern) Make() error {
 	api := l.console.API()
 
 	// 生成讲台
-	err := api.SetBlock().SetBlock(l.console.Center(), l.data.BlockName(), l.data.BlockStatesString())
-	if err != nil {
-		return fmt.Errorf("Make: %v", err)
+	if len(l.data.NBT.CustomName) == 0 {
+		err := api.SetBlock().SetBlock(l.console.Center(), l.data.BlockName(), l.data.BlockStatesString())
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
+		l.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
+			Name:   l.data.BlockName(),
+			States: l.data.BlockStates(),
+		})
+	} else {
+		err := nbt_assigner_utils.SpawnNewEmptyBlock(
+			l.console,
+			l.cache,
+			nbt_assigner_utils.EmptyBlockData{
+				Name:               l.data.BlockName(),
+				States:             l.data.BlockStates(),
+				IsCanOpenConatiner: false,
+				BlockCustomName:    l.data.NBT.CustomName,
+			},
+		)
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
 	}
-	l.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
-		Name:   l.data.BlockName(),
-		States: l.data.BlockStates(),
-	})
 
 	// 如果书可以直接使用命令放置
 	if !l.data.NBT.Book.IsComplex() && !l.data.NBT.Book.NeedEnchOrRename() {
 		underlying := l.data.NBT.Book.UnderlyingItem()
 		defaultItem := underlying.(*nbt_parser_item.DefaultItem)
 
-		err = api.Replaceitem().ReplaceitemInContainerAsync(
+		err := api.Replaceitem().ReplaceitemInContainerAsync(
 			l.console.Center(),
 			game_interface.ReplaceitemInfo{
 				Name:     l.data.NBT.Book.ItemName(),

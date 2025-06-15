@@ -116,11 +116,13 @@ func PlaceNBTBlock(
 	case *nbt_parser_block.JukeBox:
 		method = &JukeBox{
 			console: console,
+			cache:   cache,
 			data:    *block,
 		}
 	case *nbt_parser_block.BrewingStand:
 		method = &BrewingStand{
 			console: console,
+			cache:   cache,
 			data:    *block,
 		}
 	}

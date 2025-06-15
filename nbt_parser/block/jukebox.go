@@ -10,9 +10,9 @@ import (
 
 // JukeBoxNBT ..
 type JukeBoxNBT struct {
-	ItemRotation float32
-	HaveDisc     bool
-	Disc         nbt_parser_interface.Item
+	CustomName string
+	HaveDisc   bool
+	Disc       nbt_parser_interface.Item
 }
 
 // 唱片机
@@ -22,7 +22,13 @@ type JukeBox struct {
 }
 
 func (j JukeBox) NeedSpecialHandle() bool {
-	return j.NBT.HaveDisc
+	if len(j.NBT.CustomName) > 0 {
+		return true
+	}
+	if j.NBT.HaveDisc {
+		return true
+	}
+	return false
 }
 
 func (JukeBox) NeedCheckCompletely() bool {
@@ -30,6 +36,7 @@ func (JukeBox) NeedCheckCompletely() bool {
 }
 
 func (j *JukeBox) Parse(nbtMap map[string]any) error {
+	j.NBT.CustomName, _ = nbtMap["CustomName"].(string)
 	discMap, ok := nbtMap["RecordItem"].(map[string]any)
 	if ok {
 		disc, err := nbt_parser_interface.ParseItemNormal(discMap)
@@ -46,6 +53,7 @@ func (j JukeBox) NBTStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
 
+	w.String(&j.NBT.CustomName)
 	w.Bool(&j.NBT.HaveDisc)
 	if j.NBT.HaveDisc {
 		bookStableBytes := j.NBT.Disc.TypeStableBytes()

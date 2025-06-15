@@ -54,32 +54,20 @@ func (b *BrewingStand) Make() error {
 	b.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.Air{})
 
 	// 生成酿造台方块
-	if len(b.data.NBT.CustomName) == 0 {
-		// 这个酿造台没有自定义物品名称，
-		// 可以直接采用 Setblock 放置
-		err = api.SetBlock().SetBlock(b.console.Center(), b.data.BlockName(), utils.MarshalBlockStates(brewingStandStates))
-		if err != nil {
-			return fmt.Errorf("Make: %v", err)
-		}
-		updateBlockStates()
-	} else {
-		// 这个酿造台具有自定义物品名称，
-		// 需要进一步特殊处理
-		err = nbt_assigner_utils.SpawnNewEmptyBlock(
-			b.console,
-			b.cache,
-			nbt_assigner_utils.EmptyBlockData{
-				Name:                  b.data.BlockName(),
-				States:                brewingStandStates,
-				IsCanOpenConatiner:    true,
-				ConsiderOpenDirection: false,
-				ShulkerFacing:         0,
-				BlockCustomName:       b.data.NBT.CustomName,
-			},
-		)
-		if err != nil {
-			return fmt.Errorf("Make: %v", err)
-		}
+	err = nbt_assigner_utils.SpawnNewEmptyBlock(
+		b.console,
+		b.cache,
+		nbt_assigner_utils.EmptyBlockData{
+			Name:                  b.data.BlockName(),
+			States:                brewingStandStates,
+			IsCanOpenConatiner:    true,
+			ConsiderOpenDirection: false,
+			ShulkerFacing:         0,
+			BlockCustomName:       b.data.NBT.CustomName,
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("Make: %v", err)
 	}
 
 	// 处理可以直接 Replaceitem 处理的物品

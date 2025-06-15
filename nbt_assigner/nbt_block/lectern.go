@@ -6,7 +6,6 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
 	nbt_assigner_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
@@ -32,29 +31,18 @@ func (l *Lectern) Make() error {
 	api := l.console.API()
 
 	// 生成讲台
-	if len(l.data.NBT.CustomName) == 0 {
-		err := api.SetBlock().SetBlock(l.console.Center(), l.data.BlockName(), l.data.BlockStatesString())
-		if err != nil {
-			return fmt.Errorf("Make: %v", err)
-		}
-		l.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
-			Name:   l.data.BlockName(),
-			States: l.data.BlockStates(),
-		})
-	} else {
-		err := nbt_assigner_utils.SpawnNewEmptyBlock(
-			l.console,
-			l.cache,
-			nbt_assigner_utils.EmptyBlockData{
-				Name:               l.data.BlockName(),
-				States:             l.data.BlockStates(),
-				IsCanOpenConatiner: false,
-				BlockCustomName:    l.data.NBT.CustomName,
-			},
-		)
-		if err != nil {
-			return fmt.Errorf("Make: %v", err)
-		}
+	err := nbt_assigner_utils.SpawnNewEmptyBlock(
+		l.console,
+		l.cache,
+		nbt_assigner_utils.EmptyBlockData{
+			Name:               l.data.BlockName(),
+			States:             l.data.BlockStates(),
+			IsCanOpenConatiner: false,
+			BlockCustomName:    l.data.NBT.CustomName,
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("Make: %v", err)
 	}
 
 	// 如果书可以直接使用命令放置
@@ -62,7 +50,7 @@ func (l *Lectern) Make() error {
 		underlying := l.data.NBT.Book.UnderlyingItem()
 		defaultItem := underlying.(*nbt_parser_item.DefaultItem)
 
-		err := api.Replaceitem().ReplaceitemInContainerAsync(
+		err = api.Replaceitem().ReplaceitemInContainerAsync(
 			l.console.Center(),
 			game_interface.ReplaceitemInfo{
 				Name:     l.data.NBT.Book.ItemName(),

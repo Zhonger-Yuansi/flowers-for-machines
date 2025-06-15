@@ -2,7 +2,6 @@ package nbt_block
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
@@ -11,6 +10,7 @@ import (
 	nbt_assigner_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
+	nbt_assigner_utils "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/utils"
 	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
 	nbt_hash "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/hash"
 	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
@@ -56,280 +56,6 @@ func (c *Container) Make() error {
 	return nil
 }
 
-// spawnContainer 在操作台中心生成空的 container。
-// 确保这个容器的自定义物品名称也被考虑在内。
-//
-// spawnContainer 因为可能需要通过点击放置容器，
-// 因此快捷栏的槽位可能会被重用。调用者有责任确保
-// 快捷栏的物品不会因此而被意外使用
-func (c *Container) spawnContainer(container nbt_parser_block.Container) error {
-	// 准备
-	api := c.console.API()
-	useCommandToPlaceBlock := true
-	successFunc := func() {
-		c.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ContainerBlockHelper{
-			OpenInfo: block_helper.ContainerBlockOpenInfo{
-				Name:                  container.BlockName(),
-				States:                container.BlockStates(),
-				ConsiderOpenDirection: container.ConsiderOpenDirection(),
-				ShulkerFacing:         container.NBT.ShulkerFacing,
-			},
-		})
-	}
-
-	// 尝试基容器缓存
-	hit, err := c.cache.BaseContainerCache().LoadCache(
-		container.BlockName(),
-		container.BlockStates(),
-		container.CustomName,
-		container.NBT.ShulkerFacing,
-	)
-	if err != nil {
-		return fmt.Errorf("spawnContainer: %v", err)
-	}
-	if hit {
-		return nil
-	}
-
-	// 先将目标位置替换为空气
-	err = api.SetBlock().SetBlock(c.console.Center(), "minecraft:air", "[]")
-	if err != nil {
-		return fmt.Errorf("spawnContainer: %v", err)
-	}
-	c.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.Air{})
-
-	// 检查是否需要复杂的工序来放置容器
-	if len(container.CustomName) > 0 {
-		useCommandToPlaceBlock = false
-	}
-	if strings.Contains(container.BlockName(), "shulker") {
-		if container.NBT.ShulkerFacing != 1 {
-			useCommandToPlaceBlock = false
-		}
-	}
-
-	// 如果需要复杂的工序
-	if !useCommandToPlaceBlock {
-		// 先把目标物品获取到物品栏
-		err := api.Replaceitem().ReplaceitemInInventory(
-			"@s",
-			game_interface.ReplacePathHotbarOnly,
-			game_interface.ReplaceitemInfo{
-				Name:     container.BlockName(),
-				Count:    1,
-				MetaData: 0,
-				Slot:     c.console.HotbarSlotID(),
-			},
-			"",
-			true,
-		)
-		if err != nil {
-			return fmt.Errorf("spawnContainer: %v", err)
-		}
-		c.console.UseInventorySlot(nbt_console.RequesterUser, c.console.HotbarSlotID(), true)
-
-		// 这个容器具有自定义的物品名称，需要进一步特殊处理
-		if len(container.CustomName) > 0 {
-			index, err := c.console.FindOrGenerateNewAnvil()
-			if err != nil {
-				return fmt.Errorf("spawnContainer: %v", err)
-			}
-
-			success, err := c.console.OpenContainerByIndex(index)
-			if err != nil {
-				return fmt.Errorf("spawnContainer: %v", err)
-			}
-			if !success {
-				return fmt.Errorf("spawnContainer: Failed to open the anvil to rename container")
-			}
-
-			success, _, _, err = api.ItemStackOperation().OpenTransaction().
-				RenameInventoryItem(c.console.HotbarSlotID(), container.CustomName).
-				Commit()
-			if err != nil {
-				_ = api.ContainerOpenAndClose().CloseContainer()
-				return fmt.Errorf("spawnContainer: %v", err)
-			}
-			if !success {
-				_ = api.ContainerOpenAndClose().CloseContainer()
-				return fmt.Errorf("spawnContainer: The server rejected the container rename operation")
-			}
-
-			err = api.ContainerOpenAndClose().CloseContainer()
-			if err != nil {
-				return fmt.Errorf("spawnContainer: %v", err)
-			}
-		}
-
-		// 确定放置目标容器时所使用的朝向
-		var facing uint8 = 1
-		if strings.Contains(container.BlockName(), "shulker") {
-			facing = container.NBT.ShulkerFacing
-		}
-
-		// 移动机器人到操作台中心
-		err = c.console.CanReachOrMove(c.console.Center())
-		if err != nil {
-			return fmt.Errorf("makeNormal: %v", err)
-		}
-
-		// 放置目标容器
-		_, offsetPos, err := api.BotClick().PlaceBlockHighLevel(c.console.Center(), c.console.HotbarSlotID(), facing)
-		if err != nil {
-			return fmt.Errorf("makeNormal: %v", err)
-		}
-		successFunc()
-		*c.console.NearBlockByIndex(nbt_console.ConsoleIndexCenterBlock, offsetPos) = block_helper.NearBlock{
-			Name: game_interface.BasePlaceBlock,
-		}
-
-		// 将该容器保存到基容器缓存命中系统
-		err = c.cache.BaseContainerCache().StoreCache(container.CustomName, container.NBT.ShulkerFacing)
-		if err != nil {
-			return fmt.Errorf("makeNormal: %v", err)
-		}
-
-		// 返回值
-		return nil
-	}
-
-	// 目标容器可以直接通过简单的 setblock 放置
-	err = api.SetBlock().SetBlock(c.console.Center(), container.BlockName(), container.BlockStatesString())
-	if err != nil {
-		return fmt.Errorf("spawnContainer: %v", err)
-	}
-	successFunc()
-
-	return nil
-}
-
-// itemTransition 将已置于操作台中心的 srcContainer 转移为 dstContainer。
-// 应当保证 dstContainer 中的物品可以只通过移动 srcContainer 中的物品得到
-func (c *Container) itemTransition(
-	srcContainer nbt_parser_block.Container,
-	dstContainer nbt_parser_block.Container,
-) error {
-	api := c.console.API()
-
-	// 清空背包
-	_, err := api.Commands().SendWSCommandWithResp("clear")
-	if err != nil {
-		return fmt.Errorf("itemTransition: %v", err)
-	}
-	c.console.CleanInventory()
-
-	// 占用所有物品栏，
-	// 因为我们无法确保数据匹配
-	for index := range 36 {
-		c.console.UseInventorySlot(nbt_console.RequesterUser, resources_control.SlotID(index), true)
-	}
-
-	// 打开加载好的容器
-	success, err := c.console.OpenContainerByIndex(nbt_console.ConsoleIndexCenterBlock)
-	if err != nil {
-		return fmt.Errorf("itemTransition: %v", err)
-	}
-	if !success {
-		return fmt.Errorf("itemTransition: Failed to open the container for %#v (stage 1)", srcContainer)
-	}
-
-	// 将该容器内的物品移动到背包 (置于第 10 到第 36 格)
-	transaction := api.ItemStackOperation().OpenTransaction()
-	for index, item := range srcContainer.NBT.Items {
-		_ = transaction.MoveToInventory(
-			resources_control.SlotID(item.Slot),
-			resources_control.SlotID(index+9),
-			item.Item.ItemCount(),
-		)
-	}
-
-	// 提交更改
-	success, _, _, err = transaction.Commit()
-	if err != nil {
-		_ = api.ContainerOpenAndClose().CloseContainer()
-		return fmt.Errorf("itemTransition: %v", err)
-	}
-	if !success {
-		_ = api.ContainerOpenAndClose().CloseContainer()
-		return fmt.Errorf("itemTransition: The server rejected the stack request action")
-	}
-
-	// 关闭容器
-	err = api.ContainerOpenAndClose().CloseContainer()
-	if err != nil {
-		return fmt.Errorf("itemTransition: %v", err)
-	}
-
-	// 生成新容器
-	err = c.spawnContainer(dstContainer)
-	if err != nil {
-		return fmt.Errorf("itemTransition: %v", err)
-	}
-
-	// 打开新容器
-	success, err = c.console.OpenContainerByIndex(nbt_console.ConsoleIndexCenterBlock)
-	if err != nil {
-		return fmt.Errorf("itemTransition: %v", err)
-	}
-	if !success {
-		return fmt.Errorf("itemTransition: Failed to open the container for %#v (stage 2)", srcContainer)
-	}
-	defer api.ContainerOpenAndClose().CloseContainer()
-
-	// 准备
-	itemTypeIndex := game_interface.ItemType(0)
-	itemTypeMapping := make(map[uint64]game_interface.ItemType)
-	src := make([]game_interface.ItemInfoWithSlot, 0)
-	dst := make([]game_interface.ItemInfoWithSlot, 0)
-
-	// 处理源
-	for index, item := range srcContainer.NBT.Items {
-		hashNumber := nbt_hash.NBTItemTypeHash(item.Item)
-
-		if _, ok := itemTypeMapping[hashNumber]; !ok {
-			itemTypeMapping[hashNumber] = itemTypeIndex
-			itemTypeIndex++
-		}
-
-		src = append(src, game_interface.ItemInfoWithSlot{
-			Slot: resources_control.SlotID(index + 9),
-			ItemInfo: game_interface.ItemInfo{
-				Count:    item.Item.ItemCount(),
-				ItemType: itemTypeMapping[hashNumber],
-			},
-		})
-	}
-
-	// 处理目的地
-	for _, item := range dstContainer.NBT.Items {
-		hashNumber := nbt_hash.NBTItemTypeHash(item.Item)
-
-		if _, ok := itemTypeMapping[hashNumber]; !ok {
-			itemTypeMapping[hashNumber] = itemTypeIndex
-			itemTypeIndex++
-		}
-
-		dst = append(dst, game_interface.ItemInfoWithSlot{
-			Slot: resources_control.SlotID(item.Slot),
-			ItemInfo: game_interface.ItemInfo{
-				Count:    item.Item.ItemCount(),
-				ItemType: itemTypeMapping[hashNumber],
-			},
-		})
-	}
-
-	// 进行物品状态转移
-	success, err = api.ItemTransition().TransitionToContainer(src, dst)
-	if err != nil {
-		return fmt.Errorf("itemTransition: %v", err)
-	}
-	if !success {
-		return fmt.Errorf("itemTransition: Failed to do transition")
-	}
-
-	return nil
-}
-
 func (c *Container) makeNormal() error {
 	api := c.console.API()
 
@@ -356,7 +82,7 @@ func (c *Container) makeNormal() error {
 				panic("makeNormal: Should nerver happened")
 			}
 
-			err = c.itemTransition(*container, c.data)
+			err = nbt_assigner_utils.ItemTransition(c.console, c.cache, *container, c.data)
 			if err != nil {
 				return fmt.Errorf("makeNormal: %v", err)
 			}
@@ -438,7 +164,7 @@ func (c *Container) makeNormal() error {
 			panic("makeNormal: Should nerver happened")
 		}
 
-		err = c.itemTransition(*container, *wantContainer)
+		err = nbt_assigner_utils.ItemTransition(c.console, c.cache, *container, *wantContainer)
 		if err != nil {
 			return fmt.Errorf("makeNormal: %v", err)
 		}
@@ -460,7 +186,7 @@ func (c *Container) makeNormal() error {
 	}
 
 	// Step 4: 生成当前容器
-	err := c.spawnContainer(c.data)
+	err := nbt_assigner_utils.SpawnContainer(c.console, c.cache, c.data)
 	if err != nil {
 		return fmt.Errorf("makeNormal: %v", err)
 	}

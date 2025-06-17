@@ -25,6 +25,9 @@ type (
 
 		// UseNBTData 指示是否需要采用下方的 NBTData 更新物品的 NBT 数据
 		UseNBTData bool
+		// UseOriginDamage 指示在采用下方的 NBTData 时是否保留原有的
+		// Damage 标签的数据，这只对存在耐久的物品有效
+		UseOriginDamage bool
 		// NBTData 指示经过相应的物品堆栈操作后，其 NBT 字段的最终状态。
 		// 需要说明的是，物品名称的 NBT 字段无需在此处更改，它会被自动维护
 		NBTData map[string]any
@@ -101,12 +104,31 @@ func UpdateItem(
 	if clientExpected != nil {
 		newData, ok := clientExpected[slotLocation]
 		if ok {
+			// Prepare
+			var originDamageExist bool
+			var originDamage int32
+			// Update to new network ID
 			if newData.NetworkID != -1 {
 				item.Stack.ItemType.NetworkID = newData.NetworkID
 			}
+			// Get origin damage data
+			if newData.UseOriginDamage {
+				if item.Stack.NBTData != nil {
+					damage, ok := item.Stack.NBTData["Damage"].(int32)
+					if ok {
+						originDamageExist = true
+						originDamage = damage
+					}
+				}
+			}
+			// Update to new NBT data
 			if newData.UseNBTData {
 				item.Stack.NBTData = newData.NBTData
+				if newData.UseOriginDamage && originDamageExist {
+					item.Stack.NBTData["Damage"] = originDamage
+				}
 			}
+			// Update to new repair cost
 			if newData.ChangeRepairCost {
 				if item.Stack.NBTData == nil {
 					item.Stack.NBTData = make(map[string]any)

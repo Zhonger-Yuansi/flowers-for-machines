@@ -144,9 +144,10 @@ func (i *ItemStackTransaction) Commit() (
 				newItem := i.api.ConstantPacket().CreativeItemByCNI(op.CINI)
 				updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
 				updater[op.Path] = resources_control.ExpectedNewItem{
-					NetworkID:  newItem.Item.NetworkID,
-					UseNBTData: true,
-					NBTData:    newItem.Item.NBTData,
+					NetworkID:       newItem.Item.NetworkID,
+					UseNBTData:      true,
+					UseOriginDamage: false,
+					NBTData:         newItem.Item.NBTData,
 				}
 			case item_stack_operation.Renaming:
 				result, err = handler.handleRenaming(op, requestID)

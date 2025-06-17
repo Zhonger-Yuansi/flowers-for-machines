@@ -98,19 +98,16 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 		bannerHashes = append(bannerHashes, hashNumber)
 
 		expectedItem := resources_control.ExpectedNewItem{
-			NetworkID:  -1,
-			UseNBTData: true,
-			NBTData:    make(map[string]any),
+			NetworkID:       -1,
+			UseNBTData:      true,
+			UseOriginDamage: true,
+			NBTData:         make(map[string]any),
 		}
 
-		originItemIndex := bannerNBTHashToIndex[hashNumber]
-		banner := bannerItems[originItemIndex]
-		shield := s.items[originItemIndex]
-
+		banner := bannerItems[bannerNBTHashToIndex[hashNumber]]
 		if banner.NBT.Type == nbt_parser_general.BannerTypeOminous {
 			expectedItem.NBTData = map[string]any{
-				"Base":   int32(15),
-				"Damage": int32(shield.ItemMetadata()),
+				"Base": int32(15),
 				"Patterns": []any{
 					map[string]any{
 						"Color":   int32(15),
@@ -120,7 +117,6 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 			}
 		} else {
 			expectedItem.NBTData["Base"] = int32(banner.ItemMetadata())
-			expectedItem.NBTData["Damage"] = int32(shield.ItemMetadata())
 
 			nbtPatterns := make([]any, 0)
 			for _, pattern := range banner.NBT.Patterns {

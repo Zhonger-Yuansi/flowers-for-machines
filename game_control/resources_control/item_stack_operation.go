@@ -29,6 +29,7 @@ type (
 		// Damage 标签的数据，这只对存在耐久的物品有效
 		UseOriginDamage bool
 		// NBTData 指示经过相应的物品堆栈操作后，其 NBT 字段的最终状态。
+		// 应当保证 NBTData 是非 nil 的，尽管 NBTData 的长度可能为 0。
 		// 需要说明的是，物品名称的 NBT 字段无需在此处更改，它会被自动维护
 		NBTData map[string]any
 
@@ -112,14 +113,8 @@ func UpdateItem(
 				item.Stack.ItemType.NetworkID = newData.NetworkID
 			}
 			// Get origin damage data
-			if newData.UseOriginDamage {
-				if item.Stack.NBTData != nil {
-					damage, ok := item.Stack.NBTData["Damage"].(int32)
-					if ok {
-						originDamageExist = true
-						originDamage = damage
-					}
-				}
+			if newData.UseOriginDamage && item.Stack.NBTData != nil {
+				originDamage, originDamageExist = item.Stack.NBTData["Damage"].(int32)
 			}
 			// Update to new NBT data
 			if newData.UseNBTData {

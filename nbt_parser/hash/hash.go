@@ -26,7 +26,8 @@ func NBTBlockFullHash(block nbt_parser_interface.Block) uint64 {
 
 // NBTItemNBTHash 计算 item 的 NBT 哈希校验和。
 // 它校验的范围不包含物品的自定义名称和附魔数据，
-// 但包括物品名称、物品组件和物品的一些 NBT 字段
+// 但包括物品的名称、物品的元数据、物品组件数据和
+// 这个物品的一些特定 NBT 字段
 func NBTItemNBTHash(item nbt_parser_interface.Item) uint64 {
 	return xxhash.Sum64(item.NBTStableBytes())
 }

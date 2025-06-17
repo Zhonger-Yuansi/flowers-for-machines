@@ -105,7 +105,7 @@ func SystemTestingReplaceitem() {
 		if item.Stack.Count != 8 {
 			panic("SystemTestingReplaceitem: Test round 2 failed")
 		}
-		if !slices.Equal(item.Stack.CanBePlacedOn, []string{"minecraft:grass"}) {
+		if !slices.Equal(item.Stack.CanBePlacedOn, []string{"minecraft:grass_block"}) {
 			panic("SystemTestingReplaceitem: Test round 2 failed")
 		}
 	}

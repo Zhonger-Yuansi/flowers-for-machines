@@ -188,7 +188,7 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 		transaction.
 			MoveToCraftingTable(bannerSlots[index], 28, 1).
 			MoveToCraftingTable(shieldSlots[index], 29, 1).
-			Crafting(0x8f9, shieldSlots[index], 1, shieldExpectedItem[index])
+			Crafting(2418, shieldSlots[index], 1, shieldExpectedItem[index])
 	}
 
 	// Step 6: Commit changes

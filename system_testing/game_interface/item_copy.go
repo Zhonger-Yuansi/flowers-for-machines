@@ -28,7 +28,7 @@ func SystemTestingItemCopy() {
 		api.Commands().AwaitChangesGeneral()
 		api.Commands().SendSettingsCommand("setblock 0 0 0 air", true)
 		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
-			GetCreativeItemToInventory(0x5bc, 6, 1).
+			GetCreativeItemToInventory(1570, 6, 1).
 			Commit()
 		if !success {
 			panic("SystemTestingItemCopy: Failed on test round 1")
@@ -87,7 +87,7 @@ func SystemTestingItemCopy() {
 		api.Commands().AwaitChangesGeneral()
 		api.Commands().SendSettingsCommand("setblock 0 0 0 air", true)
 		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
-			GetCreativeItemToInventory(0x5bc, 6, 1).
+			GetCreativeItemToInventory(1570, 6, 1).
 			Commit()
 		if !success {
 			panic("SystemTestingItemCopy: Failed on test round 2")
@@ -146,7 +146,7 @@ func SystemTestingItemCopy() {
 		api.Commands().AwaitChangesGeneral()
 		api.Commands().SendSettingsCommand("setblock 0 0 0 air", true)
 		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
-			GetCreativeItemToInventory(0x5bc, 6, 1).
+			GetCreativeItemToInventory(1570, 6, 1).
 			Commit()
 		if !success {
 			panic("SystemTestingItemCopy: Failed on test round 3")
@@ -209,7 +209,7 @@ func SystemTestingItemCopy() {
 		api.Commands().AwaitChangesGeneral()
 		api.Commands().SendSettingsCommand("setblock 0 0 0 air", true)
 		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
-			GetCreativeItemToInventory(0x5bc, 6, 1). // Slot 6
+			GetCreativeItemToInventory(1570, 6, 1). // Slot 6
 			Commit()
 		if !success {
 			panic("SystemTestingItemCopy: Failed on test round 4")
@@ -295,7 +295,7 @@ func SystemTestingItemCopy() {
 		api.Commands().AwaitChangesGeneral()
 		api.Commands().SendSettingsCommand("setblock 0 0 0 air", true)
 		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
-			GetCreativeItemToInventory(0x5bc, 6, 16).
+			GetCreativeItemToInventory(1570, 6, 16).
 			Commit()
 		if !success {
 			panic("SystemTestingItemCopy: Failed on test round 5")
@@ -353,7 +353,7 @@ func SystemTestingItemCopy() {
 		api.Commands().AwaitChangesGeneral()
 		api.Commands().SendSettingsCommand("setblock 0 0 0 air", true)
 		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
-			GetCreativeItemToInventory(0x5bc, 6, 16).
+			GetCreativeItemToInventory(1570, 6, 16).
 			Commit()
 		if !success {
 			panic("SystemTestingItemCopy: Failed on test round 6")
@@ -454,7 +454,7 @@ func SystemTestingItemCopy() {
 		api.Commands().AwaitChangesGeneral()
 		api.Commands().SendSettingsCommand("setblock 0 0 0 air", true)
 		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
-			GetCreativeItemToInventory(0x5bc, 6, 9). // Slot 6
+			GetCreativeItemToInventory(1570, 6, 9). // Slot 6
 			Commit()
 		if !success {
 			panic("SystemTestingItemCopy: Failed on test round 8")

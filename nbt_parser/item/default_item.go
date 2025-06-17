@@ -139,6 +139,7 @@ func (d *DefaultItem) NBTStableBytes() []byte {
 
 	// Basic
 	w.String(&itemName)
+	w.Int16(&d.Basic.Metadata)
 
 	// ItemComponent
 	protocol.Single(w, &d.Enhance.ItemComponent)
@@ -159,9 +160,6 @@ func (d *DefaultItem) NBTStableBytes() []byte {
 func (d *DefaultItem) TypeStableBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	w := protocol.NewWriter(buf, 0)
-
-	// Basic
-	w.Int16(&d.Basic.Metadata)
 
 	// Enhance (Display Name, Ench List)
 	w.String(&d.Enhance.DisplayName)

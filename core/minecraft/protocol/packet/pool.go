@@ -101,7 +101,6 @@ func init() {
 		IDMapInfoRequest:              func() Packet { return &MapInfoRequest{} },
 		IDRequestChunkRadius:          func() Packet { return &RequestChunkRadius{} },
 		IDChunkRadiusUpdated:          func() Packet { return &ChunkRadiusUpdated{} },
-		IDItemFrameDropItem:           func() Packet { return &ItemFrameDropItem{} },
 		IDGameRulesChanged:            func() Packet { return &GameRulesChanged{} },
 		IDCamera:                      func() Packet { return &Camera{} },
 		IDBossEvent:                   func() Packet { return &BossEvent{} },
@@ -155,8 +154,6 @@ func init() {
 		IDLevelEventGeneric:           func() Packet { return &LevelEventGeneric{} },
 		IDLecternUpdate:               func() Packet { return &LecternUpdate{} },
 		// ---
-		IDAddEntity:                     func() Packet { return &AddEntity{} },
-		IDRemoveEntity:                  func() Packet { return &RemoveEntity{} },
 		IDClientCacheStatus:             func() Packet { return &ClientCacheStatus{} },
 		IDOnScreenTextureAnimation:      func() Packet { return &OnScreenTextureAnimation{} },
 		IDMapCreateLockedCopy:           func() Packet { return &MapCreateLockedCopy{} },
@@ -237,6 +234,9 @@ func init() {
 		IDRefreshEntitlements:            func() Packet { return &RefreshEntitlements{} },
 		IDPlayerToggleCrafterSlotRequest: func() Packet { return &PlayerToggleCrafterSlotRequest{} },
 		IDSetPlayerInventoryOptions:      func() Packet { return &SetPlayerInventoryOptions{} },
+		IDSetHud:                         func() Packet { return &SetHud{} },
+		IDAwardAchievement:               func() Packet { return &AwardAchievement{} },
+		IDClientBoundCloseForm:           func() Packet { return &ClientBoundCloseForm{} },
 
 		// PhoenixBuilder specific changes.
 		// Author: LNSSPsd, Liliya233, Happy2018new

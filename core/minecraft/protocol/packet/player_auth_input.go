@@ -52,6 +52,10 @@ const (
 	InputFlagStartFlying
 	InputFlagStopFlying
 	InputFlagClientAckServerData
+	InputFlagClientPredictedVehicle
+	InputFlagPaddlingLeft
+	InputFlagPaddlingRight
+	InputFlagBlockBreakingDelayEnabled
 )
 
 const (
@@ -103,6 +107,9 @@ type PlayerAuthInput struct {
 	// PlayMode specifies the way that the player is playing. The values it holds, which are rather random,
 	// may be found above.
 	PlayMode uint32
+	// InteractionModel is a constant representing the interaction model the player is using. It is one of the
+	// constants that may be found above.
+	InteractionModel uint32
 	// GazeDirection is the direction in which the player is gazing, when the PlayMode is PlayModeReality: In
 	// other words, when the player is playing in virtual reality.
 	GazeDirection mgl32.Vec3
@@ -118,22 +125,13 @@ type PlayerAuthInput struct {
 	ItemStackRequest protocol.ItemStackRequest
 	// BlockActions is a slice of block actions that the client has interacted with.
 	BlockActions []protocol.PlayerBlockAction
-	// AnalogueMoveVector is a Vec2 that specifies the direction in which the player moved, as a combination of X/Z
-	// values which are created using an analogue input.
+	// VehicleRotation is the rotation of the vehicle that the player is in, if any.
+	VehicleRotation mgl32.Vec2
+	// ClientPredictedVehicle is the unique ID of the vehicle that the client predicts the player to be in.
+	ClientPredictedVehicle int64
+	// AnalogueMoveVector is a Vec2 that specifies the direction in which the player moved, as a combination
+	// of X/Z values which are created using an analogue input.
 	AnalogueMoveVector mgl32.Vec2
-
-	/*
-		PhoenixBuilder specific changes.
-		Author: Liliya233
-
-		InteractionModel is a constant representing the interaction model the player is using. It is one of the
-		constants that may be found above.
-
-		For netease, the data type of this field is uint32,
-		but on standard minecraft, this is int32.
-	*/
-	InteractionModel uint32
-	// InteractionModel int32
 
 	// PhoenixBuilder specific fields.
 	// Author: Liliya233
@@ -160,11 +158,7 @@ func (pk *PlayerAuthInput) Marshal(io protocol.IO) {
 	io.Varuint64(&pk.InputData)
 	io.Varuint32(&pk.InputMode)
 	io.Varuint32(&pk.PlayMode)
-
-	// PhoenixBuilder specific changes.
-	// Author: Liliya233
 	io.Varuint32(&pk.InteractionModel)
-	// io.Varint32(&pk.InteractionModel)
 
 	if pk.PlayMode == PlayModeReality {
 		io.Vec3(&pk.GazeDirection)
@@ -188,6 +182,11 @@ func (pk *PlayerAuthInput) Marshal(io protocol.IO) {
 
 	if pk.InputData&InputFlagPerformBlockActions != 0 {
 		protocol.SliceVarint32Length(io, &pk.BlockActions)
+	}
+
+	if pk.InputData&InputFlagClientPredictedVehicle != 0 {
+		io.Vec2(&pk.VehicleRotation)
+		io.Varint64(&pk.ClientPredictedVehicle)
 	}
 
 	io.Vec2(&pk.AnalogueMoveVector)

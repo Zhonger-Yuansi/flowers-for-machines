@@ -9,6 +9,7 @@ import (
 	"crypto/x509"
 	_ "embed"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -24,7 +25,6 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/login"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
-
 	"github.com/go-jose/go-jose/v3/jwt"
 	"github.com/google/uuid"
 )
@@ -199,7 +199,7 @@ func (d Dialer) DialContext(ctx context.Context, network string) (conn *Conn, au
 
 	n, ok := networkByID(network)
 	if !ok {
-		return nil, auth.AuthResponse{}, fmt.Errorf("listen: no network under id: %v", network)
+		return nil, auth.AuthResponse{}, fmt.Errorf("dial: no network under id %v", network)
 	}
 
 	/*
@@ -315,14 +315,14 @@ func listenConn(conn *Conn, logger *log.Logger, l, c chan struct{}) {
 		packets, err := conn.dec.Decode()
 		if err != nil {
 			if !errors.Is(err, net.ErrClosed) {
-				logger.Printf("error reading from dialer connection: %v\n", err)
+				logger.Printf("dialer conn: %v\n", err)
 			}
 			return
 		}
 		for _, data := range packets {
 			loggedInBefore, readyToLoginBefore := conn.loggedIn, conn.readyToLogin
 			if err := conn.receive(data); err != nil {
-				logger.Printf("error: %v", err)
+				logger.Printf("dialer conn: %v", err)
 				return
 			}
 			if !readyToLoginBefore && conn.readyToLogin {
@@ -356,8 +356,6 @@ func defaultClientData(
 	authResponse auth.AuthResponse,
 	// address, username string, d *login.ClientData,
 ) {
-	mathRand.Seed(time.Now().Unix())
-
 	d.ServerAddress = authResponse.RentalServerIP
 	d.DeviceOS = protocol.DeviceAndroid
 	d.GameVersion = protocol.CurrentVersion
@@ -374,6 +372,12 @@ func defaultClientData(
 	d.SkinResourcePatch = base64.StdEncoding.EncodeToString(skinResourcePatch)
 	d.SkinImageHeight = 32
 	d.SkinImageWidth = 64
+
+	{
+		id := make([]byte, 8)
+		_, _ = cryptoRand.Read(id)
+		d.PlayFabID = hex.EncodeToString(id)
+	}
 }
 
 // setAndroidData ensures the login.ClientData passed matches settings you would see on an Android device.

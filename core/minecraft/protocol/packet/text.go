@@ -46,6 +46,8 @@ type Text struct {
 	// Nintendo Switch). It is otherwise an empty string, and is used to decide which players are able to
 	// chat with each other.
 	PlatformChatID string
+	// FilteredMessage is always set to empty and the usage is currently unknown.
+	FilteredMessage string
 
 	// PhoenixBuilder specific fields.
 	// Author: Liliya233, Happy2018new
@@ -75,6 +77,7 @@ func (pk *Text) Marshal(io protocol.IO) {
 	}
 	io.String(&pk.XUID)
 	io.String(&pk.PlatformChatID)
+	io.String(&pk.FilteredMessage)
 
 	// PhoenixBuilder specific changes.
 	// Author: Liliya233, Happy2018new

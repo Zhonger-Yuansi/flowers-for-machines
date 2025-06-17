@@ -217,52 +217,84 @@ func (c *Container) makeNormal() error {
 		}
 
 		// 通过 Pick block 得到所有的子方块
-		for _, index := range allSubBlocks {
-			underlying := c.data.NBT.Items[index].Item.UnderlyingItem()
-			subBlock := underlying.(*nbt_parser_item.DefaultItem).Block.SubBlock
-
-			structure, hit, partHit := c.cache.NBTBlockCache().CheckCache(nbt_hash.CompletelyHashNumber{
-				HashNumber:    nbt_hash.NBTBlockFullHash(subBlock),
-				SetHashNumber: nbt_hash.ContainerSetHash(subBlock),
-			})
-			if !hit || partHit {
-				panic("makeNormal: Should nerver happened")
+		subBlocksPtr := 0
+		for {
+			// 这代表当前轮次已经完成了
+			if subBlocksPtr >= len(allSubBlocks) {
+				break
 			}
 
-			index, _, block := c.console.FindSpaceToPlaceNewBlock(false)
-			if block == nil {
-				panic("makeNormal: Should nerver happened")
+			// 我们可以在一个时刻内使用 structure 命令
+			// 加载多个子方块，这一步可以使用协程优化。
+			// spaces 是这些可以使用的方块的位置
+			spaces := c.console.FindMutipleSpaceToPlaceNewBlock(false)
+			// 我们计算出当前轮次需要处理的子方块
+			offset := min(len(spaces), len(allSubBlocks)-subBlocksPtr)
+			currentRound := allSubBlocks[subBlocksPtr : subBlocksPtr+offset]
+			// waiters 用于等待所有 structure 命令完成
+			waiters := make([]chan struct{}, 0)
+
+			// 我们以协程的方式生成当前轮次所需的所有子方块
+			for spaceIndex, itemIndex := range currentRound {
+				underlying := c.data.NBT.Items[itemIndex].Item.UnderlyingItem()
+				subBlock := underlying.(*nbt_parser_item.DefaultItem).Block.SubBlock
+
+				structure, hit, partHit := c.cache.NBTBlockCache().CheckCache(nbt_hash.CompletelyHashNumber{
+					HashNumber:    nbt_hash.NBTBlockFullHash(subBlock),
+					SetHashNumber: nbt_hash.ContainerSetHash(subBlock),
+				})
+				if !hit || partHit {
+					panic("makeNormal: Should nerver happened")
+				}
+
+				newWaiter := make(chan struct{})
+				waiters = append(waiters, newWaiter)
+				subBlocksPtr++
+
+				go func() {
+					err := api.StructureBackup().RevertStructure(
+						structure.UniqueID,
+						c.console.BlockPosByIndex(spaces[spaceIndex]),
+					)
+					if err == nil {
+						c.console.UseHelperBlock(nbt_console.RequesterUser, spaces[spaceIndex], block_helper.ComplexBlock{
+							Name:   structure.Block.BlockName(),
+							States: structure.Block.BlockStates(),
+						})
+					}
+					close(newWaiter)
+				}()
 			}
 
-			err = api.StructureBackup().RevertStructure(
-				structure.UniqueID,
-				c.console.BlockPosByIndex(index),
-			)
-			if err != nil {
-				return fmt.Errorf("makeNormal: %v", err)
-			}
-			c.console.UseHelperBlock(nbt_console.RequesterUser, index, block_helper.ComplexBlock{
-				Name:   structure.Block.BlockName(),
-				States: structure.Block.BlockStates(),
-			})
-
-			err = c.console.CanReachOrMove(c.console.BlockPosByIndex(index))
-			if err != nil {
-				return fmt.Errorf("makeNormal: %v", err)
+			// 等待所有 structure 命令完成
+			for _, waiter := range waiters {
+				<-waiter
 			}
 
-			success, currentSlot, err := api.BotClick().PickBlock(c.console.BlockPosByIndex(index), true)
-			if err != nil || !success {
-				_ = api.BotClick().ChangeSelectedHotbarSlot(nbt_console.DefaultHotbarSlot)
-				c.console.UpdateHotbarSlotID(nbt_console.DefaultHotbarSlot)
+			// 然后，以阻塞的方式 Pick 到当前轮次生成的所有子方块
+			for spaceIndex, itemIndex := range currentRound {
+				index := spaces[spaceIndex]
+
+				err = c.console.CanReachOrMove(c.console.BlockPosByIndex(index))
+				if err != nil {
+					return fmt.Errorf("makeNormal: %v", err)
+				}
+
+				success, currentSlot, err := api.BotClick().PickBlock(c.console.BlockPosByIndex(index), true)
+				if err != nil || !success {
+					_ = api.BotClick().ChangeSelectedHotbarSlot(nbt_console.DefaultHotbarSlot)
+					c.console.UpdateHotbarSlotID(nbt_console.DefaultHotbarSlot)
+				}
+				if err != nil {
+					return fmt.Errorf("makeNormal: %v", err)
+				}
+				if !success {
+					underlying := c.data.NBT.Items[itemIndex].Item.UnderlyingItem()
+					subBlock := underlying.(*nbt_parser_item.DefaultItem).Block.SubBlock
+					return fmt.Errorf("makeNormal: Failed to get sub block %#v by pick block", subBlock)
+				}
+				c.console.UpdateHotbarSlotID(currentSlot)
 			}
-			if err != nil {
-				return fmt.Errorf("makeNormal: %v", err)
-			}
-			if !success {
-				return fmt.Errorf("makeNormal: Failed to get sub block %#v by pick block", subBlock)
-			}
-			c.console.UpdateHotbarSlotID(currentSlot)
 		}
 
 		// 现在所有子方块都被 Pick Block 到背包了

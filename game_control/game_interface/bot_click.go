@@ -132,11 +132,7 @@ func (b *BotClick) clickBlock(
 		}
 		err = b.r.WritePacket(&packet.PlayerAuthInput{
 			InputData: packet.InputFlagStartFlying,
-			Position: mgl32.Vec3{
-				float32(request.BotPos[0]),
-				float32(request.BotPos[1]),
-				float32(request.BotPos[2]),
-			},
+			Position:  request.BotPos,
 		})
 		if err != nil {
 			return fmt.Errorf("clickBlock: %v", err)
@@ -147,11 +143,7 @@ func (b *BotClick) clickBlock(
 		}
 		err = b.r.WritePacket(&packet.PlayerAuthInput{
 			InputData: packet.InputFlagStartFlying,
-			Position: mgl32.Vec3{
-				float32(request.BotPos[0]),
-				float32(request.BotPos[1]),
-				float32(request.BotPos[2]),
-			},
+			Position:  request.BotPos,
 		})
 		if err != nil {
 			return fmt.Errorf("clickBlock: %v", err)

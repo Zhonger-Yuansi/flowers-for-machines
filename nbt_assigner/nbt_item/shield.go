@@ -103,10 +103,14 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 			NBTData:    make(map[string]any),
 		}
 
-		banner := bannerItems[bannerNBTHashToIndex[hashNumber]]
+		originItemIndex := bannerNBTHashToIndex[hashNumber]
+		banner := bannerItems[originItemIndex]
+		shield := s.items[originItemIndex]
+
 		if banner.NBT.Type == nbt_parser_general.BannerTypeOminous {
 			expectedItem.NBTData = map[string]any{
-				"Base": int32(15),
+				"Base":   int32(15),
+				"Damage": int32(shield.ItemMetadata()),
 				"Patterns": []any{
 					map[string]any{
 						"Color":   int32(15),
@@ -116,6 +120,7 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 			}
 		} else {
 			expectedItem.NBTData["Base"] = int32(banner.ItemMetadata())
+			expectedItem.NBTData["Damage"] = int32(shield.ItemMetadata())
 
 			nbtPatterns := make([]any, 0)
 			for _, pattern := range banner.NBT.Patterns {

@@ -137,13 +137,15 @@ func (d *DefaultItem) NBTStableBytes() []byte {
 	haveBlock := (len(d.Block.Name) > 0)
 	haveSubBlock := (d.Block.SubBlock != nil)
 
+	// Basic
+	w.String(&itemName)
+
 	// ItemComponent
 	protocol.Single(w, &d.Enhance.ItemComponent)
 
 	// Block
 	w.Bool(&haveBlock)
 	if haveBlock {
-		w.String(&itemName)
 		w.Bool(&haveSubBlock)
 		if haveSubBlock {
 			subBlockData := d.Block.SubBlock.NBTStableBytes()

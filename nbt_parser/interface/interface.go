@@ -71,8 +71,8 @@ type Item interface {
 	// 需要进一步的特殊处理才能得到
 	IsComplex() bool
 	// NBTStableBytes 返回该物品在 NBT 部分的校验和。
-	// NBT 的部分不包含物品名称和附魔数据，但包括物品
-	// 组件和这个物品特定的一些 NBT 字段
+	// NBT 的部分不包含物品的自定义名称和附魔数据，
+	// 但包括物品名称、物品组件和物品的一些 NBT 字段
 	NBTStableBytes() []byte
 	// TypeStableBytes 返回该种物品的种类哈希校验和。
 	// 这意味着，同种的物品具有一致的种类哈希校验和

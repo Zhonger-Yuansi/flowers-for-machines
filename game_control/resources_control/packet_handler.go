@@ -2,6 +2,7 @@ package resources_control
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
@@ -19,7 +20,10 @@ import (
 // teleported.
 func (r *Resources) handleMovePlayer(p *packet.MovePlayer) {
 	if p.EntityRuntimeID == r.BotInfo().EntityRuntimeID && p.Mode == packet.MoveModeTeleport {
-		_ = r.WritePacket(&packet.PlayerAuthInput{InputData: packet.InputFlagHandledTeleport})
+		_ = r.WritePacket(&packet.PlayerAuthInput{
+			InputData: packet.InputFlagHandledTeleport,
+			Position:  p.Position,
+		})
 	}
 }
 
@@ -36,8 +40,13 @@ func (r *Resources) handleRespawn(p *packet.Respawn) {
 			ActionType:      protocol.PlayerActionRespawn,
 			BlockFace:       -1,
 		})
-		_ = r.WritePacket(&packet.PlayerAuthInput{InputData: packet.InputFlagStartFlying})
-		_ = r.WritePacket(&packet.PlayerAuthInput{InputData: packet.InputFlagStartFlying})
+		for range 2 {
+			_ = r.WritePacket(&packet.PlayerAuthInput{
+				InputData: packet.InputFlagStartFlying,
+				Position:  p.Position,
+			})
+			time.Sleep(time.Second / 20 * 3)
+		}
 	}
 }
 

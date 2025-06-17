@@ -148,6 +148,30 @@ func (c Console) FindSpaceToPlaceNewBlock(includeCenter bool) (
 	return
 }
 
+// FindMutipleSpaceToPlaceNewBlock 从操作台
+// 找到所有可供放置新方块的位置。
+//
+// includeCenter 指示要查找的方块是否也包括操
+// 作台中心处的方块。
+//
+// FindMutipleSpaceToPlaceNewBlock 在设计上
+// 认为 blockIndexs 的长度必定大于 0。
+//
+// 找到的方块可以通过修改其指向的值从而将它变成其他方块
+func (c Console) FindMutipleSpaceToPlaceNewBlock(includeCenter bool) (blockIndexs []int) {
+	for index, value := range c.helperBlocks {
+		if !includeCenter && index == 0 {
+			continue
+		}
+		switch (*value).(type) {
+		case block_helper.AnvilBlockHelper, block_helper.LoomBlockHelper:
+		default:
+			blockIndexs = append(blockIndexs, index)
+		}
+	}
+	return
+}
+
 // FindOrGenerateNewAnvil 寻找操作台的 8 个帮助方块中
 // 是否有一个是铁砧。如果没有，则生成一个铁砧及其承重方块。
 // index 指示找到或生成的铁砧在操作台上的索引

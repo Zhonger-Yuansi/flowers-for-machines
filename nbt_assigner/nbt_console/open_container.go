@@ -52,6 +52,7 @@ func (c *Console) OpenContainerByIndex(index int) (success bool, err error) {
 
 	request := game_interface.UseItemOnBlocks{
 		HotbarSlotID: c.currentHotBar,
+		BotPos:       c.Position(),
 		BlockPos:     blockPos,
 		BlockName:    (*block).BlockName(),
 		BlockStates:  (*block).BlockStates(),

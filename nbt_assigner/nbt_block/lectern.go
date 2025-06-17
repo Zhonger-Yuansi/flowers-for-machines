@@ -151,6 +151,7 @@ func (l *Lectern) Make() error {
 	// 放置成书
 	err = api.BotClick().ClickBlock(game_interface.UseItemOnBlocks{
 		HotbarSlotID: l.console.HotbarSlotID(),
+		BotPos:       l.console.Position(),
 		BlockPos:     l.console.Center(),
 		BlockName:    l.data.BlockName(),
 		BlockStates:  l.data.BlockStates(),

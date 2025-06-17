@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/pterm/pterm"
 )
 
@@ -53,6 +54,7 @@ func SystemTestingItemCopy() {
 		err = api.ItemCopy().CopyItem(
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: 5,
+				BotPos:       mgl32.Vec3{0, 0, 0},
 				BlockPos:     [3]int32{0, 0, 0},
 				BlockName:    "barrel",
 				BlockStates: map[string]any{
@@ -112,6 +114,7 @@ func SystemTestingItemCopy() {
 		err = api.ItemCopy().CopyItem(
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: 8,
+				BotPos:       mgl32.Vec3{0, 0, 0},
 				BlockPos:     [3]int32{0, 0, 0},
 				BlockName:    "barrel",
 				BlockStates: map[string]any{
@@ -175,6 +178,7 @@ func SystemTestingItemCopy() {
 		err = api.ItemCopy().CopyItem(
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: 8,
+				BotPos:       mgl32.Vec3{0, 0, 0},
 				BlockPos:     [3]int32{0, 0, 0},
 				BlockName:    "barrel",
 				BlockStates: map[string]any{
@@ -254,6 +258,7 @@ func SystemTestingItemCopy() {
 		err = api.ItemCopy().CopyItem(
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: 3,
+				BotPos:       mgl32.Vec3{0, 0, 0},
 				BlockPos:     [3]int32{0, 0, 0},
 				BlockName:    "chest",
 				BlockStates: map[string]any{
@@ -320,6 +325,7 @@ func SystemTestingItemCopy() {
 		err = api.ItemCopy().CopyItem(
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: 8,
+				BotPos:       mgl32.Vec3{0, 0, 0},
 				BlockPos:     [3]int32{0, 0, 0},
 				BlockName:    "chest",
 				BlockStates: map[string]any{
@@ -378,6 +384,7 @@ func SystemTestingItemCopy() {
 		err = api.ItemCopy().CopyItem(
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: 8,
+				BotPos:       mgl32.Vec3{0, 0, 0},
 				BlockPos:     [3]int32{0, 0, 0},
 				BlockName:    "chest",
 				BlockStates: map[string]any{
@@ -421,6 +428,7 @@ func SystemTestingItemCopy() {
 		err = api.ItemCopy().CopyItem(
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: 4,
+				BotPos:       mgl32.Vec3{0, 0, 0},
 				BlockPos:     [3]int32{0, 0, 0},
 				BlockName:    "chest",
 				BlockStates: map[string]any{
@@ -499,6 +507,7 @@ func SystemTestingItemCopy() {
 		err = api.ItemCopy().CopyItem(
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: 3,
+				BotPos:       mgl32.Vec3{0, 0, 0},
 				BlockPos:     [3]int32{0, 0, 0},
 				BlockName:    "chest",
 				BlockStates: map[string]any{

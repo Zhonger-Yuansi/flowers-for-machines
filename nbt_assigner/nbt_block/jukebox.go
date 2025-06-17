@@ -137,6 +137,7 @@ func (j *JukeBox) Make() error {
 	// 放置唱片
 	err = api.BotClick().ClickBlock(game_interface.UseItemOnBlocks{
 		HotbarSlotID: j.console.HotbarSlotID(),
+		BotPos:       j.console.Position(),
 		BlockPos:     j.console.Center(),
 		BlockName:    j.data.BlockName(),
 		BlockStates:  j.data.BlockStates(),

@@ -460,6 +460,7 @@ func (c *Container) makeNormal() error {
 		err = api.ItemCopy().CopyItem(
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: c.console.HotbarSlotID(),
+				BotPos:       c.console.Position(),
 				BlockPos:     c.console.Center(),
 				BlockName:    c.data.BlockName(),
 				BlockStates:  c.data.BlockStates(),

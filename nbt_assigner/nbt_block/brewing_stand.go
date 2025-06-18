@@ -70,18 +70,42 @@ func (b *BrewingStand) Make() error {
 		return fmt.Errorf("Make: %v", err)
 	}
 
+	// 针对酿造台燃料槽位的特殊处理
+	for _, item := range b.data.NBT.Items {
+		if item.Slot != 4 {
+			continue
+		}
+
+		err = api.Replaceitem().ReplaceitemInContainerAsync(
+			b.console.Center(),
+			game_interface.ReplaceitemInfo{
+				Name:     "minecraft:blaze_powder",
+				Count:    1,
+				MetaData: 0,
+				Slot:     4,
+			},
+			"",
+		)
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
+
+		err = api.Commands().AwaitChangesGeneral()
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
+
+		break
+	}
+
 	// 处理可以直接 Replaceitem 处理的物品
 	for _, item := range b.data.NBT.Items {
-		var fuelAddCount uint8 = 0
 		underlaying := item.Item.UnderlyingItem()
 		defaultItem := underlaying.(*nbt_parser_item.DefaultItem)
 
 		if item.Item.NeedEnchOrRename() {
 			existItemNeedRename = true
 			continue
-		}
-		if item.Slot == 4 {
-			fuelAddCount = 1
 		}
 
 		usedSyncReplaceitemCommand = true
@@ -98,7 +122,7 @@ func (b *BrewingStand) Make() error {
 			b.console.Center(),
 			game_interface.ReplaceitemInfo{
 				Name:     item.Item.ItemName(),
-				Count:    item.Item.ItemCount() + fuelAddCount,
+				Count:    item.Item.ItemCount(),
 				MetaData: item.Item.ItemMetadata(),
 				Slot:     resources_control.SlotID(item.Slot),
 			},
@@ -127,15 +151,11 @@ func (b *BrewingStand) Make() error {
 
 	// 先将需要特殊处理的物品放入快捷栏
 	for _, item := range b.data.NBT.Items {
-		var fuelAddCount uint8 = 0
 		underlaying := item.Item.UnderlyingItem()
 		defaultItem := underlaying.(*nbt_parser_item.DefaultItem)
 
 		if !item.Item.NeedEnchOrRename() {
 			continue
-		}
-		if item.Slot == 4 {
-			fuelAddCount = 1
 		}
 
 		err = b.console.API().Replaceitem().ReplaceitemInInventory(
@@ -143,7 +163,7 @@ func (b *BrewingStand) Make() error {
 			game_interface.ReplacePathHotbarOnly,
 			game_interface.ReplaceitemInfo{
 				Name:     item.Item.ItemName(),
-				Count:    item.Item.ItemCount() + fuelAddCount,
+				Count:    item.Item.ItemCount(),
 				MetaData: item.Item.ItemMetadata(),
 				Slot:     resources_control.SlotID(item.Slot),
 			},
@@ -209,19 +229,13 @@ func (b *BrewingStand) Make() error {
 
 	// 移动已改名物品到酿造台
 	for _, item := range b.data.NBT.Items {
-		var fuelAddCount uint8 = 0
-
 		if !item.Item.NeedEnchOrRename() {
 			continue
 		}
-		if item.Slot == 4 {
-			fuelAddCount = 1
-		}
-
 		_ = transaction.MoveToContainer(
 			resources_control.SlotID(item.Slot),
 			resources_control.SlotID(item.Slot),
-			item.Item.ItemCount()+fuelAddCount,
+			item.Item.ItemCount(),
 		)
 	}
 

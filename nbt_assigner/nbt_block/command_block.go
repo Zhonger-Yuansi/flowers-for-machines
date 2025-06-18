@@ -36,8 +36,9 @@ func (c *CommandBlock) Make() error {
 		return fmt.Errorf("Make: %v", err)
 	}
 	c.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
-		Name:   c.data.BlockName(),
-		States: c.data.BlockStates(),
+		KnownStates: true,
+		Name:        c.data.BlockName(),
+		States:      c.data.BlockStates(),
 	})
 
 	err = c.console.CanReachOrMove(c.console.Center())

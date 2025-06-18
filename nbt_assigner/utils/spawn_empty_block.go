@@ -74,8 +74,9 @@ func SpawnNewEmptyBlock(
 	if !data.IsCanOpenConatiner {
 		successFunc = func() {
 			console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
-				Name:   data.Name,
-				States: data.States,
+				KnownStates: true,
+				Name:        data.Name,
+				States:      data.States,
 			})
 		}
 	}
@@ -181,10 +182,20 @@ func SpawnNewEmptyBlock(
 		if err != nil {
 			return fmt.Errorf("makeNormal: %v", err)
 		}
-		successFunc()
+		console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
+			KnownStates: false,
+			Name:        data.Name,
+		})
 		*console.NearBlockByIndex(nbt_console.ConsoleIndexCenterBlock, offsetPos) = block_helper.NearBlock{
 			Name: game_interface.BasePlaceBlock,
 		}
+
+		// 覆写容器的方块状态
+		err = api.SetBlock().SetBlock(console.Center(), data.Name, utils.MarshalBlockStates(data.States))
+		if err != nil {
+			return fmt.Errorf("makeNormal: %v", err)
+		}
+		successFunc()
 
 		// 如果这个容器可以打开且可以操作物品，则将其保存到基容器缓存命中系统
 		if data.IsCanOpenConatiner {

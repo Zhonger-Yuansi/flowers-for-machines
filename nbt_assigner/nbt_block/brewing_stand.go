@@ -58,8 +58,12 @@ func (b *BrewingStand) Make() error {
 		b.console,
 		b.cache,
 		nbt_assigner_utils.EmptyBlockData{
-			Name:                  b.data.BlockName(),
-			States:                brewingStandStates,
+			Name: b.data.BlockName(),
+			States: map[string]any{
+				"brewing_stand_slot_a_bit": byte(0),
+				"brewing_stand_slot_b_bit": byte(0),
+				"brewing_stand_slot_c_bit": byte(0),
+			},
 			IsCanOpenConatiner:    true,
 			ConsiderOpenDirection: false,
 			ShulkerFacing:         0,

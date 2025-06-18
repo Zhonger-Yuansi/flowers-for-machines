@@ -283,12 +283,8 @@ func (f *Frame) Make() error {
 		return fmt.Errorf("Make: %v", err)
 	}
 	f.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
-		Name: f.data.BlockName(),
-		States: map[string]any{
-			"facing_direction":     int32(1),
-			"item_frame_map_bit":   byte(0),
-			"item_frame_photo_bit": byte(0),
-		},
+		KnownStates: false,
+		Name:        f.data.BlockName(),
 	})
 
 	// 前往操作台中心处
@@ -321,8 +317,9 @@ func (f *Frame) Make() error {
 		return fmt.Errorf("Make: %v", err)
 	}
 	f.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
-		Name:   f.data.BlockName(),
-		States: f.data.BlockStates(),
+		KnownStates: true,
+		Name:        f.data.BlockName(),
+		States:      f.data.BlockStates(),
 	})
 
 	return nil

@@ -258,8 +258,9 @@ func (c *Container) makeNormal() error {
 					)
 					if err == nil {
 						c.console.UseHelperBlock(nbt_console.RequesterUser, spaces[spaceIndex], block_helper.ComplexBlock{
-							Name:   structure.Block.BlockName(),
-							States: structure.Block.BlockStates(),
+							KnownStates: true,
+							Name:        structure.Block.BlockName(),
+							States:      structure.Block.BlockStates(),
 						})
 					}
 					close(newWaiter)

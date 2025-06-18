@@ -13,7 +13,6 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
 	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
 	nbt_parser_item "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/item"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 )
 
 // 旗帜
@@ -32,13 +31,11 @@ func (b *Banner) Make() error {
 	api := b.console.API()
 
 	// 前置准备
-	helperBannerBlock := "minecraft:standing_banner"
-	helperBlockStates := `["ground_sign_direction"=0]`
 	blockFacing := 1
+	helperBannerBlock := "minecraft:standing_banner"
 	if strings.Contains(b.data.BlockName(), "wall") {
-		helperBannerBlock = "minecraft:wall_banner"
-		helperBlockStates = `["facing_direction"=0]`
 		blockFacing = 2
+		helperBannerBlock = "minecraft:wall_banner"
 	}
 
 	// 清空操作台中心处的方块
@@ -148,8 +145,8 @@ func (b *Banner) Make() error {
 		return fmt.Errorf("Make: %v", err)
 	}
 	b.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
-		Name:   helperBannerBlock,
-		States: utils.ParseBlockStatesString(helperBlockStates),
+		KnownStates: false,
+		Name:        helperBannerBlock,
 	})
 	*b.console.NearBlockByIndex(nbt_console.ConsoleIndexCenterBlock, offsetPos) = block_helper.NearBlock{
 		Name: game_interface.BasePlaceBlock,
@@ -161,8 +158,9 @@ func (b *Banner) Make() error {
 		return fmt.Errorf("Make: %v", err)
 	}
 	b.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
-		Name:   b.data.BlockName(),
-		States: b.data.BlockStates(),
+		KnownStates: true,
+		Name:        b.data.BlockName(),
+		States:      b.data.BlockStates(),
 	})
 
 	return nil

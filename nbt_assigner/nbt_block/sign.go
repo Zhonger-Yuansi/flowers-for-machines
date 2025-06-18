@@ -89,8 +89,8 @@ func (s *Sign) Make() error {
 		return fmt.Errorf("Make: %v", err)
 	}
 	s.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
-		Name:   helperSignBlock,
-		States: utils.ParseBlockStatesString(helperBlockStates),
+		KnownStates: false,
+		Name:        helperSignBlock,
 	})
 
 	// 打开告示牌并写入文本数据
@@ -200,8 +200,9 @@ func (s *Sign) Make() error {
 		return fmt.Errorf("Make: %v", err)
 	}
 	s.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
-		Name:   s.data.BlockName(),
-		States: s.data.BlockStates(),
+		KnownStates: true,
+		Name:        s.data.BlockName(),
+		States:      s.data.BlockStates(),
 	})
 
 	return nil

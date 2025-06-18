@@ -34,8 +34,9 @@ func (n *NBTBlockCache) LoadCache(hashNumber nbt_hash.CompletelyHashNumber) (
 
 	if structure.Offset != [3]int32{0, 0, 0} {
 		*n.console.NearBlockByIndex(nbt_console.ConsoleIndexCenterBlock, structure.Offset) = block_helper.ComplexBlock{
-			Name:   structure.Block.BlockName(),
-			States: structure.Block.BlockStates(),
+			KnownStates: true,
+			Name:        structure.Block.BlockName(),
+			States:      structure.Block.BlockStates(),
 		}
 	}
 
@@ -60,8 +61,9 @@ func (n *NBTBlockCache) LoadCache(hashNumber nbt_hash.CompletelyHashNumber) (
 		n.uniqueID,
 		nbt_console.ConsoleIndexCenterBlock,
 		block_helper.ComplexBlock{
-			Name:   structure.Block.BlockName(),
-			States: structure.Block.BlockStates(),
+			KnownStates: true,
+			Name:        structure.Block.BlockName(),
+			States:      structure.Block.BlockStates(),
 		},
 	)
 	return structure, hit, isSetHashHit, nil

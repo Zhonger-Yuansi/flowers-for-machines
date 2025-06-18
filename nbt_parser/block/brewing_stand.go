@@ -64,9 +64,6 @@ func (b *BrewingStand) Parse(nbtMap map[string]any) error {
 		if err != nil {
 			return fmt.Errorf("Parse: %v", err)
 		}
-		if item.ItemCount() >= 64 && slot == 4 {
-			panic("Parse: Should nerver happened")
-		}
 
 		b.NBT.Items = append(b.NBT.Items, ItemWithSlot{
 			Item: item,

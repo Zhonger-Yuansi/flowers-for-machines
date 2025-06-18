@@ -167,11 +167,6 @@ func EnchMultiple(
 			}
 		}
 
-		err = api.Commands().AwaitChangesGeneral()
-		if err != nil {
-			return fmt.Errorf("EnchMultiple: %v", err)
-		}
-
 		for currentSlotID, originSlotID := range currentRound {
 			_ = transaction.MoveBetweenInventory(
 				resources_control.SlotID(currentSlotID),

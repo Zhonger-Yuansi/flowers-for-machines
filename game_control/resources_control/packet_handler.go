@@ -45,7 +45,7 @@ func (r *Resources) handleRespawn(p *packet.Respawn) {
 				InputData: packet.InputFlagStartFlying,
 				Position:  p.Position,
 			})
-			time.Sleep(time.Second / 20 * 3)
+			time.Sleep(time.Second / 20 * 5)
 		}
 	}
 }

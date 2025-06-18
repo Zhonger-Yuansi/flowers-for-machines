@@ -29,8 +29,9 @@ func (s *StructrueBlock) Make() error {
 		return fmt.Errorf("Make: %v", err)
 	}
 	s.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.ComplexBlock{
-		Name:   s.data.BlockName(),
-		States: s.data.BlockStates(),
+		KnownStates: true,
+		Name:        s.data.BlockName(),
+		States:      s.data.BlockStates(),
 	})
 
 	err = s.console.CanReachOrMove(s.console.Center())

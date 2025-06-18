@@ -5,8 +5,9 @@ import "github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 // ComplexBlock 描述一种复杂的方块，它除了具有名称和方块状态以外，
 // 它还具有很多其他的数据。为了方便，此处不会记录额外的数据
 type ComplexBlock struct {
-	Name   string
-	States map[string]any
+	KnownStates bool
+	Name        string
+	States      map[string]any
 }
 
 func (c ComplexBlock) BlockName() string {

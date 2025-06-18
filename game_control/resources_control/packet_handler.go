@@ -40,12 +40,12 @@ func (r *Resources) handleRespawn(p *packet.Respawn) {
 			ActionType:      protocol.PlayerActionRespawn,
 			BlockFace:       -1,
 		})
-		for range 2 {
+		for range 5 {
 			_ = r.WritePacket(&packet.PlayerAuthInput{
 				InputData: packet.InputFlagStartFlying,
 				Position:  p.Position,
 			})
-			time.Sleep(time.Second / 20 * 5)
+			time.Sleep(time.Second / 20 * 3)
 		}
 	}
 }

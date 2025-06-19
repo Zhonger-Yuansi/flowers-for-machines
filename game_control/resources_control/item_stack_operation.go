@@ -13,20 +13,47 @@ type (
 	ItemStackRequestID int32
 	// ContainerID 是容器的 ID
 	ContainerID uint8
+)
 
+type (
 	// ExpectedNewItem 描述单个物品堆栈在经历一次物品堆栈操作后，
 	// 其最终应当拥有的一些数据信息。应当说明的是，这些数据信息不
 	// 会由服务器告知，它应当是客户端内部处理的
 	ExpectedNewItem struct {
-		// NetworkID 是该物品的数值网络 ID，它在单个 MC 版本中不会变化。
-		// 它可正亦可负，具体取决于其所关注的物品堆栈实例。
-		// 另外，为 NetworkID 填写 -1 的值可以保持其不变
-		NetworkID int32
+		// NetworkID 指示我们应当如何更新物品的 NetworkID 字段
+		NetworkID ItemNewNetworkID
+		// BlockRuntimeID 指示我们应当如何更新物品对应的方块运行时 ID 数据
+		BlockRuntimeID ItemNewBlockRuntimeID
+		// NBT 指示我们应当如何更新物品的 NBT 字段
+		NBT ItemNewNBTData
+		// Component 指示我们应该如何更新物品的 Legacy 物品组件字段
+		Component ItemNewComponent
+	}
 
+	// ItemNewNetworkID 描述物品的新 NetworkID 字段如何更新
+	ItemNewNetworkID struct {
+		// UseNetworkID 指示是否需要采用下方的 NetworkID 更新物品的数值网络 ID
+		UseNetworkID bool
+		// NetworkID 是该物品的数值网络 ID，它在单个 MC 版本中不会变化。
+		// 它可正亦可负，具体取决于其所关注的物品堆栈实例
+		NetworkID int32
+	}
+
+	// ItemNewBlockRuntimeID 描述物品对应的方块运行时数据应该如何更新
+	ItemNewBlockRuntimeID struct {
+		// UseBlockRuntimeID 指示是否需要采用下方的 BlockRuntimeID 更新物品的方块运行时 ID
+		UseBlockRuntimeID bool
+		// BlockRuntimeID 指示这个物品获得的新方块运行时 ID 数据
+		BlockRuntimeID int32
+	}
+
+	// ItemNewNBTData 描述物品的新 NBT 字段如何更新
+	ItemNewNBTData struct {
 		// UseNBTData 指示是否需要采用下方的 NBTData 更新物品的 NBT 数据
 		UseNBTData bool
 		// UseOriginDamage 指示在采用下方的 NBTData 时是否保留原有的
-		// Damage 标签的数据，这只对存在耐久的物品有效
+		// Damage 标签的数据。如果本身就不存在，则不进行任何额外的操作。
+		// 另外，UseOriginDamage 似乎只对存在耐久的物品有效
 		UseOriginDamage bool
 		// NBTData 指示经过相应的物品堆栈操作后，其 NBT 字段的最终状态。
 		// 应当保证 NBTData 是非 nil 的，尽管 NBTData 的长度可能为 0。
@@ -36,27 +63,50 @@ type (
 		// ChangeRepairCost 指示是否需要更新物品的 RepairCost 字段。
 		// 应当说明的是，RepairCost 被用于铁砧的惩罚机制
 		ChangeRepairCost bool
-		// RepairCostDelta 是要修改的 RepairCost 的增量，可以为负
+		// RepairCostDelta 是要修改的 RepairCost 的增量，可以为负。
+		// 当且仅当 ChangeRepairCost 为真时有效，并且其将在 NBTData 被使用后再应用
 		RepairCostDelta int32
+
+		// ChangeDamage 指示是否需要更新的 Damage 字段。
+		// ChangeDamage 和 UseOriginDamage 不应同时为真。
+		// 当 ChangeDamage 为真时，确保物品最终得到一个 Damage 标签
+		ChangeDamage bool
+		// DamageDelta 是要修改的 Damage 的增量，可以为负。
+		// 当且仅当 ChangeDamage 为真时有效，并且其将在 NBTData 被使用后再应用
+		DamageDelta int32
 	}
 
+	// ItemNewComponent 描述物品的 Legacy 物品组件应当如何更新
+	ItemNewComponent struct {
+		// UseCanPlaceOn 指示是否需要采用下方的 CanPlaceOn 更新物品的 can place on 物品组件
+		UseCanPlaceOn bool
+		// CanPlaceOn 指示物品在 can place on 上的新物品组件数据
+		CanPlaceOn []string
+		// UseCanDestroy 指示是否需要采用下方的 UseCanDestroy 更新物品的 can destroy 物品组件
+		UseCanDestroy bool
+		// CanDestroy 指示物品在 can destroy 上的新物品组件数据
+		CanDestroy []string
+	}
+)
+
+type (
 	// ItemStackResponseMapping 是一个由容器 ID 到库存窗口 ID 的映射。
 	// 由于服务器返回的物品堆栈响应按 ContainerID 来返回更改的物品堆栈，
 	// 因此本处的资源处理器定义了下面的运行时映射，以便于操作
 	ItemStackResponseMapping map[ContainerID]WindowID
-)
 
-// ItemStackOperationManager 是所有物品堆栈操作的管理者
-type ItemStackOperationManager struct {
-	// currentItemStackRequestID 是目前物品堆栈请求的累计 RequestID 计数
-	currentItemStackRequestID int32
-	// itemStackMapping 存放每个物品堆栈操作请求中的 ItemStackResponseMapping
-	itemStackMapping utils.SyncMap[ItemStackRequestID, ItemStackResponseMapping]
-	// itemStackUpdater 存放每个物品堆栈操作请求中相关物品的更新函数
-	itemStackUpdater utils.SyncMap[ItemStackRequestID, map[SlotLocation]ExpectedNewItem]
-	// itemStackCallback 存放所有物品堆栈操作请求的回调函数
-	itemStackCallback utils.SyncMap[ItemStackRequestID, func(response *protocol.ItemStackResponse)]
-}
+	// ItemStackOperationManager 是所有物品堆栈操作的管理者
+	ItemStackOperationManager struct {
+		// currentItemStackRequestID 是目前物品堆栈请求的累计 RequestID 计数
+		currentItemStackRequestID int32
+		// itemStackMapping 存放每个物品堆栈操作请求中的 ItemStackResponseMapping
+		itemStackMapping utils.SyncMap[ItemStackRequestID, ItemStackResponseMapping]
+		// itemStackUpdater 存放每个物品堆栈操作请求中相关物品的更新函数
+		itemStackUpdater utils.SyncMap[ItemStackRequestID, map[SlotLocation]ExpectedNewItem]
+		// itemStackCallback 存放所有物品堆栈操作请求的回调函数
+		itemStackCallback utils.SyncMap[ItemStackRequestID, func(response *protocol.ItemStackResponse)]
+	}
+)
 
 // NewItemStackOperationManager 创建并返回一个新的 ItemStackOperationManager
 func NewItemStackOperationManager() *ItemStackOperationManager {

@@ -94,7 +94,7 @@ func (f *Frame) processComplex() (canUseCommand bool, resultSlot resources_contr
 	for _, slotID := range resultSlotMapping {
 		resultSlot = slotID
 	}
-	if resultSlot > 9 {
+	if resultSlot > 8 {
 		err = api.Replaceitem().ReplaceitemInInventory(
 			"@s",
 			game_interface.ReplacePathHotbarOnly,

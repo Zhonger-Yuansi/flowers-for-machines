@@ -188,6 +188,7 @@ func (b *Banner) makeNormal(
 			UseOriginDamage: false,
 			NBTData: map[string]any{
 				"Patterns": nbtPatterns,
+				"Type":     nbt_parser_general.BannerTypeNormal,
 			},
 		}
 	}

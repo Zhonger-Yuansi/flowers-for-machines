@@ -80,7 +80,7 @@ func (b *Banner) Make() error {
 	for _, slotID := range resultSlot {
 		resultSlotID = slotID
 	}
-	if resultSlotID > 9 {
+	if resultSlotID > 8 {
 		err = api.Replaceitem().ReplaceitemInInventory(
 			"@s",
 			game_interface.ReplacePathHotbarOnly,
@@ -118,8 +118,15 @@ func (b *Banner) Make() error {
 			return fmt.Errorf("Make: The server rejected the stack request action")
 		}
 
+		err = api.ContainerOpenAndClose().CloseContainer()
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
+
 		resultSlotID = b.console.HotbarSlotID()
 	}
+
+	// 切换物品栏，如果需要的话
 	if resultSlotID != b.console.HotbarSlotID() {
 		err = b.console.API().BotClick().ChangeSelectedHotbarSlot(resultSlotID)
 		if err != nil {

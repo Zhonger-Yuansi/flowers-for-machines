@@ -10,6 +10,10 @@ type ComplexBlock struct {
 	States      map[string]any
 }
 
+func (c ComplexBlock) KnownBlockStates() bool {
+	return c.KnownStates
+}
+
 func (c ComplexBlock) BlockName() string {
 	return c.Name
 }

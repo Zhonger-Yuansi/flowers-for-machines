@@ -7,6 +7,10 @@ type AnvilBlockHelper struct {
 	States map[string]any
 }
 
+func (AnvilBlockHelper) KnownBlockStates() bool {
+	return true
+}
+
 func (AnvilBlockHelper) BlockName() string {
 	return "minecraft:anvil"
 }

@@ -2,6 +2,10 @@ package block_helper
 
 type LoomBlockHelper struct{}
 
+func (LoomBlockHelper) KnownBlockStates() bool {
+	return true
+}
+
 func (LoomBlockHelper) BlockName() string {
 	return "minecraft:loom"
 }

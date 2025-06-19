@@ -30,6 +30,10 @@ type ContainerBlockHelper struct {
 	OpenInfo ContainerBlockOpenInfo
 }
 
+func (ContainerBlockHelper) KnownBlockStates() bool {
+	return true
+}
+
 func (c ContainerBlockHelper) BlockName() string {
 	return c.OpenInfo.Name
 }

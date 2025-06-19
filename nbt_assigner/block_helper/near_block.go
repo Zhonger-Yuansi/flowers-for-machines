@@ -5,6 +5,10 @@ type NearBlock struct {
 	Name string
 }
 
+func (NearBlock) KnownBlockStates() bool {
+	return true
+}
+
 func (n NearBlock) BlockName() string {
 	return n.Name
 }

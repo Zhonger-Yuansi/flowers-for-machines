@@ -7,6 +7,10 @@ package block_helper
 // 如果表示的是一个帮助类方块，
 // 那么它可以是容器、铁砧或织布机
 type BlockHelper interface {
+	// KnownBlockStates 指示我们是否已经知晓这个方块的方块状态。
+	// 对于大多数帮助类方块，KnownBlockStates 总是返回真。
+	// 对于返回假的情况，只可能出现在 ComplexBlock 时
+	KnownBlockStates() bool
 	// BlockName 获取该方块的名称
 	BlockName() string
 	// BlockStates 获取该方块的方块状态

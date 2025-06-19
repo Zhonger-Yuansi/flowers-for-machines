@@ -122,21 +122,11 @@ func (b *BotClick) clickBlock(
 	}
 
 	// Step 4: 额外操作 (自 v1.20.50 以外的必须更改)
-	{
-		// !!! NOTE - MUST SEND AUTH INPUT TWICE !!!
-		// await changes and send auth
-		// input to submit changes
-		err = b.c.AwaitChangesGeneral()
-		if err != nil {
-			return fmt.Errorf("clickBlock: %v", err)
-		}
-		err = b.r.WritePacket(&packet.PlayerAuthInput{
-			InputData: packet.InputFlagStartFlying,
-			Position:  request.BotPos,
-		})
-		if err != nil {
-			return fmt.Errorf("clickBlock: %v", err)
-		}
+	//
+	// !!! NOTE - MUST SEND AUTH INPUT TWICE !!!
+	// await changes and send auth
+	// input to submit changes
+	for range 2 {
 		err = b.c.AwaitChangesGeneral()
 		if err != nil {
 			return fmt.Errorf("clickBlock: %v", err)

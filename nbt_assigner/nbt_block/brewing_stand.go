@@ -46,15 +46,8 @@ func (b *BrewingStand) Make() error {
 		})
 	}
 
-	// 清除酿造台处的方块
-	err := api.SetBlock().SetBlock(b.console.Center(), "minecraft:air", "[]")
-	if err != nil {
-		return fmt.Errorf("Make: %v", err)
-	}
-	b.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.Air{})
-
 	// 生成酿造台方块
-	err = nbt_assigner_utils.SpawnNewEmptyBlock(
+	err := nbt_assigner_utils.SpawnNewEmptyBlock(
 		b.console,
 		b.cache,
 		nbt_assigner_utils.EmptyBlockData{

@@ -20,8 +20,8 @@ type (
 	// 其最终应当拥有的一些数据信息。应当说明的是，这些数据信息不
 	// 会由服务器告知，它应当是客户端内部处理的
 	ExpectedNewItem struct {
-		// NetworkID 指示我们应当如何更新物品的 NetworkID 字段
-		NetworkID ItemNewNetworkID
+		// ItemType 指示我们应当如何更新物品的一些基本字段
+		ItemType ItemNewType
 		// BlockRuntimeID 指示我们应当如何更新物品对应的方块运行时 ID 数据
 		BlockRuntimeID ItemNewBlockRuntimeID
 		// NBT 指示我们应当如何更新物品的 NBT 字段
@@ -30,13 +30,19 @@ type (
 		Component ItemNewComponent
 	}
 
-	// ItemNewNetworkID 描述物品的新 NetworkID 字段如何更新
-	ItemNewNetworkID struct {
+	// ItemNewType 描述物品的一些基本字段应如何更新
+	ItemNewType struct {
 		// UseNetworkID 指示是否需要采用下方的 NetworkID 更新物品的数值网络 ID
 		UseNetworkID bool
 		// NetworkID 是该物品的数值网络 ID，它在单个 MC 版本中不会变化。
 		// 它可正亦可负，具体取决于其所关注的物品堆栈实例
 		NetworkID int32
+		// UseMetadata 指示是否需要采用下方的 UseMetadata 更新物品的元数据
+		UseMetadata bool
+		// Metadata 指示这跟物品的新元数据。特别地，耐久数据不在本处设置，敬请参阅
+		// [ItemNewNBTData.UseOriginDamage]、[ItemNewNBTData.ChangeDamage] 和
+		// [ItemNewNBTData.DamageDelta]
+		Metadata uint32
 	}
 
 	// ItemNewBlockRuntimeID 描述物品对应的方块运行时数据应该如何更新
@@ -51,9 +57,9 @@ type (
 	ItemNewNBTData struct {
 		// UseNBTData 指示是否需要采用下方的 NBTData 更新物品的 NBT 数据
 		UseNBTData bool
-		// UseOriginDamage 指示在采用下方的 NBTData 时是否保留原有的
-		// Damage 标签的数据。如果本身就不存在，则不进行任何额外的操作。
-		// 另外，UseOriginDamage 似乎只对存在耐久的物品有效
+		// UseOriginDamage 指示在采用下方的 NBTData 时是否保留原有的 Damage
+		// 标签的数据。如果原本就不存在，或 UseNBTData 为假，那么最终将不会进
+		// 行任何额外的操作。另外，UseOriginDamage 似乎只对存在耐久的物品有效
 		UseOriginDamage bool
 		// NBTData 指示经过相应的物品堆栈操作后，其 NBT 字段的最终状态。
 		// 应当保证 NBTData 是非 nil 的，尽管 NBTData 的长度可能为 0。
@@ -141,9 +147,10 @@ func (i *ItemStackOperationManager) AddNewRequest(
 	}
 }
 
-// UpdateItem 通过 serverResponse 和 clientExpected 共同评估 item 的新值。
-// slotLocation 指示该物品的位置。应当说明的是，相关修改将直接在 item 上进行
-func UpdateItem(
+// UpdateNetworkItem 通过 serverResponse 和 clientExpected 共同评估 item 的新值。
+// slotLocation 指示该物品的位置。应当说明的是，相关修改将直接在 item 上进行。
+// UpdateItem 保证 clientExpected 所指示的数据不会被意外重用，内部实现将使用深拷贝
+func UpdateNetworkItem(
 	item *protocol.ItemInstance,
 	slotLocation SlotLocation,
 	serverResponse protocol.StackResponseSlotInfo,
@@ -153,38 +160,87 @@ func UpdateItem(
 	item.StackNetworkID = serverResponse.StackNetworkID
 
 	if clientExpected != nil {
-		newData, ok := clientExpected[slotLocation]
+		updater, ok := clientExpected[slotLocation]
 		if ok {
-			// Prepare
-			var originDamageExist bool
-			var originDamage int32
-			// Update to new network ID
-			if newData.NetworkID != -1 {
-				item.Stack.ItemType.NetworkID = newData.NetworkID
-			}
-			// Get origin damage data
-			if newData.UseOriginDamage && item.Stack.NBTData != nil {
-				originDamage, originDamageExist = item.Stack.NBTData["Damage"].(int32)
-			}
-			// Update to new NBT data
-			if newData.UseNBTData {
-				item.Stack.NBTData = newData.NBTData
-				if newData.UseOriginDamage && originDamageExist {
-					item.Stack.NBTData["Damage"] = originDamage
-				}
-			}
-			// Update to new repair cost
-			if newData.ChangeRepairCost {
-				if item.Stack.NBTData == nil {
-					item.Stack.NBTData = make(map[string]any)
-				}
-				repairCost, _ := item.Stack.NBTData["RepairCost"].(int32)
-				repairCost += newData.RepairCostDelta
-				item.Stack.NBTData["RepairCost"] = repairCost
-			}
+			UpdateItemClientSide(item, slotLocation, updater)
 		}
 	}
 
+	UpdateDisplay(item, serverResponse)
+}
+
+// UpdateItemClientSide 通过 clientExpected 评估 item 的新值。
+// slotLocation 指示该物品的位置。应当说明的是，相关修改将直接在 item 上进行。
+// UpdateItemData 保证 clientExpected 所指示的数据不会被意外重用，内部实现将使用深拷贝
+func UpdateItemClientSide(
+	item *protocol.ItemInstance,
+	slotLocation SlotLocation,
+	clientExpected ExpectedNewItem,
+) {
+	// Prepare
+	var originDamageExist bool
+	var originDamage int32
+	if item.Stack.NBTData != nil {
+		originDamage, originDamageExist = item.Stack.NBTData["Damage"].(int32)
+	}
+
+	// Update to new network ID and new metadata
+	if clientExpected.ItemType.UseNetworkID {
+		item.Stack.ItemType.NetworkID = clientExpected.ItemType.NetworkID
+	}
+	if clientExpected.ItemType.UseMetadata {
+		item.Stack.ItemType.MetadataValue = clientExpected.ItemType.Metadata
+	}
+	// Update to new block runtime ID
+	if clientExpected.BlockRuntimeID.UseBlockRuntimeID {
+		item.Stack.BlockRuntimeID = clientExpected.BlockRuntimeID.BlockRuntimeID
+	}
+	// Update to new can place on
+	if clientExpected.Component.UseCanPlaceOn {
+		item.Stack.CanBePlacedOn = nil
+		copy(item.Stack.CanBePlacedOn, clientExpected.Component.CanPlaceOn)
+	}
+	// Update to new can destroy
+	if clientExpected.Component.UseCanDestroy {
+		item.Stack.CanBreak = nil
+		copy(item.Stack.CanBreak, clientExpected.Component.CanDestroy)
+	}
+
+	// Update to new NBT data
+	if clientExpected.NBT.UseNBTData {
+		item.Stack.NBTData = utils.DeepCopyNBT(clientExpected.NBT.NBTData)
+		// Use origin damage if needed
+		if clientExpected.NBT.UseOriginDamage && originDamageExist {
+			item.Stack.NBTData["Damage"] = originDamage
+		}
+	}
+	// Update to new damage
+	if clientExpected.NBT.ChangeDamage {
+		if item.Stack.NBTData == nil {
+			item.Stack.NBTData = make(map[string]any)
+		}
+		damage, _ := item.Stack.NBTData["Damage"].(int32)
+		damage += clientExpected.NBT.DamageDelta
+		item.Stack.NBTData["Damage"] = damage
+	}
+	// Update to new repair cost
+	if clientExpected.NBT.ChangeRepairCost {
+		if item.Stack.NBTData == nil {
+			item.Stack.NBTData = make(map[string]any)
+		}
+		repairCost, _ := item.Stack.NBTData["RepairCost"].(int32)
+		repairCost += clientExpected.NBT.RepairCostDelta
+		item.Stack.NBTData["RepairCost"] = repairCost
+	}
+}
+
+// UpdateItemDisplay 通过 serverResponse 评估 item 的新自定义物品名数据。
+// slotLocation 指示该物品的位置。应当说明的是，相关修改将直接在 item 上进行
+func UpdateDisplay(
+	item *protocol.ItemInstance,
+	serverResponse protocol.StackResponseSlotInfo,
+) {
+	// 物品没有 NBT 数据，但有物品名称
 	if len(item.Stack.NBTData) == 0 && len(serverResponse.CustomName) > 0 {
 		item.Stack.NBTData = map[string]any{
 			"display": map[string]any{
@@ -193,6 +249,7 @@ func UpdateItem(
 		}
 	}
 
+	// 物品存在 NBT 数据
 	if len(item.Stack.NBTData) > 0 {
 		_, displayExisted := item.Stack.NBTData["display"].(map[string]any)
 

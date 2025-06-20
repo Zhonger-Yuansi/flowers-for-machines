@@ -203,18 +203,18 @@ func SystemTestingItemStackOperation() {
 		}
 
 		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
-			LoomingFromInventory("bo", 0, 0, 1, resources_control.ExpectedNewItem{NetworkID: -1}).  // Banner 1 (1)
-			LoomingFromInventory("moj", 2, 0, 3, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 1 (2)
-			LoomingFromInventory("sku", 4, 0, 1, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 1 (3)
-			LoomingFromInventory("sku", 4, 0, 1, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 1 (4)
-			LoomingFromInventory("sku", 4, 0, 1, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 1 (5)
-			LoomingFromInventory("sku", 4, 0, 1, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 1 (6)
-			LoomingFromInventory("cbo", 5, 6, 3, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 2 (1)
-			LoomingFromInventory("bo", 0, 6, 1, resources_control.ExpectedNewItem{NetworkID: -1}).  // Banner 2 (2)
-			LoomingFromInventory("moj", 2, 6, 7, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 2 (3)
-			LoomingFromInventory("sku", 4, 6, 3, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 2 (4)
-			LoomingFromInventory("cbo", 5, 6, 1, resources_control.ExpectedNewItem{NetworkID: -1}). // Banner 2 (5)
-			LoomingFromInventory("bo", 0, 6, 1, resources_control.ExpectedNewItem{NetworkID: -1}).  // Banner 2 (6)
+			LoomingFromInventory("bo", 0, 0, 1, resources_control.ExpectedNewItem{}).  // Banner 1 (1)
+			LoomingFromInventory("moj", 2, 0, 3, resources_control.ExpectedNewItem{}). // Banner 1 (2)
+			LoomingFromInventory("sku", 4, 0, 1, resources_control.ExpectedNewItem{}). // Banner 1 (3)
+			LoomingFromInventory("sku", 4, 0, 1, resources_control.ExpectedNewItem{}). // Banner 1 (4)
+			LoomingFromInventory("sku", 4, 0, 1, resources_control.ExpectedNewItem{}). // Banner 1 (5)
+			LoomingFromInventory("sku", 4, 0, 1, resources_control.ExpectedNewItem{}). // Banner 1 (6)
+			LoomingFromInventory("cbo", 5, 6, 3, resources_control.ExpectedNewItem{}). // Banner 2 (1)
+			LoomingFromInventory("bo", 0, 6, 1, resources_control.ExpectedNewItem{}).  // Banner 2 (2)
+			LoomingFromInventory("moj", 2, 6, 7, resources_control.ExpectedNewItem{}). // Banner 2 (3)
+			LoomingFromInventory("sku", 4, 6, 3, resources_control.ExpectedNewItem{}). // Banner 2 (4)
+			LoomingFromInventory("cbo", 5, 6, 1, resources_control.ExpectedNewItem{}). // Banner 2 (5)
+			LoomingFromInventory("bo", 0, 6, 1, resources_control.ExpectedNewItem{}).  // Banner 2 (6)
 			Commit()
 		if !success {
 			panic("SystemTestingItemStackOperation: Failed on test round 4")
@@ -236,10 +236,10 @@ func SystemTestingItemStackOperation() {
 		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
 			MoveToCraftingTable(6, 28, 1).
 			MoveToCraftingTable(8, 29, 1).
-			Crafting(2418, 10, 1, resources_control.ExpectedNewItem{NetworkID: -1}).
+			Crafting(2418, 10, 1, resources_control.ExpectedNewItem{}).
 			MoveToCraftingTable(9, 28, 1). // Hacking attempt
 			MoveToCraftingTable(0, 31, 1). // Hacking attempt
-			Crafting(2418, 0, 1, resources_control.ExpectedNewItem{NetworkID: -1}).
+			Crafting(2418, 0, 1, resources_control.ExpectedNewItem{}).
 			MoveBetweenInventory(10, 8, 1).
 			DropInventoryItem(8, 1).
 			DropInventoryItem(0, 1).

@@ -183,12 +183,15 @@ func (b *Banner) makeNormal(
 		}
 
 		resultBanners[idx] = resources_control.ExpectedNewItem{
-			NetworkID:       -1,
-			UseNBTData:      true,
-			UseOriginDamage: false,
-			NBTData: map[string]any{
-				"Patterns": nbtPatterns,
-				"Type":     nbt_parser_general.BannerTypeNormal,
+			NBT: resources_control.ItemNewNBTData{
+				UseNBTData:      true,
+				UseOriginDamage: false,
+				NBTData: map[string]any{
+					"Patterns": nbtPatterns,
+					"Type":     nbt_parser_general.BannerTypeNormal,
+				},
+				ChangeRepairCost: false,
+				ChangeDamage:     false,
 			},
 		}
 	}

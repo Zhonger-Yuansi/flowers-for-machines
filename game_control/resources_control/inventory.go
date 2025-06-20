@@ -55,22 +55,28 @@ func NewInventories() *Inventories {
 	}
 }
 
-// NewAirItem 返回一个新的空气物品堆栈实例
-func NewAirItem() *protocol.ItemInstance {
+// NewAirItemStack 返回一个新的空气物品堆栈
+func NewAirItemStack() *protocol.ItemStack {
+	return &protocol.ItemStack{
+		ItemType: protocol.ItemType{
+			NetworkID:     0,
+			MetadataValue: 0,
+		},
+		BlockRuntimeID: 0,
+		Count:          0,
+		NBTData:        make(map[string]any),
+		CanBePlacedOn:  []string(nil),
+		CanBreak:       []string(nil),
+		HasNetworkID:   false,
+	}
+}
+
+// NewAirItemInstance 返回一个新的空气物品堆栈实例。
+// 与 NewAirItemStack 的区别在于，这是在网络上传输的
+func NewAirItemInstance() *protocol.ItemInstance {
 	return &protocol.ItemInstance{
 		StackNetworkID: 0,
-		Stack: protocol.ItemStack{
-			ItemType: protocol.ItemType{
-				NetworkID:     0,
-				MetadataValue: 0,
-			},
-			BlockRuntimeID: 0,
-			Count:          0,
-			NBTData:        make(map[string]any),
-			CanBePlacedOn:  []string(nil),
-			CanBreak:       []string(nil),
-			HasNetworkID:   false,
-		},
+		Stack:          *NewAirItemStack(),
 	}
 }
 
@@ -84,7 +90,7 @@ func (i *Inventory) GetItemStack(slotID SlotID) *protocol.ItemInstance {
 
 	result, ok := i.mapping[slotID]
 	if !ok {
-		return NewAirItem()
+		return NewAirItemInstance()
 	}
 
 	return result
@@ -112,13 +118,13 @@ func (i *Inventory) setItemStack(slotID SlotID, item *protocol.ItemInstance) {
 	defer i.mu.Unlock()
 
 	if item == nil {
-		i.mapping[slotID] = NewAirItem()
+		i.mapping[slotID] = NewAirItemInstance()
 		return
 	}
 
 	if item.Stack.NetworkID == -1 {
 		if _, ok := i.mapping[slotID]; !ok {
-			i.mapping[slotID] = NewAirItem()
+			i.mapping[slotID] = NewAirItemInstance()
 		}
 		return
 	}

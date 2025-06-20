@@ -7,7 +7,6 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface/item_stack_operation"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
 )
 
 // Discord 丢弃曾经执行的更改。
@@ -119,7 +118,7 @@ func (i *ItemStackTransaction) Commit() (
 			api.ItemStackOperation().AddNewRequest(
 				requestID,
 				handler.responseMapping.mapping,
-				nil,
+				handler.virtualInventories.dumpToUpdaters(),
 				func(response *protocol.ItemStackResponse) {
 					mu.Lock()
 					defer mu.Unlock()
@@ -132,44 +131,19 @@ func (i *ItemStackTransaction) Commit() (
 
 		// Step 2.2: If can not inline
 		for _, operation := range requests {
-			var (
-				requestID   resources_control.ItemStackRequestID = api.ItemStackOperation().NewRequestID()
-				updater     map[resources_control.SlotLocation]resources_control.ExpectedNewItem
-				itemNewName *string
-			)
+			var itemNewName *string
+			requestID := api.ItemStackOperation().NewRequestID()
 
 			switch op := operation.(type) {
 			case item_stack_operation.CreativeItem:
 				result, err = handler.handleCreativeItem(op, requestID)
-				newItem := i.api.ConstantPacket().CreativeItemByCNI(op.CINI)
-				updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
-				updater[op.Path] = resources_control.ExpectedNewItem{
-					NetworkID:       newItem.Item.NetworkID,
-					UseNBTData:      true,
-					UseOriginDamage: false,
-					NBTData:         newItem.Item.NBTData,
-				}
 			case item_stack_operation.Renaming:
 				result, err = handler.handleRenaming(op, requestID)
 				itemNewName = &op.NewName
-				updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
-				updater[op.Path] = resources_control.ExpectedNewItem{
-					NetworkID:        -1,
-					ChangeRepairCost: true,
-					RepairCostDelta:  0,
-				}
 			case item_stack_operation.Looming:
 				result, err = handler.handleLooming(op, requestID)
-				updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
-				updater[op.BannerPath] = op.ResultItem
 			case item_stack_operation.Crafting:
 				result, err = handler.handleCrafting(op, requestID)
-				updater = make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
-				location := resources_control.SlotLocation{
-					WindowID: protocol.WindowIDInventory,
-					SlotID:   op.ResultSlotID,
-				}
-				updater[location] = op.ResultItem
 			}
 			if err != nil {
 				return false, nil, nil, fmt.Errorf("Commit: %v", err)
@@ -189,10 +163,11 @@ func (i *ItemStackTransaction) Commit() (
 			channel := make(chan struct{})
 			waiters = append(waiters, channel)
 
+			handler.virtualInventories.dumpToUpdaters()
 			api.ItemStackOperation().AddNewRequest(
 				requestID,
 				handler.responseMapping.mapping,
-				updater,
+				handler.virtualInventories.dumpToUpdaters(),
 				func(response *protocol.ItemStackResponse) {
 					mu.Lock()
 					defer mu.Unlock()

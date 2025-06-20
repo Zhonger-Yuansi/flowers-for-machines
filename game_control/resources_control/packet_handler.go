@@ -160,7 +160,7 @@ func (r *Resources) handleItemStackResponse(p *packet.ItemStackResponse) {
 					)
 				}
 
-				UpdateItem(
+				UpdateNetworkItem(
 					item,
 					SlotLocation{WindowID: windowID, SlotID: slotID},
 					slotInfo, itemUpdater,

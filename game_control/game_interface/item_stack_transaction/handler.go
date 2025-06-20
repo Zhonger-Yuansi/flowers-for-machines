@@ -567,15 +567,7 @@ func (i *itemStackOperationHandler) handleCrafting(
 		}
 
 		// Sync item data
-		resultCount, err := i.virtualInventories.loadItemCount(resultPath)
-		if err != nil {
-			return nil, fmt.Errorf("handleCrafting: %v", err)
-		}
 		err = i.virtualInventories.updateFromUpdater(resultPath, op.ResultItem)
-		if err != nil {
-			return nil, fmt.Errorf("handleCrafting: %v", err)
-		}
-		err = i.virtualInventories.setItemCount(resultPath, resultCount)
 		if err != nil {
 			return nil, fmt.Errorf("handleCrafting: %v", err)
 		}

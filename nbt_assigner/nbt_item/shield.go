@@ -97,17 +97,36 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 		bannerSlots = append(bannerSlots, slot)
 		bannerHashes = append(bannerHashes, hashNumber)
 
+		originItemIndex := bannerNBTHashToIndex[hashNumber]
+		banner := bannerItems[originItemIndex]
+		shield := s.items[originItemIndex]
+
 		expectedItem := resources_control.ExpectedNewItem{
+			ItemType: resources_control.ItemNewType{
+				UseNetworkID: true,
+				NetworkID:    int32(api.Resources().ConstantPacket().ItemByName("minecraft:shield").RuntimeID),
+				UseMetadata:  true,
+				Metadata:     0,
+			},
+			BlockRuntimeID: resources_control.ItemNewBlockRuntimeID{
+				UseBlockRuntimeID: true,
+				BlockRuntimeID:    0,
+			},
 			NBT: resources_control.ItemNewNBTData{
 				UseNBTData:       true,
-				UseOriginDamage:  true,
+				UseOriginDamage:  false,
 				NBTData:          make(map[string]any),
 				ChangeRepairCost: false,
 				ChangeDamage:     false,
 			},
+			Component: resources_control.ItemNewComponent{
+				UseCanPlaceOn: true,
+				CanPlaceOn:    shield.Enhance.ItemComponent.CanPlaceOn,
+				UseCanDestroy: true,
+				CanDestroy:    shield.Enhance.ItemComponent.CanDestroy,
+			},
 		}
 
-		banner := bannerItems[bannerNBTHashToIndex[hashNumber]]
 		if banner.NBT.Type == nbt_parser_general.BannerTypeOminous {
 			expectedItem.NBT.NBTData = map[string]any{
 				"Base": int32(15),
@@ -120,6 +139,7 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 			}
 		} else {
 			expectedItem.NBT.NBTData["Base"] = int32(banner.ItemMetadata())
+			expectedItem.NBT.NBTData["Damage"] = int32(shield.ItemMetadata())
 
 			nbtPatterns := make([]any, 0)
 			for _, pattern := range banner.NBT.Patterns {

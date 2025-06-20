@@ -54,6 +54,7 @@ func (f Frame) NBTStableBytes() []byte {
 	w.Bool(&f.NBT.HaveItem)
 	if f.NBT.HaveItem {
 		itemStableBytes := f.NBT.Item.TypeStableBytes()
+		w.Float32(&f.NBT.ItemRotation)
 		w.ByteSlice(&itemStableBytes)
 	}
 

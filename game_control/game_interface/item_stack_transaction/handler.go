@@ -435,7 +435,7 @@ func (i *itemStackOperationHandler) handleLooming(
 		i.responseMapping.bind(op.BannerPath.WindowID, cid)
 		i.responseMapping.bind(resources_control.WindowID(containerData.WindowID), protocol.ContainerLoomInput)
 
-		// Update pattern data
+		// Update banner data
 		err = i.virtualInventories.updateFromUpdater(op.BannerPath, op.ResultItem)
 		if err != nil {
 			return nil, fmt.Errorf("handleLooming: %v", err)

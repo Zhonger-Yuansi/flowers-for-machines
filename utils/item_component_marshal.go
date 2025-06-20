@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 )
@@ -41,6 +42,11 @@ func ParseItemComponent(nbtMap map[string]any) (result ItemComponent) {
 			if !ok {
 				continue
 			}
+
+			if !strings.HasPrefix(val, "minecraft:") {
+				val = "minecraft:" + val
+			}
+
 			result.CanDestroy = append(result.CanDestroy, val)
 		}
 	}
@@ -52,6 +58,11 @@ func ParseItemComponent(nbtMap map[string]any) (result ItemComponent) {
 			if !ok {
 				continue
 			}
+
+			if !strings.HasPrefix(val, "minecraft:") {
+				val = "minecraft:" + val
+			}
+
 			result.CanPlaceOn = append(result.CanPlaceOn, val)
 		}
 	}

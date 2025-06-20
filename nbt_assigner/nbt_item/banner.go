@@ -183,6 +183,16 @@ func (b *Banner) makeNormal(
 		}
 
 		resultBanners[idx] = resources_control.ExpectedNewItem{
+			ItemType: resources_control.ItemNewType{
+				UseNetworkID: true,
+				NetworkID:    int32(api.Resources().ConstantPacket().ItemByName("minecraft:banner").RuntimeID),
+				UseMetadata:  true,
+				Metadata:     uint32(banner.ItemMetadata()),
+			},
+			BlockRuntimeID: resources_control.ItemNewBlockRuntimeID{
+				UseBlockRuntimeID: true,
+				BlockRuntimeID:    0,
+			},
 			NBT: resources_control.ItemNewNBTData{
 				UseNBTData:      true,
 				UseOriginDamage: false,
@@ -192,6 +202,12 @@ func (b *Banner) makeNormal(
 				},
 				ChangeRepairCost: false,
 				ChangeDamage:     false,
+			},
+			Component: resources_control.ItemNewComponent{
+				UseCanPlaceOn: true,
+				CanPlaceOn:    banner.Enhance.ItemComponent.CanPlaceOn,
+				UseCanDestroy: true,
+				CanDestroy:    banner.Enhance.ItemComponent.CanDestroy,
 			},
 		}
 	}

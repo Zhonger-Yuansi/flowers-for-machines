@@ -6,6 +6,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
 	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 	"github.com/TriM-Organization/bedrock-world-operator/block"
 	"github.com/df-mc/worldupgrader/blockupgrader"
 )
@@ -27,6 +28,33 @@ type ItemBlockData struct {
 	// 数据的容器，但如果被判定为不需要特殊
 	// 处理，则 SubBlock 仍然解析为空
 	SubBlock nbt_parser_interface.Block
+}
+
+// HaveSubBlockData 验证 tag 是否指向有效的子方块数据荷载。
+//
+// 一个特殊情况是，可能在首次解析时，目标子方块的子方块被证明
+// 为不需要进行特殊处理，于是它的子方块数据被剔除。
+//
+// 但由于这个子方块对应的物品形式含有物品名称，于是在验证导入
+// 完整性时，由于 len(tag) > 0 而尝试解析子方块，并得到一个
+// 需要特殊处理的子方块 (而原始情况却是不需要进行处理)。
+//
+// 这是因为，此时的 tag 虽然不包含子方块的数据，但包含其他 NBT
+// 字段，如这个物品的物品组件或名称数据等。于是，在尝试解析它为
+// 子方块时，子方块会得到全零值的字段，但这不代表它是不需要被特
+// 殊处理的情况——于是再次解析所得的产物跟原产物不等价，自环发生。
+//
+// 所以，HaveSubBlockData 深拷贝 tag 并移除所有可能因导入而产生
+// 的额外的 NBT 字段，然后再检查 tag 的长度是否大于 0 并返回结果
+func HaveSubBlockData(tag map[string]any) bool {
+	newTag := utils.DeepCopyNBT(tag)
+	delete(newTag, "Damage")
+	delete(newTag, "RepairCost")
+	delete(newTag, "display")
+	delete(newTag, "ench")
+	delete(newTag, "minecraft:keep_on_death")
+	delete(newTag, "minecraft:item_lock")
+	return len(newTag) > 0
 }
 
 // ParseItemBlock ..
@@ -76,7 +104,7 @@ func ParseItemBlock(itemName string, nbtMap map[string]any) (result ItemBlockDat
 		result.States = states
 	}
 
-	if len(tag) > 0 {
+	if HaveSubBlockData(tag) {
 		subBlock, err := nbt_parser_interface.ParseBlock(result.Name, result.States, tag)
 		if err != nil {
 			return ItemBlockData{}, fmt.Errorf("ParseItemBlock: %v", err)
@@ -125,7 +153,7 @@ func ParseItemBlockNetwork(itemName string, item protocol.ItemStack) (result Ite
 		result.States = states
 	}
 
-	if len(item.NBTData) > 0 {
+	if HaveSubBlockData(item.NBTData) {
 		subBlock, err := nbt_parser_interface.ParseBlock(result.Name, result.States, item.NBTData)
 		if err != nil {
 			return ItemBlockData{}, fmt.Errorf("ParseItemBlock: %v", err)

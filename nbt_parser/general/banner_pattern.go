@@ -22,6 +22,9 @@ type BannerPattern struct {
 
 // Format ..
 func (b BannerPattern) Format(prefix string) string {
+	if b.Pattern == mapping.BannerPatternOminous {
+		return prefix + "不祥\n"
+	}
 	colorName := mapping.ColorFormat[b.Color]
 	patternName := mapping.BannerPatternFormat[b.Pattern]
 	return prefix + colorName + patternName + "\n"

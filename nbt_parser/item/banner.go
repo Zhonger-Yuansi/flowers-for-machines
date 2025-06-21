@@ -103,7 +103,7 @@ func (b Banner) complexFieldsOnly() []byte {
 	return buf.Bytes()
 }
 
-func (b Banner) NBTStableBytes() []byte {
+func (b *Banner) NBTStableBytes() []byte {
 	return append(b.DefaultItem.NBTStableBytes(), b.complexFieldsOnly()...)
 }
 

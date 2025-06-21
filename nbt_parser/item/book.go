@@ -83,7 +83,7 @@ func (b Book) complexFieldsOnly() []byte {
 	return buf.Bytes()
 }
 
-func (b Book) NBTStableBytes() []byte {
+func (b *Book) NBTStableBytes() []byte {
 	return append(b.DefaultItem.NBTStableBytes(), b.complexFieldsOnly()...)
 }
 

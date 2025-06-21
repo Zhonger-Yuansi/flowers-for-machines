@@ -110,7 +110,7 @@ func (s Shield) complexFieldsOnly() []byte {
 	return buf.Bytes()
 }
 
-func (s Shield) NBTStableBytes() []byte {
+func (s *Shield) NBTStableBytes() []byte {
 	return append(s.DefaultItem.NBTStableBytes(), s.complexFieldsOnly()...)
 }
 

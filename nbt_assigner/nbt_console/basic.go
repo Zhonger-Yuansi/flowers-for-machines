@@ -44,8 +44,8 @@ func (c *Console) UpdateHotbarSlotID(slotID resources_control.SlotID) {
 	c.currentHotBar = slotID
 }
 
-// ChangeAndUpdateHotbarSlotID 将机器人的手持物品栏切换为 slotID
-// 并同时将此更改广播到操作台的底层实现
+// ChangeAndUpdateHotbarSlotID 将机器人的手持物品栏
+// 切换为 slotID 并同时将此更改广播到操作台的底层实现
 func (c *Console) ChangeAndUpdateHotbarSlotID(slotID resources_control.SlotID) error {
 	err := c.api.BotClick().ChangeSelectedHotbarSlot(slotID)
 	if err != nil {

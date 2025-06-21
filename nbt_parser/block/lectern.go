@@ -39,7 +39,7 @@ func (l Lectern) formatNBT(prefix string) string {
 	result := ""
 
 	if len(l.NBT.CustomName) > 0 {
-		result += prefix + fmt.Sprintf("自定义名称: %s\n", result)
+		result += prefix + fmt.Sprintf("自定义名称: %s\n", l.NBT.CustomName)
 	}
 	if l.NBT.HaveBook {
 		result += prefix + "书籍数据: \n"

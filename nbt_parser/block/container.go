@@ -83,7 +83,7 @@ func (c Container) formatNBT(prefix string) string {
 	result := ""
 
 	if len(c.NBT.CustomName) > 0 {
-		result += prefix + fmt.Sprintf("自定义名称: %s\n", result)
+		result += prefix + fmt.Sprintf("自定义名称: %s\n", c.NBT.CustomName)
 	}
 
 	if itemCount := len(c.NBT.Items); itemCount > 0 {

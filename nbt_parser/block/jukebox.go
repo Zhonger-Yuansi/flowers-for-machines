@@ -39,7 +39,7 @@ func (j JukeBox) formatNBT(prefix string) string {
 	result := ""
 
 	if len(j.NBT.CustomName) > 0 {
-		result += prefix + fmt.Sprintf("自定义名称: %s\n", result)
+		result += prefix + fmt.Sprintf("自定义名称: %s\n", j.NBT.CustomName)
 	}
 	if j.NBT.HaveDisc {
 		result += prefix + "唱片数据: \n"

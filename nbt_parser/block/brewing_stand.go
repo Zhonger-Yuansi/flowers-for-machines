@@ -40,7 +40,7 @@ func (b BrewingStand) formatNBT(prefix string) string {
 	result := ""
 
 	if len(b.NBT.CustomName) > 0 {
-		result += prefix + fmt.Sprintf("自定义名称: %s\n", result)
+		result += prefix + fmt.Sprintf("自定义名称: %s\n", b.NBT.CustomName)
 	}
 
 	if itemCount := len(b.NBT.Items); itemCount > 0 {

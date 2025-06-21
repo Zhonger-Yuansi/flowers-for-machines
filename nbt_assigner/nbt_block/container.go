@@ -34,8 +34,7 @@ func (c *Container) Make() error {
 
 	_, _ = c.console.API().Commands().SendWSCommandWithResp("clear")
 	c.console.CleanInventory()
-	_ = c.console.API().BotClick().ChangeSelectedHotbarSlot(nbt_console.DefaultHotbarSlot)
-	c.console.UpdateHotbarSlotID(nbt_console.DefaultHotbarSlot)
+	_ = c.console.ChangeAndUpdateHotbarSlotID(nbt_console.DefaultHotbarSlot)
 
 	if err != nil {
 		return fmt.Errorf("Make: %v", err)
@@ -283,8 +282,7 @@ func (c *Container) makeNormal() error {
 
 				success, currentSlot, err := api.BotClick().PickBlock(c.console.BlockPosByIndex(index), true)
 				if err != nil || !success {
-					_ = api.BotClick().ChangeSelectedHotbarSlot(nbt_console.DefaultHotbarSlot)
-					c.console.UpdateHotbarSlotID(nbt_console.DefaultHotbarSlot)
+					_ = c.console.ChangeAndUpdateHotbarSlotID(nbt_console.DefaultHotbarSlot)
 				}
 				if err != nil {
 					return fmt.Errorf("makeNormal: %v", err)

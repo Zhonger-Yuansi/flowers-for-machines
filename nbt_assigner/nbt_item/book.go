@@ -76,11 +76,10 @@ func (b *Book) Make() (resultSlot map[uint64]resources_control.SlotID, err error
 			wantSlotID := resources_control.SlotID(index)
 
 			if b.api.HotbarSlotID() != wantSlotID {
-				err = api.BotClick().ChangeSelectedHotbarSlot(resources_control.SlotID(index))
+				err = b.api.ChangeAndUpdateHotbarSlotID(wantSlotID)
 				if err != nil {
 					return nil, fmt.Errorf("Make: %v", err)
 				}
-				b.api.UpdateHotbarSlotID(wantSlotID)
 			}
 
 			err = api.BotClick().ClickAir(wantSlotID)

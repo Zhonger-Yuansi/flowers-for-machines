@@ -128,11 +128,10 @@ func (b *Banner) Make() error {
 
 	// 切换物品栏，如果需要的话
 	if resultSlotID != b.console.HotbarSlotID() {
-		err = b.console.API().BotClick().ChangeSelectedHotbarSlot(resultSlotID)
+		err = b.console.ChangeAndUpdateHotbarSlotID(resultSlotID)
 		if err != nil {
 			return fmt.Errorf("Make: %v", err)
 		}
-		b.console.UpdateHotbarSlotID(resultSlotID)
 	}
 
 	// 前往操作台中心处

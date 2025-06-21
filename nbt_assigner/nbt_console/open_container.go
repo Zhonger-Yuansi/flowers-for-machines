@@ -17,15 +17,12 @@ func (c *Console) OpenContainerByIndex(index int) (success bool, err error) {
 	api := c.api
 
 	block := c.BlockByIndex(index)
-	_, ok := (*block).(block_helper.AnvilBlockHelper)
-	if !ok {
-		_, ok = (*block).(block_helper.LoomBlockHelper)
-	}
-	if !ok {
-		container, isContainer = (*block).(block_helper.ContainerBlockHelper)
-		if !isContainer {
-			return false, fmt.Errorf("OpenContainerByIndex: Block %T is not a container; *block = %#v", *block, *block)
-		}
+	switch b := (*block).(type) {
+	case block_helper.AnvilBlockHelper, block_helper.LoomBlockHelper:
+	case block_helper.ContainerBlockHelper:
+		container, isContainer = b, true
+	default:
+		return false, fmt.Errorf("OpenContainerByIndex: Block %T is not a container; *block = %#v", *block, *block)
 	}
 
 	if isContainer {

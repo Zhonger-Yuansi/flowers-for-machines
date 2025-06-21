@@ -135,11 +135,10 @@ func (l *Lectern) Make() error {
 
 	// 切换手持物品栏
 	if targetSlot != l.console.HotbarSlotID() {
-		err = api.BotClick().ChangeSelectedHotbarSlot(targetSlot)
+		err = l.console.ChangeAndUpdateHotbarSlotID(targetSlot)
 		if err != nil {
 			return fmt.Errorf("Make: %v", err)
 		}
-		l.console.UpdateHotbarSlotID(targetSlot)
 	}
 
 	// 传送到操作台中心

@@ -46,7 +46,7 @@ func (i ItemComponent) Format(prefix string) string {
 	if canPlaceOnCount := len(i.CanPlaceOn); canPlaceOnCount > 0 {
 		result += prefix + fmt.Sprintf("冒险放置 (合计 %d 个): \n", canPlaceOnCount)
 		for _, canPlaceOn := range i.CanPlaceOn {
-			result += prefix + "\t-" + canPlaceOn
+			result += prefix + "\t- " + canPlaceOn
 		}
 	} else {
 		result += prefix + "冒险放置: 不存在\n"
@@ -55,7 +55,7 @@ func (i ItemComponent) Format(prefix string) string {
 	if canDestroyCount := len(i.CanDestroy); canDestroyCount > 0 {
 		result += prefix + fmt.Sprintf("冒险破坏 (合计 %d 个): \n", canDestroyCount)
 		for _, canDestroy := range i.CanDestroy {
-			result += prefix + "\t-" + canDestroy
+			result += prefix + "\t- " + canDestroy
 		}
 	} else {
 		result += prefix + "冒险破坏: 不存在\n"

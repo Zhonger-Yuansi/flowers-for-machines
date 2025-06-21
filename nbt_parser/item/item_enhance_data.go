@@ -14,13 +14,6 @@ type SingleItemEnch struct {
 	Level int16 `mapstructure:"lvl"` // 魔咒等级
 }
 
-// Format ..
-func (s SingleItemEnch) Format(prefix string) string {
-	result := prefix + fmt.Sprintf("魔咒: %d\n", s.ID)
-	result += prefix + fmt.Sprintf("等级: %d\n", s.Level)
-	return result
-}
-
 // Marshal ..
 func (s *SingleItemEnch) Marshal(io protocol.IO) {
 	io.Int16(&s.ID)

@@ -50,7 +50,7 @@ func (b BrewingStand) formatNBT(prefix string) string {
 	}
 
 	for _, item := range b.NBT.Items {
-		result += item.Format(prefix + "\t-")
+		result += item.Format(prefix + "\t")
 	}
 
 	return result

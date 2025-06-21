@@ -7,6 +7,7 @@ import (
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 )
 
 // 默认 NBT 物品
@@ -53,7 +54,7 @@ func (d *DefaultItem) Format(prefix string) string {
 	if enchCount := len(d.Enhance.EnchList); enchCount > 0 {
 		result += prefix + fmt.Sprintf("物品附魔信息 (合计 %d 个附魔): \n", enchCount)
 		for _, ench := range d.Enhance.EnchList {
-			result += ench.Format(prefix + "\t-")
+			result += prefix + fmt.Sprintf("\t- %s\n", utils.FormatEnch(ench.ID, ench.Level))
 		}
 	}
 

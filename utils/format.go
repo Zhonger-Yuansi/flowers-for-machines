@@ -1,5 +1,11 @@
 package utils
 
+import (
+	"fmt"
+
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
+)
+
 // FormatBool 将 input 格式化为中文表示
 func FormatBool(input bool) string {
 	if input {
@@ -14,4 +20,17 @@ func FormatByte(input uint8) string {
 		return "否"
 	}
 	return "是"
+}
+
+// FormatEnch 将格式化一个等级为 level 且 ID 为 id 的魔咒
+func FormatEnch(id int16, level int16) string {
+	levelString := ""
+
+	if int(level-1) < len(mapping.EnchLevelFormat) {
+		levelString = mapping.EnchLevelFormat[level-1]
+	} else {
+		levelString = fmt.Sprintf("%d", level)
+	}
+
+	return mapping.EnchantFormat[id] + " " + levelString
 }

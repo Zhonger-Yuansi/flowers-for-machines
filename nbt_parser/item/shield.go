@@ -30,7 +30,7 @@ func (s Shield) formatNBT(prefix string) string {
 		result += prefix + fmt.Sprintf("旗帜图案 (合计 %d 个图案): \n", patternCount)
 	}
 	for _, pattern := range s.NBT.Patterns {
-		result += pattern.Format(prefix + "\t-")
+		result += pattern.Format(prefix + "\t- ")
 	}
 
 	return result

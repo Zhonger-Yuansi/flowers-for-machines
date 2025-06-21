@@ -21,9 +21,9 @@ type ItemWithSlot struct {
 
 // Format ..
 func (i ItemWithSlot) Format(prefix string) string {
-	result := prefix + fmt.Sprintf("所在物品栏: %d", i.Slot+1)
-	result += prefix + "物品数据: \n"
-	result += i.Item.Format(prefix + "\t")
+	result := prefix + fmt.Sprintf("- 所在物品栏: %d\n", i.Slot+1)
+	result += prefix + "  物品数据: \n"
+	result += i.Item.Format(prefix + "  \t")
 	return result
 }
 
@@ -93,7 +93,7 @@ func (c Container) formatNBT(prefix string) string {
 	}
 
 	for _, item := range c.NBT.Items {
-		result += item.Format(prefix + "\t-")
+		result += item.Format(prefix + "\t")
 	}
 
 	return result

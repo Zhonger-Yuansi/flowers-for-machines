@@ -62,8 +62,7 @@ func (f *Frame) processComplex() (canUseCommand bool, resultSlot resources_contr
 
 		success, currentSlot, err := api.BotClick().PickBlock(f.console.Center(), true)
 		if err != nil || !success {
-			_ = api.BotClick().ChangeSelectedHotbarSlot(nbt_console.DefaultHotbarSlot)
-			f.console.UpdateHotbarSlotID(nbt_console.DefaultHotbarSlot)
+			_ = f.console.ChangeAndUpdateHotbarSlotID(nbt_console.DefaultHotbarSlot)
 		}
 		if err != nil {
 			return false, 0, fmt.Errorf("processComplex: %v", err)
@@ -186,11 +185,10 @@ func (f *Frame) Make() error {
 
 	// 切换物品栏，如果需要的话
 	if resultSlot != f.console.HotbarSlotID() {
-		err = api.BotClick().ChangeSelectedHotbarSlot(resultSlot)
+		err = f.console.ChangeAndUpdateHotbarSlotID(resultSlot)
 		if err != nil {
 			return fmt.Errorf("Make: %v", err)
 		}
-		f.console.UpdateHotbarSlotID(resultSlot)
 	}
 
 	// 如果这个物品需要重命名或附魔

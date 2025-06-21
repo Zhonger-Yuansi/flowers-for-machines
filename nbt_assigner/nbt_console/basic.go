@@ -1,6 +1,8 @@
 package nbt_console
 
 import (
+	"fmt"
+
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
@@ -40,4 +42,15 @@ func (c Console) HotbarSlotID() resources_control.SlotID {
 // UpdateHotbarSlotID 设置机器人当前所手持物品栏的槽位索引
 func (c *Console) UpdateHotbarSlotID(slotID resources_control.SlotID) {
 	c.currentHotBar = slotID
+}
+
+// ChangeAndUpdateHotbarSlotID 将机器人的手持物品栏切换为 slotID
+// 并同时将此更改广播到操作台的底层实现
+func (c *Console) ChangeAndUpdateHotbarSlotID(slotID resources_control.SlotID) error {
+	err := c.api.BotClick().ChangeSelectedHotbarSlot(slotID)
+	if err != nil {
+		return fmt.Errorf("ChangeAndUpdateHotbarSlotID: %v", err)
+	}
+	c.currentHotBar = slotID
+	return nil
 }

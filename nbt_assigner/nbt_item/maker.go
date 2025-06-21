@@ -147,11 +147,10 @@ func EnchMultiple(
 
 			currentSlotID := resources_control.SlotID(index)
 			if console.HotbarSlotID() != currentSlotID {
-				err = api.BotClick().ChangeSelectedHotbarSlot(currentSlotID)
+				err = console.ChangeAndUpdateHotbarSlotID(currentSlotID)
 				if err != nil {
 					return fmt.Errorf("EnchMultiple: %v", err)
 				}
-				console.UpdateHotbarSlotID(currentSlotID)
 			}
 
 			for _, ench := range defaultItem.Enhance.EnchList {

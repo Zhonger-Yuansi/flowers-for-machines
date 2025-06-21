@@ -89,7 +89,7 @@ var BannerPatternFormat = map[string]string{
 	"cre": "苦力怕盾徽",
 	"sku": "头颅盾徽",
 	"flo": "花朵盾徽",
-	"moj": "Mojang 盾徽",
+	"moj": " Mojang 盾徽",
 	"glb": "地球",
 	"pig": "猪鼻",
 	"flw": "涡流",

@@ -24,12 +24,12 @@ func (b Book) formatNBT(prefix string) string {
 	result := ""
 
 	if len(b.NBT.Title) > 0 {
-		result += prefix + fmt.Sprintf("标题名: %s", b.NBT.Title)
+		result += prefix + fmt.Sprintf("标题名: %s\n", b.NBT.Title)
 	}
 	if len(b.NBT.Author) > 0 {
-		result += prefix + fmt.Sprintf("创造主: %s", b.NBT.Author)
+		result += prefix + fmt.Sprintf("创造主: %s\n", b.NBT.Author)
 	}
-	result += prefix + fmt.Sprintf("页数: %d", len(b.NBT.Pages))
+	result += prefix + fmt.Sprintf("页数: %d\n", len(b.NBT.Pages))
 
 	return result
 }

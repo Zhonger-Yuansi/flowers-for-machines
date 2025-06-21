@@ -70,12 +70,18 @@ func (c CommandBlock) NeedCheckCompletely() bool {
 }
 
 func (c *CommandBlock) formatNBT(prefix string) string {
-	result := prefix + fmt.Sprintf("悬浮文本: %s\n", c.NBT.CustomName)
+	result := ""
+
+	if len(c.NBT.CustomName) > 0 {
+		result += prefix + fmt.Sprintf("悬浮文本: %s\n", c.NBT.CustomName)
+	}
+
 	result += prefix + fmt.Sprintf("控制台命令: %s\n", c.NBT.Command)
 	result += prefix + fmt.Sprintf("有条件的: %s\n", utils.FormatByte(c.NBT.ConditionalMode))
 	result += prefix + fmt.Sprintf("需要红石: %s\n", utils.FormatBool(c.NBT.Auto == 0))
 	result += prefix + fmt.Sprintf("已选项中的延迟: %d\n", c.NBT.TickDelay)
 	result += prefix + fmt.Sprintf("执行第一个已选项: %s\n", utils.FormatByte(c.NBT.ExecuteOnFirstTick))
+
 	return result
 }
 

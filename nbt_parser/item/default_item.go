@@ -47,6 +47,7 @@ func (d *DefaultItem) Format(prefix string) string {
 	result := prefix + "物品基本信息: \n"
 	result += prefix + "\t" + fmt.Sprintf("名称: %s\n", d.ItemName())
 	result += prefix + "\t" + fmt.Sprintf("数据值: %d\n", d.ItemMetadata())
+	result += prefix + "\t" + fmt.Sprintf("数量: %d\n", d.ItemCount())
 	if len(d.Enhance.DisplayName) > 0 {
 		result += prefix + "\t" + fmt.Sprintf("显示名称: %s\n", d.Enhance.DisplayName)
 	}

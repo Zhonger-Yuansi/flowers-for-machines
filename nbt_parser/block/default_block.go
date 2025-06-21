@@ -2,6 +2,7 @@ package nbt_parser_block
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
@@ -40,6 +41,12 @@ func (DefaultBlock) NeedSpecialHandle() bool {
 
 func (DefaultBlock) NeedCheckCompletely() bool {
 	return false
+}
+
+func (d *DefaultBlock) Format(prefix string) string {
+	result := prefix + fmt.Sprintf("方块名称: %s\n", d.BlockName())
+	result += prefix + fmt.Sprintf("方块状态: %s\n", d.BlockStatesString())
+	return result
 }
 
 func (DefaultBlock) NBTStableBytes() []byte {

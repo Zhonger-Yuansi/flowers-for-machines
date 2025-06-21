@@ -36,6 +36,35 @@ func (BrewingStand) NeedCheckCompletely() bool {
 	return true
 }
 
+func (b BrewingStand) formatNBT(prefix string) string {
+	result := ""
+
+	if len(b.NBT.CustomName) > 0 {
+		result += prefix + fmt.Sprintf("自定义名称: %s\n", result)
+	}
+
+	if itemCount := len(b.NBT.Items); itemCount > 0 {
+		result += prefix + fmt.Sprintf("共装有 %d 个物品: \n", itemCount)
+	} else {
+		result += prefix + "无物品\n"
+	}
+
+	for _, item := range b.NBT.Items {
+		result += item.Format(prefix + "\t-")
+	}
+
+	return result
+}
+
+func (b *BrewingStand) Format(prefix string) string {
+	result := b.DefaultBlock.Format(prefix)
+	if b.NeedSpecialHandle() {
+		result += prefix + "附加数据: \n"
+		result += b.formatNBT(prefix + "\t")
+	}
+	return result
+}
+
 func (b *BrewingStand) Parse(nbtMap map[string]any) error {
 	itemsMap, _ := nbtMap["Items"].([]any)
 	blockStates := map[string]any{

@@ -194,7 +194,7 @@ func (c *Container) makeNormal() error {
 			IsCanOpenConatiner:    true,
 			ConsiderOpenDirection: c.data.ConsiderOpenDirection(),
 			ShulkerFacing:         c.data.NBT.ShulkerFacing,
-			BlockCustomName:       c.data.CustomName,
+			BlockCustomName:       c.data.NBT.CustomName,
 		},
 	)
 	if err != nil {

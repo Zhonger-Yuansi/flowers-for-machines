@@ -35,6 +35,29 @@ func (JukeBox) NeedCheckCompletely() bool {
 	return true
 }
 
+func (j JukeBox) formatNBT(prefix string) string {
+	result := ""
+
+	if len(j.NBT.CustomName) > 0 {
+		result += prefix + fmt.Sprintf("自定义名称: %s\n", result)
+	}
+	if j.NBT.HaveDisc {
+		result += prefix + "唱片数据: \n"
+		result += j.NBT.Disc.Format(prefix + "\t")
+	}
+
+	return result
+}
+
+func (j *JukeBox) Format(prefix string) string {
+	result := j.DefaultBlock.Format(prefix)
+	if j.NeedSpecialHandle() {
+		result += prefix + "附加数据: \n"
+		result += j.formatNBT(prefix + "\t")
+	}
+	return result
+}
+
 func (j *JukeBox) Parse(nbtMap map[string]any) error {
 	j.NBT.CustomName, _ = nbtMap["CustomName"].(string)
 	discMap, ok := nbtMap["RecordItem"].(map[string]any)

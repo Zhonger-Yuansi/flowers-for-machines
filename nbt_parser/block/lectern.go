@@ -35,6 +35,29 @@ func (Lectern) NeedCheckCompletely() bool {
 	return true
 }
 
+func (l Lectern) formatNBT(prefix string) string {
+	result := ""
+
+	if len(l.NBT.CustomName) > 0 {
+		result += prefix + fmt.Sprintf("自定义名称: %s\n", result)
+	}
+	if l.NBT.HaveBook {
+		result += prefix + "书籍数据: \n"
+		result += l.NBT.Book.Format(prefix + "\t")
+	}
+
+	return result
+}
+
+func (l *Lectern) Format(prefix string) string {
+	result := l.DefaultBlock.Format(prefix)
+	if l.NeedSpecialHandle() {
+		result += prefix + "附加数据: \n"
+		result += l.formatNBT(prefix + "\t")
+	}
+	return result
+}
+
 func (l *Lectern) Parse(nbtMap map[string]any) error {
 	l.NBT.CustomName, _ = nbtMap["CustomName"].(string)
 	bookMap, ok := nbtMap["book"].(map[string]any)

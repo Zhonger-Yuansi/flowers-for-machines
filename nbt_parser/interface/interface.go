@@ -26,6 +26,9 @@ type Block interface {
 	BlockStates() map[string]any
 	// BlockStatesString 返回这个方块的方块状态的字符串表示
 	BlockStatesString() string
+	// Format 将这个 NBT 方块格式化为中文的字符串表示。
+	// prefix 是格式化时所使用的前缀字符
+	Format(prefix string) string
 	// Parse 从 nbtMap 解析一个方块实体，
 	// nbtMap 是这个方块的方块实体数据
 	Parse(nbtMap map[string]any) error
@@ -55,6 +58,9 @@ type Item interface {
 	ItemCount() uint8
 	// ItemMetadata 返回这个物品的元数据
 	ItemMetadata() int16
+	// Format 将这个 NBT 物品格式化为中文的字符串表示。
+	// prefix 是格式化时所使用的前缀字符
+	Format(prefix string) string
 	// ParseNetwork 解析网络传输上的物品堆栈实例 item。
 	// itemName 是这个物品的名称
 	ParseNetwork(item protocol.ItemStack, itemName string) error

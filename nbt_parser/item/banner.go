@@ -22,6 +22,34 @@ type Banner struct {
 	NBT BannerNBT
 }
 
+func (b Banner) formatNBT(prefix string) string {
+	result := prefix + fmt.Sprintf("旗帜基色: %s\n", mapping.ColorFormat[int32(b.ItemMetadata())])
+
+	if b.NBT.Type == nbt_parser_general.BannerTypeOminous {
+		result += prefix + "旗帜类型: 灾厄\n"
+	} else {
+		result += prefix + "旗帜类型: 普通\n"
+	}
+
+	if patternCount := len(b.NBT.Patterns); patternCount > 0 {
+		result += prefix + fmt.Sprintf("旗帜图案 (合计 %d 个图案): \n", patternCount)
+	}
+	for _, pattern := range b.NBT.Patterns {
+		result += pattern.Format(prefix + "\t-")
+	}
+
+	return result
+}
+
+func (b *Banner) Format(prefix string) string {
+	result := b.DefaultItem.Format(prefix)
+	if b.IsComplex() {
+		result += prefix + "附加数据: \n"
+		result += b.formatNBT(prefix + "\t")
+	}
+	return result
+}
+
 // parse ..
 func (b *Banner) parse(tag map[string]any) error {
 	b.DefaultItem.Enhance.ItemComponent.LockInInventory = false

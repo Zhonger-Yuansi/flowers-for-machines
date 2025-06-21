@@ -19,17 +19,25 @@ type ItemWithSlot struct {
 	Slot uint8
 }
 
+// Format ..
+func (i ItemWithSlot) Format(prefix string) string {
+	result := prefix + fmt.Sprintf("所在物品栏: %d", i.Slot+1)
+	result += prefix + "物品数据: \n"
+	result += i.Item.Format(prefix + "\t")
+	return result
+}
+
 // ContainerNBT ..
 type ContainerNBT struct {
 	Items         []ItemWithSlot
+	CustomName    string
 	ShulkerFacing uint8
 }
 
 // 容器
 type Container struct {
 	DefaultBlock
-	CustomName string
-	NBT        ContainerNBT
+	NBT ContainerNBT
 }
 
 // SetShulkerBoxFacing 将 container 的潜影盒朝向设置为 facing。
@@ -47,7 +55,7 @@ func (c *Container) NeedSpecialHandle() bool {
 	if strings.Contains(c.BlockName(), "shulker") && c.NBT.ShulkerFacing != 1 {
 		return true
 	}
-	if len(c.CustomName) > 0 {
+	if len(c.NBT.CustomName) > 0 {
 		return true
 	}
 	if len(c.NBT.Items) > 0 {
@@ -69,6 +77,35 @@ func (c *Container) ConsiderOpenDirection() bool {
 		return true
 	}
 	return false
+}
+
+func (c Container) formatNBT(prefix string) string {
+	result := ""
+
+	if len(c.NBT.CustomName) > 0 {
+		result += prefix + fmt.Sprintf("自定义名称: %s\n", result)
+	}
+
+	if itemCount := len(c.NBT.Items); itemCount > 0 {
+		result += prefix + fmt.Sprintf("共装有 %d 个物品: \n", itemCount)
+	} else {
+		result += prefix + "无物品\n"
+	}
+
+	for _, item := range c.NBT.Items {
+		result += item.Format(prefix + "\t-")
+	}
+
+	return result
+}
+
+func (c *Container) Format(prefix string) string {
+	result := c.DefaultBlock.Format(prefix)
+	if c.NeedSpecialHandle() {
+		result += prefix + "附加数据: \n"
+		result += c.formatNBT(prefix + "\t")
+	}
+	return result
 }
 
 func (c *Container) Parse(nbtMap map[string]any) error {
@@ -111,7 +148,7 @@ func (c *Container) Parse(nbtMap map[string]any) error {
 		)
 	}
 
-	c.CustomName, _ = nbtMap["CustomName"].(string)
+	c.NBT.CustomName, _ = nbtMap["CustomName"].(string)
 	c.NBT.ShulkerFacing, _ = nbtMap["facing"].(byte)
 	return nil
 }
@@ -121,7 +158,7 @@ func (c Container) NBTStableBytes() []byte {
 	w := protocol.NewWriter(buf, 0)
 	isShulkerBox := strings.Contains(c.BlockName(), "shulker")
 
-	w.String(&c.CustomName)
+	w.String(&c.NBT.CustomName)
 	w.Bool(&isShulkerBox)
 	if isShulkerBox {
 		w.Uint8(&c.NBT.ShulkerFacing)

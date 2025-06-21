@@ -40,6 +40,34 @@ func (b Banner) NeedCheckCompletely() bool {
 	return true
 }
 
+func (b Banner) formatNBT(prefix string) string {
+	result := prefix + fmt.Sprintf("旗帜基色: %s\n", mapping.ColorFormat[b.NBT.Base])
+
+	if b.NBT.Type == nbt_parser_general.BannerTypeOminous {
+		result += prefix + "旗帜类型: 灾厄\n"
+	} else {
+		result += prefix + "旗帜类型: 普通\n"
+	}
+
+	if patternCount := len(b.NBT.Patterns); patternCount > 0 {
+		result += prefix + fmt.Sprintf("旗帜图案 (合计 %d 个图案): \n", patternCount)
+	}
+	for _, pattern := range b.NBT.Patterns {
+		result += pattern.Format(prefix + "\t-")
+	}
+
+	return result
+}
+
+func (b *Banner) Format(prefix string) string {
+	result := b.DefaultBlock.Format(prefix)
+	if b.NeedSpecialHandle() {
+		result += prefix + "附加数据: \n"
+		result += b.formatNBT(prefix + "\t")
+	}
+	return result
+}
+
 func (b *Banner) Parse(nbtMap map[string]any) error {
 	patterns, _ := nbtMap["Patterns"].([]any)
 	if len(patterns) > 6 {

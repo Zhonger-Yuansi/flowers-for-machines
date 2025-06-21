@@ -42,6 +42,34 @@ func (d DefaultItem) ItemMetadata() int16 {
 	return d.Basic.Metadata
 }
 
+func (d *DefaultItem) Format(prefix string) string {
+	result := prefix + "物品基本信息: \n"
+	result += prefix + "\t" + fmt.Sprintf("名称: %s\n", d.ItemName())
+	result += prefix + "\t" + fmt.Sprintf("数据值: %d\n", d.ItemMetadata())
+	if len(d.Enhance.DisplayName) > 0 {
+		result += prefix + "\t" + fmt.Sprintf("显示名称: %s\n", d.Enhance.DisplayName)
+	}
+
+	if enchCount := len(d.Enhance.EnchList); enchCount > 0 {
+		result += prefix + fmt.Sprintf("物品附魔信息 (合计 %d 个附魔): \n", enchCount)
+		for _, ench := range d.Enhance.EnchList {
+			result += ench.Format(prefix + "\t-")
+		}
+	}
+
+	if d.Enhance.ItemComponent.NeedFormat() {
+		result += prefix + "物品组件数据: \n"
+		result += d.Enhance.ItemComponent.Format(prefix + "\t")
+	}
+
+	if d.Block.SubBlock != nil {
+		result += prefix + "子方块数据: \n"
+		result += d.Block.SubBlock.Format(prefix + "\t")
+	}
+
+	return result
+}
+
 func (d *DefaultItem) parse(basic ItemBasicData, enhance ItemEnhanceData, block ItemBlockData) {
 	// Prepare
 	var shouldCleanItemLock bool

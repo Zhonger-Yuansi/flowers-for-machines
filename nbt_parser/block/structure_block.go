@@ -107,9 +107,15 @@ func (s StructureBlock) NeedCheckCompletely() bool {
 }
 
 func (s StructureBlock) formatNBT(prefix string) string {
-	result := prefix + fmt.Sprintf("结构名称: %s\n", s.NBT.StructureName)
+	result := ""
+
+	if len(s.NBT.StructureName) > 0 {
+		result += prefix + fmt.Sprintf("结构名称: %s\n", s.NBT.StructureName)
+	}
+
 	result += prefix + fmt.Sprintf("结构尺寸: %d×%d×%d\n", s.NBT.XStructureSize, s.NBT.YStructureSize, s.NBT.ZStructureSize)
-	result += prefix + fmt.Sprintf("结构偏移: (%d, %d, %d)\n", s.NBT.XStructureOffset, s.NBT.YStructureOffset, s.NBT.ZStructureOffset)
+	result += prefix + fmt.Sprintf("结构偏移: (%d,%d,%d)\n", s.NBT.XStructureOffset, s.NBT.YStructureOffset, s.NBT.ZStructureOffset)
+
 	return result
 }
 

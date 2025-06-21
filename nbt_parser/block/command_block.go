@@ -75,8 +75,10 @@ func (c *CommandBlock) formatNBT(prefix string) string {
 	if len(c.NBT.CustomName) > 0 {
 		result += prefix + fmt.Sprintf("悬浮文本: %s\n", c.NBT.CustomName)
 	}
+	if len(c.NBT.Command) > 0 {
+		result += prefix + fmt.Sprintf("控制台命令: %s\n", c.NBT.Command)
+	}
 
-	result += prefix + fmt.Sprintf("控制台命令: %s\n", c.NBT.Command)
 	result += prefix + fmt.Sprintf("有条件的: %s\n", utils.FormatByte(c.NBT.ConditionalMode))
 	result += prefix + fmt.Sprintf("需要红石: %s\n", utils.FormatBool(c.NBT.Auto == 0))
 	result += prefix + fmt.Sprintf("已选项中的延迟: %d\n", c.NBT.TickDelay)

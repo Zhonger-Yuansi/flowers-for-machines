@@ -197,12 +197,12 @@ func UpdateItemClientSide(
 	}
 	// Update to new can place on
 	if clientExpected.Component.UseCanPlaceOn {
-		item.Stack.CanBePlacedOn = nil
+		item.Stack.CanBePlacedOn = make([]string, len(clientExpected.Component.CanPlaceOn))
 		copy(item.Stack.CanBePlacedOn, clientExpected.Component.CanPlaceOn)
 	}
 	// Update to new can destroy
 	if clientExpected.Component.UseCanDestroy {
-		item.Stack.CanBreak = nil
+		item.Stack.CanBreak = make([]string, len(clientExpected.Component.CanDestroy))
 		copy(item.Stack.CanBreak, clientExpected.Component.CanDestroy)
 	}
 

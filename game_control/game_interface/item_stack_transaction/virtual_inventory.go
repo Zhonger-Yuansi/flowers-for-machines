@@ -107,8 +107,8 @@ func (v *virtualInventories) dumpToUpdaters() map[resources_control.SlotLocation
 	result := make(map[resources_control.SlotLocation]resources_control.ExpectedNewItem)
 
 	for location, item := range v.items {
-		var newCanPlaceOn []string
-		var newCanDestroy []string
+		newCanPlaceOn := make([]string, len(item.Stack.CanBePlacedOn))
+		newCanDestroy := make([]string, len(item.Stack.CanBreak))
 
 		copy(newCanPlaceOn, item.Stack.CanBePlacedOn)
 		copy(newCanDestroy, item.Stack.CanBreak)

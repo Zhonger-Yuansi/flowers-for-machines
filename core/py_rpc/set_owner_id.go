@@ -4,7 +4,9 @@ import "fmt"
 
 // 设置机器人的 Netease User ID
 type SetOwnerId struct {
-	OwnerID int64
+	OwnerIDIsUint64 bool
+	OwnerIDIsInt64  bool
+	OwnerID         int
 }
 
 // Return the name of s
@@ -26,11 +28,18 @@ func (s *SetOwnerId) FromGo(obj any) error {
 	if len(object) != 1 {
 		return fmt.Errorf("FromGo: The length of object is not equal to 1; object = %#v", object)
 	}
-	// convert and check data
-	s.OwnerID, success = object[0].(int64)
-	if !success {
-		return fmt.Errorf("FromGo: Failed to convert object[0] to int64; object[0] = %#v", object[0])
+	// try uint64 owner ID
+	uint64OwnerID, IsUint64 := object[0].(uint64)
+	if IsUint64 {
+		s.OwnerID, s.OwnerIDIsUint64 = int(uint64OwnerID), true
+		return nil
 	}
+	// try int64 owner ID
+	int64OwnerID, isInt64 := object[0].(int64)
+	if !isInt64 {
+		return fmt.Errorf("FromGo: Failed to convert object[0] to uint64 or int64; object[0] = %#v", object[0])
+	}
+	s.OwnerID, s.OwnerIDIsInt64 = int(int64OwnerID), true
 	// get and sync data
 	return nil
 	// return

@@ -131,18 +131,15 @@ func (c ConstantPacket) ItemCanGetByCommand(name string) bool {
 	if !strings.HasPrefix(name, "minecraft:") {
 		name = "minecraft:" + name
 	}
-
-	if name == "minecraft:written_book" {
-		return true
-	}
-
 	return c.commandItemsMapping[name]
 }
 
 // onAvailableCommands ..
 func (c *ConstantPacket) onAvailableCommands(p *packet.AvailableCommands) {
-	c.commandItems = nil
-	c.commandItemsMapping = make(map[string]bool)
+	c.commandItems = []string{"minecraft:written_book"}
+	c.commandItemsMapping = map[string]bool{
+		"minecraft:written_book": true,
+	}
 
 	for _, enum := range p.Enums {
 		if enum.Type != "Item" {

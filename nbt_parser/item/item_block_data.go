@@ -58,7 +58,11 @@ func HaveSubBlockData(tag map[string]any) bool {
 }
 
 // ParseItemBlock ..
-func ParseItemBlock(itemName string, nbtMap map[string]any) (result ItemBlockData, err error) {
+func ParseItemBlock(
+	nameChecker func(name string) bool,
+	itemName string,
+	nbtMap map[string]any,
+) (result ItemBlockData, err error) {
 	var blockMap map[string]any
 	var haveBlock bool
 
@@ -105,7 +109,7 @@ func ParseItemBlock(itemName string, nbtMap map[string]any) (result ItemBlockDat
 	}
 
 	if HaveSubBlockData(tag) {
-		subBlock, err := nbt_parser_interface.ParseBlock(result.Name, result.States, tag)
+		subBlock, err := nbt_parser_interface.ParseBlock(nameChecker, result.Name, result.States, tag)
 		if err != nil {
 			return ItemBlockData{}, fmt.Errorf("ParseItemBlock: %v", err)
 		}
@@ -154,7 +158,7 @@ func ParseItemBlockNetwork(itemName string, item protocol.ItemStack) (result Ite
 	}
 
 	if HaveSubBlockData(item.NBTData) {
-		subBlock, err := nbt_parser_interface.ParseBlock(result.Name, result.States, item.NBTData)
+		subBlock, err := nbt_parser_interface.ParseBlock(nil, result.Name, result.States, item.NBTData)
 		if err != nil {
 			return ItemBlockData{}, fmt.Errorf("ParseItemBlock: %v", err)
 		}

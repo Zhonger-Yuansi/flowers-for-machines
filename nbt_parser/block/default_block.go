@@ -11,8 +11,9 @@ import (
 
 // 默认 NBT 实体
 type DefaultBlock struct {
-	Name   string
-	States map[string]any
+	Name        string
+	States      map[string]any
+	NameChecker func(name string) bool
 }
 
 func (d *DefaultBlock) BlockName() string {

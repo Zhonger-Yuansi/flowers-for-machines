@@ -50,11 +50,11 @@ func (f *Frame) Parse(nbtMap map[string]any) error {
 
 	itemMap, ok := nbtMap["Item"].(map[string]any)
 	if ok {
-		item, err := nbt_parser_interface.ParseItemNormal(itemMap)
+		item, canGetByCommand, err := nbt_parser_interface.ParseItemNormal(f.NameChecker, itemMap)
 		if err != nil {
 			return fmt.Errorf("Parse: %v", err)
 		}
-		if item.ItemName() != "minecraft:filled_map" {
+		if canGetByCommand && item.ItemName() != "minecraft:filled_map" {
 			f.NBT.HaveItem = true
 			f.NBT.Item = item
 		}

@@ -62,12 +62,14 @@ func (j *JukeBox) Parse(nbtMap map[string]any) error {
 	j.NBT.CustomName, _ = nbtMap["CustomName"].(string)
 	discMap, ok := nbtMap["RecordItem"].(map[string]any)
 	if ok {
-		disc, err := nbt_parser_interface.ParseItemNormal(discMap)
+		disc, canGetByCommand, err := nbt_parser_interface.ParseItemNormal(j.NameChecker, discMap)
 		if err != nil {
 			return fmt.Errorf("Parse: %v", err)
 		}
-		j.NBT.HaveDisc = true
-		j.NBT.Disc = disc
+		if canGetByCommand {
+			j.NBT.HaveDisc = true
+			j.NBT.Disc = disc
+		}
 	}
 	return nil
 }

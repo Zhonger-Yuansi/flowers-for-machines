@@ -134,9 +134,12 @@ func (c *Container) Parse(nbtMap map[string]any) error {
 	for _, value := range itemList {
 		slotID, _ := value["Slot"].(byte)
 
-		item, err := nbt_parser_interface.ParseItemNormal(value)
+		item, canGetByCommand, err := nbt_parser_interface.ParseItemNormal(c.NameChecker, value)
 		if err != nil {
 			return fmt.Errorf("Parse: %v", err)
+		}
+		if !canGetByCommand {
+			continue
 		}
 
 		c.NBT.Items = append(

@@ -79,6 +79,14 @@ func (b *BrewingStand) Parse(nbtMap map[string]any) error {
 			continue
 		}
 
+		item, canGetByCommand, err := nbt_parser_interface.ParseItemNormal(b.NameChecker, itemMap)
+		if err != nil {
+			return fmt.Errorf("Parse: %v", err)
+		}
+		if !canGetByCommand {
+			continue
+		}
+
 		slot, _ := itemMap["Slot"].(byte)
 		switch slot {
 		case 1:
@@ -87,11 +95,6 @@ func (b *BrewingStand) Parse(nbtMap map[string]any) error {
 			blockStates["brewing_stand_slot_b_bit"] = byte(1)
 		case 3:
 			blockStates["brewing_stand_slot_c_bit"] = byte(1)
-		}
-
-		item, err := nbt_parser_interface.ParseItemNormal(itemMap)
-		if err != nil {
-			return fmt.Errorf("Parse: %v", err)
 		}
 
 		b.NBT.Items = append(b.NBT.Items, ItemWithSlot{

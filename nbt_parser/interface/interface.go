@@ -4,14 +4,53 @@ import "github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft
 
 var (
 	// ParseNBTBlock 从方块实体数据 blockNBT 解析一个方块实体。
-	// blockName 和 blockStates 分别指示这个方块实体的名称和方块状态
-	ParseBlock func(blockName string, blockStates map[string]any, blockNBT map[string]any) (block Block, err error)
+	// blockName 和 blockStates 分别指示这个方块实体的名称和方块状态。
+	//
+	// nameChecker 是一个可选的函数，用于检查 name 所指示的物品名称是
+	// 否可通过指令获取。如果不能，则 nameChecker 返回假。
+	//
+	// nameChecker 对于大多数方块的解析可能没有帮助，但它可以帮助验证
+	// 容器内的物品是否是可以通过指令获取的物品。
+	//
+	// 另外，如果没有这样的 nameChecker 函数，则可以将其简单的置为 nil
+	ParseBlock func(
+		nameChecker func(name string) bool,
+		blockName string,
+		blockStates map[string]any,
+		blockNBT map[string]any,
+	) (
+		block Block,
+		err error,
+	)
 	// ParseItemNormal 从 nbtMap 解析一个 NBT 物品。
-	// nbtMap 是含有这个物品 tag 标签的父复合标签
-	ParseItemNormal func(nbtMap map[string]any) (item Item, err error)
+	// nbtMap 是含有这个物品 tag 标签的父复合标签。
+	//
+	// nameChecker 是一个可选的函数，用于检查 name 所
+	// 指示的物品名称是否可通过指令获取。如果不能，则返
+	// 回的 canGetByCommand 为假。
+	//
+	// 无论 canGetByCommand 的值是多少，如果解析没有发
+	// 生错误，则 item 不会为空。
+	//
+	// 另外，如果没有这样的 nameChecker 函数，则可以将其
+	// 简单的置为 nil
+	ParseItemNormal func(
+		nameChecker func(name string) bool,
+		nbtMap map[string]any,
+	) (
+		item Item,
+		canGetByCommand bool,
+		err error,
+	)
 	// ParseItemNetwork 解析网络传输上的物品堆栈实例 item。
 	// itemName 是这个物品堆栈实例的名称
-	ParseItemNetwork func(itemStack protocol.ItemStack, itemName string) (item Item, err error)
+	ParseItemNetwork func(
+		itemStack protocol.ItemStack,
+		itemName string,
+	) (
+		item Item,
+		err error,
+	)
 )
 
 // SetItemCount 设置 item 的物品数量为 count。

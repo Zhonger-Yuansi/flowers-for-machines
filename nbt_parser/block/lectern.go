@@ -62,12 +62,14 @@ func (l *Lectern) Parse(nbtMap map[string]any) error {
 	l.NBT.CustomName, _ = nbtMap["CustomName"].(string)
 	bookMap, ok := nbtMap["book"].(map[string]any)
 	if ok {
-		book, err := nbt_parser_interface.ParseItemNormal(bookMap)
+		book, canGetByCommand, err := nbt_parser_interface.ParseItemNormal(l.NameChecker, bookMap)
 		if err != nil {
 			return fmt.Errorf("Parse: %v", err)
 		}
-		l.NBT.HaveBook = true
-		l.NBT.Book = book
+		if canGetByCommand {
+			l.NBT.HaveBook = true
+			l.NBT.Book = book
+		}
 	}
 	return nil
 }

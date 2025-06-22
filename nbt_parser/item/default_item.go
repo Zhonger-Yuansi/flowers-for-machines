@@ -12,9 +12,10 @@ import (
 
 // 默认 NBT 物品
 type DefaultItem struct {
-	Basic   ItemBasicData
-	Enhance ItemEnhanceData
-	Block   ItemBlockData
+	Basic       ItemBasicData
+	Enhance     ItemEnhanceData
+	Block       ItemBlockData
+	NameChecker func(name string) bool
 }
 
 func init() {
@@ -109,7 +110,7 @@ func (d *DefaultItem) ParseNormal(nbtMap map[string]any) error {
 		return fmt.Errorf("ParseNormal: %v", err)
 	}
 	// Parse item block data
-	block, err := ParseItemBlock(basic.Name, nbtMap)
+	block, err := ParseItemBlock(d.NameChecker, basic.Name, nbtMap)
 	if err != nil {
 		return fmt.Errorf("ParseNormal: %v", err)
 	}

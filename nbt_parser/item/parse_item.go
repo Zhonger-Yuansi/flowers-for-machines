@@ -33,13 +33,15 @@ func ParseItemNormal(
 		return nil, false, fmt.Errorf("ParseItemNormal: %v", err)
 	}
 
+	if nameChecker != nil {
+		canGetByCommand = nameChecker(defaultItem.ItemName())
+	} else {
+		canGetByCommand = true
+	}
+
 	itemType, ok := mapping.SupportItemsPool[defaultItem.ItemName()]
 	if !ok {
-		item = &defaultItem
-		if nameChecker != nil {
-			return item, nameChecker(item.ItemName()), nil
-		}
-		return item, true, nil
+		return &defaultItem, canGetByCommand, nil
 	}
 
 	switch itemType {
@@ -57,11 +59,7 @@ func ParseItemNormal(
 	if err != nil {
 		return nil, false, fmt.Errorf("ParseItemNormal: %v", err)
 	}
-
-	if nameChecker != nil {
-		return item, nameChecker(item.ItemName()), nil
-	}
-	return item, true, nil
+	return item, canGetByCommand, nil
 }
 
 // ParseItemNetwork 解析网络传输上的物品堆栈实例 item。

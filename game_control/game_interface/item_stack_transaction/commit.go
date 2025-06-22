@@ -106,8 +106,9 @@ func (i *ItemStackTransaction) Commit() (
 			pk.Requests = append(
 				pk.Requests,
 				protocol.ItemStackRequest{
-					RequestID: int32(requestID),
-					Actions:   actions,
+					RequestID:   int32(requestID),
+					Actions:     actions,
+					FilterCause: -1,
 				},
 			)
 
@@ -150,8 +151,9 @@ func (i *ItemStackTransaction) Commit() (
 			}
 
 			newRequest := protocol.ItemStackRequest{
-				RequestID: int32(requestID),
-				Actions:   result,
+				RequestID:   int32(requestID),
+				Actions:     result,
+				FilterCause: -1,
 			}
 			if itemNewName != nil {
 				newRequest.FilterStrings = []string{*itemNewName}

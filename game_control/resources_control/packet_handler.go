@@ -188,8 +188,8 @@ func (r *Resources) handleContainerClose(p *packet.ContainerClose) {
 	case protocol.WindowIDArmour, protocol.WindowIDUI:
 	default:
 		r.inventory.deleteInventory(WindowID(p.WindowID))
-		r.inventory.deleteInventory(WindowID(protocol.WindowIDCrafting))
 	}
+	r.inventory.deleteInventory(WindowID(protocol.WindowIDCrafting))
 	r.container.onContainerClose(p)
 }
 

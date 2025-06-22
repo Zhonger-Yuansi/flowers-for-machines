@@ -92,6 +92,7 @@ func ParseItemComponent(nbtMap map[string]any) (result ItemComponent) {
 				continue
 			}
 
+			val = strings.ToLower(val)
 			if !strings.HasPrefix(val, "minecraft:") {
 				val = "minecraft:" + val
 			}
@@ -108,6 +109,7 @@ func ParseItemComponent(nbtMap map[string]any) (result ItemComponent) {
 				continue
 			}
 
+			val = strings.ToLower(val)
 			if !strings.HasPrefix(val, "minecraft:") {
 				val = "minecraft:" + val
 			}

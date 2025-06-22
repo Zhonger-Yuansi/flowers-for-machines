@@ -219,6 +219,8 @@ func (r *Resources) handlePacket(pk packet.Packet) {
 		r.handleContainerClose(p)
 	case *packet.CreativeContent:
 		r.constant.onCreativeContent(p)
+	case *packet.AvailableCommands:
+		r.constant.onAvailableCommands(p)
 	}
 	// for other implements
 	r.listener.onPacket(pk)

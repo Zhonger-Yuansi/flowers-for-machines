@@ -27,10 +27,14 @@ func DeepCopyItemStack(src protocol.ItemStack) (dst protocol.ItemStack) {
 		BlockRuntimeID: src.BlockRuntimeID,
 		Count:          src.Count,
 		NBTData:        DeepCopyNBT(src.NBTData),
+		CanBePlacedOn:  make([]string, len(src.CanBePlacedOn)),
+		CanBreak:       make([]string, len(src.CanBreak)),
 		HasNetworkID:   src.HasNetworkID,
 	}
+
 	copy(dst.CanBePlacedOn, src.CanBePlacedOn)
 	copy(dst.CanBreak, src.CanBreak)
+
 	return
 }
 

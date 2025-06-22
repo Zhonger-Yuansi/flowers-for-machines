@@ -35,7 +35,11 @@ func ParseItemNormal(
 
 	itemType, ok := mapping.SupportItemsPool[defaultItem.ItemName()]
 	if !ok {
-		return &defaultItem, false, nil
+		item = &defaultItem
+		if nameChecker != nil {
+			return item, nameChecker(item.ItemName()), nil
+		}
+		return item, true, nil
 	}
 
 	switch itemType {

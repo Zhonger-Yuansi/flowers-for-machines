@@ -131,6 +131,11 @@ func (c ConstantPacket) ItemCanGetByCommand(name string) bool {
 	if !strings.HasPrefix(name, "minecraft:") {
 		name = "minecraft:" + name
 	}
+
+	if name == "minecraft:written_book" {
+		return true
+	}
+
 	return c.commandItemsMapping[name]
 }
 

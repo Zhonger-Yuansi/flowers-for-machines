@@ -177,7 +177,6 @@ func (r *Resources) handleItemStackResponse(p *packet.ItemStackResponse) {
 // when a container is opened
 func (r *Resources) handleContainerOpen(p *packet.ContainerOpen) {
 	r.inventory.createInventory(WindowID(p.WindowID))
-	r.inventory.createInventory(protocol.WindowIDCrafting)
 	r.container.onContainerOpen(p)
 }
 
@@ -189,7 +188,6 @@ func (r *Resources) handleContainerClose(p *packet.ContainerClose) {
 	default:
 		r.inventory.deleteInventory(WindowID(p.WindowID))
 	}
-	r.inventory.deleteInventory(WindowID(protocol.WindowIDCrafting))
 	r.container.onContainerClose(p)
 }
 

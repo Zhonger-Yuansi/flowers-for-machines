@@ -65,6 +65,7 @@ func PlaceNBTBlock(
 	return placeNBTBlock(console, cache, nbtBlock, 0)
 }
 
+// placeNBTBlock ..
 func placeNBTBlock(
 	console *nbt_console.Console,
 	cache *nbt_cache.NBTCacheSystem,

@@ -51,7 +51,6 @@ func (s Sign) NeedCheckCompletely() bool {
 
 func (s Sign) formatNBT(prefix string) string {
 	result := prefix + fmt.Sprintf("是否涂蜡: %s\n", utils.FormatByte(s.NBT.IsWaxed))
-	prefix += "\t"
 
 	rgb, _ := utils.DecodeVarRGBA(s.NBT.FrontText.SignTextColor)
 	frontBestColor := utils.SearchForBestColor(rgb, mapping.DefaultDyeColor)

@@ -13,6 +13,14 @@ import (
 	"github.com/google/uuid"
 )
 
+// 在放置 NBT 方块以后会进行完整性检查，
+// 如果完整性检查不提供，那么这个 NBT
+// 方块会被重复制作。
+//
+// MaxRetryPlaceNBTBlock 便是指示重复
+// 制作这个 NBT 方块的最大次数
+const MaxRetryPlaceNBTBlock = 7
+
 func init() {
 	nbt_assigner_interface.NBTBlockIsSupported = NBTBlockIsSupported
 	nbt_assigner_interface.PlaceNBTBlock = PlaceNBTBlock
@@ -48,6 +56,20 @@ func PlaceNBTBlock(
 	console *nbt_console.Console,
 	cache *nbt_cache.NBTCacheSystem,
 	nbtBlock nbt_parser_interface.Block,
+) (
+	canFast bool,
+	uniqueID uuid.UUID,
+	offset protocol.BlockPos,
+	err error,
+) {
+	return placeNBTBlock(console, cache, nbtBlock, 0)
+}
+
+func placeNBTBlock(
+	console *nbt_console.Console,
+	cache *nbt_cache.NBTCacheSystem,
+	nbtBlock nbt_parser_interface.Block,
+	repeatCount uint8,
 ) (
 	canFast bool,
 	uniqueID uuid.UUID,
@@ -146,7 +168,19 @@ func PlaceNBTBlock(
 		}
 
 		if hashNumber.HashNumber != nbt_hash.NBTBlockFullHash(newBlock) {
-			return PlaceNBTBlock(console, cache, nbtBlock)
+			nextCount := repeatCount + 1
+			if nextCount > MaxRetryPlaceNBTBlock {
+				return false, uuid.UUID{}, protocol.BlockPos{}, fmt.Errorf(
+					""+
+						"PlaceNBTBlock: Self loop when place NBT block, "+
+						"and result in invalid user input data, "+
+						"and need to correct; "+
+						"nbtBlock = %#v; "+
+						"nbtBlock.Format(\"\") = %#v",
+					nbtBlock, nbtBlock.Format(""),
+				)
+			}
+			return placeNBTBlock(console, cache, nbtBlock, nextCount)
 		}
 	}
 
@@ -157,5 +191,5 @@ func PlaceNBTBlock(
 	}
 
 	// 下次调用时将直接返回缓存
-	return PlaceNBTBlock(console, cache, nbtBlock)
+	return placeNBTBlock(console, cache, nbtBlock, repeatCount)
 }

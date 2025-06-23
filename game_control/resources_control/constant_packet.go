@@ -6,7 +6,12 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
+	"github.com/pterm/pterm"
 )
+
+// DebugPrintUnknownItem 指示在调用 ItemCanGetByCommand 之后，
+// 若 ItemCanGetByCommand 返回假，是否需要在控制台打印相应的警告
+const DebugPrintUnknownItem = true
 
 // ConstantPacket 记载在登录序列期间，
 // 由租赁服发送的在整个连接期间不会变化的常量
@@ -131,7 +136,13 @@ func (c ConstantPacket) ItemCanGetByCommand(name string) bool {
 	if !strings.HasPrefix(name, "minecraft:") {
 		name = "minecraft:" + name
 	}
-	return c.commandItemsMapping[name]
+
+	result := c.commandItemsMapping[name]
+	if DebugPrintUnknownItem && !result {
+		pterm.Warning.Printfln("ItemCanGetByCommand: Item %#v is unknown, due to it can not get by command", name)
+	}
+
+	return result
 }
 
 // onAvailableCommands ..

@@ -158,6 +158,32 @@ func (i *ItemStackTransaction) MoveToCraftingTable(
 	)
 }
 
+// MoveFromCraftingTable 将已放入合成栏 source 处的物品
+// 移动到背包的 destination 处，且只移动 count 个物品。
+//
+// 此操作需要保证背包已被打开，或打开了工作台，否则整个事务
+// 将会失败。
+//
+// 该操作是支持内联的，它会与所有相邻的支持内联的操作一起被
+// 内联到单个物品堆栈操作请求中
+func (i *ItemStackTransaction) MoveFromCraftingTable(
+	source resources_control.SlotID,
+	destination resources_control.SlotID,
+	count uint8,
+) *ItemStackTransaction {
+	return i.MoveItem(
+		resources_control.SlotLocation{
+			WindowID: protocol.WindowIDCrafting,
+			SlotID:   source,
+		},
+		resources_control.SlotLocation{
+			WindowID: protocol.WindowIDInventory,
+			SlotID:   destination,
+		},
+		count,
+	)
+}
+
 // SwapItem 交换 source 处和 destination 处的物品。
 //
 // 该操作是支持内联的，它会与所有相邻的支持内联的操作

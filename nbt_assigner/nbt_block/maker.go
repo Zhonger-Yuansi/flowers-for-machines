@@ -176,9 +176,10 @@ func placeNBTBlock(
 						"PlaceNBTBlock: Self loop when place NBT block, "+
 						"and result in invalid user input data, "+
 						"and need to correct; "+
-						"nbtBlock = %#v; "+
-						"nbtBlock.Format(\"\") = %#v",
-					nbtBlock, nbtBlock.Format(""),
+						"nbtBlock = %#v; newBlock = %#v; "+
+						"nbtBlock.Format(\"\") = %#v; newBlock.Format(\"\") = %#v",
+					nbtBlock, newBlock,
+					nbtBlock.Format(""), newBlock.Format(""),
 				)
 			}
 			return placeNBTBlock(console, cache, nbtBlock, nextCount)

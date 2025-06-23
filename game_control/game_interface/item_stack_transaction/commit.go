@@ -7,6 +7,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface/item_stack_operation"
+	"github.com/pterm/pterm"
 )
 
 // Discord 丢弃曾经执行的更改。
@@ -197,7 +198,59 @@ func (i *ItemStackTransaction) Commit() (
 		}
 	}
 
-	// Step 5.2: Return success
+	// Step 5.2: Print failed renaming operations if needed
+	if DebugPrintFailedRename {
+		i.checkRenaming(allRequests, serverResponse)
+	}
+
+	// Step 5.3: Return success
 	_ = i.Discord()
 	return true, pk, serverResponse, nil
+}
+
+// checkRenaming ..
+func (i *ItemStackTransaction) checkRenaming(
+	allRequests [][]item_stack_operation.ItemStackOperation,
+	serverResponse []*protocol.ItemStackResponse,
+) {
+	for index, response := range serverResponse {
+		var containerInfo protocol.StackResponseContainerInfo
+
+		if len(allRequests[index]) == 0 {
+			panic("checkRenaming: Should nerver happened")
+		}
+
+		request := allRequests[index][0]
+		renaming, ok := request.(item_stack_operation.Renaming)
+		if !ok {
+			continue
+		}
+
+		if len(response.ContainerInfo) != 2 {
+			panic("checkRenaming: Should nerver happened")
+		}
+
+		cid1 := response.ContainerInfo[0].ContainerID
+		cid2 := response.ContainerInfo[1].ContainerID
+		cid3 := byte(protocol.ContainerAnvilInput)
+		if !((cid1 == cid3 && cid2 != cid3) || (cid1 != cid3 && cid2 == cid3)) {
+			panic("checkRenaming: Should nerver happened")
+		}
+
+		if cid1 != cid3 {
+			containerInfo = response.ContainerInfo[0]
+		} else {
+			containerInfo = response.ContainerInfo[1]
+		}
+		if len(containerInfo.SlotInfo) != 1 {
+			panic("checkRenaming: Should nerver happened")
+		}
+
+		if newName := containerInfo.SlotInfo[0].CustomName; newName != renaming.NewName {
+			pterm.Warning.Printfln(
+				"checkRenaming: A renaming operation is failed due to the the new name (%s) is not equal to the request name (%s)",
+				newName, renaming.NewName,
+			)
+		}
+	}
 }

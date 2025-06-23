@@ -283,5 +283,51 @@ func SystemTestingItemStackOperation() {
 		}
 	}
 
+	// Test round 6
+	{
+		api.Commands().SendSettingsCommand("clear", true)
+		api.Commands().AwaitChangesGeneral()
+		api.Commands().SendSettingsCommand("give @s enchanted_golden_apple 10", true)
+		api.Commands().AwaitChangesGeneral()
+
+		states, err := api.SetBlock().SetAnvil(protocol.BlockPos{0, 0, 0}, true)
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemStackOperation: Test round 6 failed due to %v (stage 1)", err))
+		}
+
+		success, err := api.ContainerOpenAndClose().OpenContainer(
+			game_interface.UseItemOnBlocks{
+				HotbarSlotID: 2,
+				BotPos:       mgl32.Vec3{0, 0, 0},
+				BlockPos:     [3]int32{0, 0, 0},
+				BlockName:    "minecraft:anvil",
+				BlockStates:  states,
+			},
+			false,
+		)
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemStackOperation: Test round 6 failed due to %v (stage 2)", err))
+		}
+		if !success {
+			panic("SystemTestingItemStackOperation: Failed on test round 6")
+		}
+
+		success, _, _, err = api.ItemStackOperation().OpenTransaction().
+			RenameInventoryItem(0, "sb").
+			DropInventoryItem(0, 10).
+			Commit()
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemStackOperation: Test round 6 failed due to %v (stage 3)", err))
+		}
+		if !success {
+			panic("SystemTestingItemStackOperation: Failed on test round 6")
+		}
+
+		err = api.ContainerOpenAndClose().CloseContainer()
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingItemStackOperation: Test round 6 failed due to %v (stage 4)", err))
+		}
+	}
+
 	pterm.Success.Printfln("SystemTestingItemStackOperation: PASS (Time used = %v)", time.Since(tA))
 }

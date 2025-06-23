@@ -2,6 +2,7 @@ package resources_control
 
 import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/client"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
 )
 
@@ -41,11 +42,14 @@ func NewResourcesControl(client *client.Client) *Resources {
 	resourcesControl := &Resources{
 		client:    client,
 		commands:  NewCommandRequestCallback(),
-		inventory: NewInventories(),
 		itemStack: NewItemStackOperationManager(),
 		container: NewContainerManager(),
 		listener:  NewPacketListener(),
 	}
+
+	inventory := NewInventories()
+	inventory.createInventory(protocol.WindowIDCrafting)
+	resourcesControl.inventory = inventory
 
 	constantPacket := NewConstantPacket()
 	constantPacket.updateByGameData(client.Conn().GameData())

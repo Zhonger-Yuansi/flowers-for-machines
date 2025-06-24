@@ -8,7 +8,7 @@ import (
 
 const (
 	// BaseBackground 是操作台地板的构成方块
-	BaseBackground = "verdant_froglight"
+	BaseBackground = "minecraft:sea_lantern"
 	// DefaultHotbarSlot 是机器人默认的手持物品栏
 	DefaultHotbarSlot = 5
 	// DefaultTimeoutInitConsole 是抵达操作台目标区域的最长等待期限

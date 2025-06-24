@@ -26,7 +26,7 @@ const (
 	// 这里则选择了绿宝石块作为被点击的方块。
 	//
 	// SuperScript 最喜欢绿宝石块了！
-	BasePlaceBlock string = "emerald_block"
+	BasePlaceBlock string = "minecraft:emerald_block"
 )
 
 // UseItemOnBlocks 是机器人在使用手

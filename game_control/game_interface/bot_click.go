@@ -121,7 +121,7 @@ func (b *BotClick) clickBlock(
 		return fmt.Errorf("clickBlock: %v", err)
 	}
 
-	// Step 4: 额外操作 (自 v1.20.50 以外的必须更改)
+	// Step 4: 额外操作 (自 v1.20.50 以来的必须更改)
 	//
 	// !!! NOTE - MUST SEND AUTH INPUT TWICE !!!
 	// await changes and send auth
@@ -209,7 +209,7 @@ func (b *BotClick) ClickAir(hotbarSlot resources_control.SlotID, realPosition mg
 		return fmt.Errorf("ClickAir: %v", err)
 	}
 
-	// Step 3: 额外操作 (自 v1.20.50 以外的必须更改)
+	// Step 3: 额外操作 (自 v1.20.50 以来的必须更改)
 	err = b.c.AwaitChangesGeneral()
 	if err != nil {
 		return fmt.Errorf("ClickAir: %v", err)

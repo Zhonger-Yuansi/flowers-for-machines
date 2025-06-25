@@ -109,7 +109,7 @@ func ParseItemBlock(
 	}
 
 	if HaveSubBlockData(tag) {
-		subBlock, err := nbt_parser_interface.ParseBlock(nameChecker, result.Name, result.States, tag)
+		subBlock, err := nbt_parser_interface.ParseBlock(nameChecker, result.Name, result.States, utils.DeepCopyNBT(tag))
 		if err != nil {
 			return ItemBlockData{}, fmt.Errorf("ParseItemBlock: %v", err)
 		}
@@ -158,7 +158,7 @@ func ParseItemBlockNetwork(itemName string, item protocol.ItemStack) (result Ite
 	}
 
 	if HaveSubBlockData(item.NBTData) {
-		subBlock, err := nbt_parser_interface.ParseBlock(nil, result.Name, result.States, item.NBTData)
+		subBlock, err := nbt_parser_interface.ParseBlock(nil, result.Name, result.States, utils.DeepCopyNBT(item.NBTData))
 		if err != nil {
 			return ItemBlockData{}, fmt.Errorf("ParseItemBlock: %v", err)
 		}

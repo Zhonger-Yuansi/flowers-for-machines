@@ -7,6 +7,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
+	nbt_assigner_utils "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/utils"
 	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
 )
 
@@ -25,7 +26,8 @@ func (c *Crafter) Make() error {
 	api := c.console.API()
 	center := c.console.Center()
 
-	// 处理容器内的物品
+	// 处理容器内的物品。如果无需处理，则说明这是一个空的合成台，
+	// 但内部禁用了一些物品栏，于是我们需要手动地生成新的合成台
 	if c.data.AsContainer().NeedSpecialHandle() {
 		container := Container{
 			console: c.console,
@@ -33,6 +35,21 @@ func (c *Crafter) Make() error {
 			data:    *c.data.AsContainer(),
 		}
 		err := container.Make()
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
+	} else {
+		err := nbt_assigner_utils.SpawnNewEmptyBlock(
+			c.console,
+			c.cache,
+			nbt_assigner_utils.EmptyBlockData{
+				Name:                  c.data.BlockName(),
+				States:                c.data.BlockStates(),
+				IsCanOpenConatiner:    true,
+				ConsiderOpenDirection: false,
+				BlockCustomName:       c.data.NBT.ContainerInfo.CustomName,
+			},
+		)
 		if err != nil {
 			return fmt.Errorf("Make: %v", err)
 		}

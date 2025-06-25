@@ -141,8 +141,10 @@ func ParseItemComponent(nbtMap map[string]any) (result ItemComponent) {
 
 // ParseItemComponentNetwork 从 item 解析一个物品的物品组件数据
 func ParseItemComponentNetwork(item protocol.ItemStack) (result ItemComponent) {
-	result.CanDestroy = item.CanBreak
-	result.CanPlaceOn = item.CanBePlacedOn
+	result.CanDestroy = make([]string, len(item.CanBreak))
+	result.CanPlaceOn = make([]string, len(item.CanBePlacedOn))
+	copy(result.CanDestroy, item.CanBreak)
+	copy(result.CanPlaceOn, item.CanBePlacedOn)
 
 	if item.NBTData == nil {
 		return

@@ -52,6 +52,7 @@ var ContainerIDMapping = map[ContainerTypeWithSlot]uint8{
 	{ContainerType: protocol.ContainerTypeDispenser}: protocol.ContainerLevelEntity,                // 7 (dispenser)
 	{ContainerType: protocol.ContainerTypeDropper}:   protocol.ContainerLevelEntity,                // 7 (dropper)
 	{ContainerType: protocol.ContainerTypeHopper}:    protocol.ContainerLevelEntity,                // 7 (hopper)
+	{ContainerType: protocol.ContainerTypeCrafter}:   protocol.ContainerLevelEntity,                // 7 (crafter)
 	{ContainerType: protocol.ContainerTypeArmour}:    protocol.ContainerArmor,                      // 6 (armour)
 
 	// furnac, lit_furnace
@@ -108,7 +109,6 @@ var ContainerIDMapping = map[ContainerTypeWithSlot]uint8{
 	{ContainerType: protocol.ContainerTypeJigsawEditor}:       ContainerIDUnknown,
 	{ContainerType: protocol.ContainerTypeSmithingTable}:      ContainerIDUnknown,
 	{ContainerType: protocol.ContainerTypeChestBoat}:          ContainerIDUnknown,
-	{ContainerType: protocol.ContainerTypeCrafter}:            ContainerIDUnknown, // TODO: Waiting to support on v1.21.0
 
 	// The following container can't be opened
 	{ContainerType: protocol.ContainerTypeCauldron}:     ContainerIDCanNotOpen,

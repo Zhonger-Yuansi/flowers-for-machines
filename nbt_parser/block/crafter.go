@@ -67,12 +67,14 @@ func (c *Crafter) Format(prefix string) string {
 }
 
 func (c *Crafter) Parse(nbtMap map[string]any) error {
-	c.NBT.DisabledSlots, _ = nbtMap["disabled_slots"].(int16)
-
-	err := c.AsContainer().Parse(nbtMap)
+	container := c.AsContainer()
+	err := container.Parse(nbtMap)
 	if err != nil {
 		return fmt.Errorf("Parse: %v", err)
 	}
+
+	c.NBT.DisabledSlots, _ = nbtMap["disabled_slots"].(int16)
+	c.NBT.ContainerInfo = container.NBT
 
 	return nil
 }

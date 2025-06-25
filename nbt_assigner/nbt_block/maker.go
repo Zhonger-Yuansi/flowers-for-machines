@@ -148,6 +148,12 @@ func placeNBTBlock(
 			cache:   cache,
 			data:    *block,
 		}
+	case *nbt_parser_block.Crafter:
+		method = &Crafter{
+			console: console,
+			cache:   cache,
+			data:    *block,
+		}
 	}
 
 	// 放置相应方块

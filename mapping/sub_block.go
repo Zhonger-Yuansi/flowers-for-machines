@@ -65,12 +65,13 @@ var ItemNameToBlockName = map[string]string{
 	// 物品展示框
 	"minecraft:frame":      "minecraft:frame",
 	"minecraft:glow_frame": "minecraft:glow_frame",
-	// 结构方块、旗帜、讲台、唱片机 和 酿造台
+	// 结构方块、旗帜、讲台、唱片机、酿造台 和 合成器
 	"minecraft:structure_block": "minecraft:structure_block",
 	"minecraft:banner":          "minecraft:wall_banner",
 	"minecraft:lectern":         "minecraft:lectern",
 	"minecraft:jukebox":         "minecraft:jukebox",
 	"minecraft:brewing_stand":   "minecraft:brewing_stand",
+	"minecraft:crafter":         "minecraft:crafter",
 }
 
 // SubBlocksPool 记载了物品制作中可以嵌套的子方块
@@ -82,4 +83,5 @@ var SubBlocksPool = map[uint8]bool{
 	SupportNBTBlockTypeLectern:        true,
 	SupportNBTBlockTypeJukeBox:        true,
 	SupportNBTBlockTypeBrewingStand:   true,
+	SupportNBTBlockTypeCrafter:        true,
 }

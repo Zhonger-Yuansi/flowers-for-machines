@@ -64,6 +64,8 @@ func ParseNBTBlock(
 		block = &JukeBox{DefaultBlock: defaultBlock}
 	case mapping.SupportNBTBlockTypeBrewingStand:
 		block = &BrewingStand{DefaultBlock: defaultBlock}
+	case mapping.SupportNBTBlockTypeCrafter:
+		block = &Crafter{DefaultBlock: defaultBlock}
 	default:
 		panic("ParseNBTBlock: Should nerver happened")
 	}

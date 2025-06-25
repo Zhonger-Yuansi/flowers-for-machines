@@ -10,6 +10,7 @@ const (
 	SupportNBTBlockTypeLectern
 	SupportNBTBlockTypeJukeBox
 	SupportNBTBlockTypeBrewingStand
+	SupportNBTBlockTypeCrafter
 )
 
 // 此表描述了现阶段已经支持了的方块实体。
@@ -86,11 +87,12 @@ var SupportBlocksPool = map[string]uint8{
 	// 物品展示框
 	"minecraft:frame":      SupportNBTBlockTypeFrame,
 	"minecraft:glow_frame": SupportNBTBlockTypeFrame,
-	// 结构方块, 旗帜, 讲台, 唱片机 和 酿造台
+	// 结构方块, 旗帜, 讲台, 唱片机, 酿造台 和 合成器
 	"minecraft:structure_block": SupportNBTBlockTypeStructureBlock,
 	"minecraft:standing_banner": SupportNBTBlockTypeBanner,
 	"minecraft:wall_banner":     SupportNBTBlockTypeBanner,
 	"minecraft:lectern":         SupportNBTBlockTypeLectern,
 	"minecraft:jukebox":         SupportNBTBlockTypeJukeBox,
 	"minecraft:brewing_stand":   SupportNBTBlockTypeBrewingStand,
+	"minecraft:crafter":         SupportNBTBlockTypeCrafter,
 }

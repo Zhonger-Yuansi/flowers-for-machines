@@ -44,7 +44,11 @@ func ParseBlock(
 	if !ok {
 		return &defaultBlock, nil
 	}
-	defaultBlock.States = DeepCopyAndFixStates(blockType, defaultBlock.BlockName(), defaultBlock.BlockStates())
+	defaultBlock.States = nbt_parser_interface.DeepCopyAndFixStates(
+		blockType,
+		defaultBlock.BlockName(),
+		defaultBlock.BlockStates(),
+	)
 
 	switch blockType {
 	case mapping.SupportNBTBlockTypeCommandBlock:

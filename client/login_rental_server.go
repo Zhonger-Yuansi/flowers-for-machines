@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/bunker/auth"
+	"github.com/OmineDev/flowers-for-machines/core/bunker/auth"
 )
 
 // LoginRentalServer ..

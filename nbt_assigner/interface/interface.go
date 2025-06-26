@@ -1,11 +1,12 @@
 package nbt_assigner_interface
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
-	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/game_control/resources_control"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_cache"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
+	nbt_parser_interface "github.com/OmineDev/flowers-for-machines/nbt_parser/interface"
+
 	"github.com/google/uuid"
 )
 

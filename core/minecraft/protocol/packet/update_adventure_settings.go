@@ -1,7 +1,7 @@
 package packet
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
 )
 
 // UpdateAdventureSettings is a packet sent from the server to the client to update the adventure settings of the player.

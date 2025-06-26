@@ -1,7 +1,7 @@
 package game_interface
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface/item_stack_transaction"
+	"github.com/OmineDev/flowers-for-machines/game_control/game_interface/item_stack_transaction"
 )
 
 // ItemStackOperation 是物品操作请求的包装实现

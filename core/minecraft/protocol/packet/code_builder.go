@@ -1,7 +1,7 @@
 package packet
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
 )
 
 // CodeBuilder is an Education Edition packet sent by the server to the client to open the URL to a Code

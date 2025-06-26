@@ -3,8 +3,8 @@ package game_interface
 import (
 	"fmt"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/game_control/resources_control"
 )
 
 // ItemTransition 是基于 ResourcesWrapper 和 ItemStackOperation 实现的物品状态转移

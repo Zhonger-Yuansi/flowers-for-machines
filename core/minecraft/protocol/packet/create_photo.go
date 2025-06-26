@@ -1,6 +1,6 @@
 package packet
 
-import "github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+import "github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
 
 // CreatePhoto is a packet that allows players to export photos from their portfolios into items in their inventory.
 // This packet only works on the Education Edition version of Minecraft.

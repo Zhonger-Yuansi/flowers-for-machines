@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol/packet"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
 )
 
 // TODO: Merge this to game interface

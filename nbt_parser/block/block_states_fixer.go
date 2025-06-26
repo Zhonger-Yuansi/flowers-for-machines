@@ -1,9 +1,9 @@
 package nbt_parser_block
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
-	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
+	"github.com/OmineDev/flowers-for-machines/mapping"
+	nbt_parser_interface "github.com/OmineDev/flowers-for-machines/nbt_parser/interface"
+	"github.com/OmineDev/flowers-for-machines/utils"
 )
 
 func init() {

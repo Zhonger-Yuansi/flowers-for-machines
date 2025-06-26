@@ -1,7 +1,7 @@
 package packet
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
 )
 
 // SettingsCommand is sent by the client when it changes a setting in the settings that results in the issuing

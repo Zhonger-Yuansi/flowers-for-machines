@@ -3,11 +3,11 @@ package nbt_block
 import (
 	"fmt"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
-	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol/packet"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/block_helper"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
+	nbt_parser_block "github.com/OmineDev/flowers-for-machines/nbt_parser/block"
 )
 
 // 命令方块

@@ -1,7 +1,7 @@
 package packet
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
 )
 
 // ScriptMessage is used to communicate custom messages from the client to the server, or from the server to the client.

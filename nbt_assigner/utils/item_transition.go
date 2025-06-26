@@ -3,12 +3,12 @@ package nbt_assigner_utils
 import (
 	"fmt"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
-	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
-	nbt_hash "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/hash"
+	"github.com/OmineDev/flowers-for-machines/game_control/game_interface"
+	"github.com/OmineDev/flowers-for-machines/game_control/resources_control"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_cache"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
+	nbt_parser_block "github.com/OmineDev/flowers-for-machines/nbt_parser/block"
+	nbt_hash "github.com/OmineDev/flowers-for-machines/nbt_parser/hash"
 )
 
 // ItemTransition 将已置于操作台中心的 srcContainer 转移为 dstContainer。

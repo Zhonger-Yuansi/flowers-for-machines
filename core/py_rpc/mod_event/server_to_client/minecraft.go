@@ -1,8 +1,8 @@
 package mod_event_server_to_client
 
 import (
-	mei "github.com/Happy2018new/the-last-problem-of-the-humankind/core/py_rpc/mod_event/interface"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/py_rpc/mod_event/server_to_client/minecraft"
+	mei "github.com/OmineDev/flowers-for-machines/core/py_rpc/mod_event/interface"
+	"github.com/OmineDev/flowers-for-machines/core/py_rpc/mod_event/server_to_client/minecraft"
 )
 
 // Minecraft Package

@@ -1,7 +1,7 @@
 package packet
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
 )
 
 // PlayerAction is sent by the client when it executes any action, for example starting to sprint, swim,

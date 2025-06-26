@@ -1,6 +1,6 @@
 package nbt_console
 
-import "github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+import "github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
 
 // BlockPosByIndex 按 index 查找操作台上目标方块的绝对坐标。
 // index 为 0 将查找操作台中心处方块的绝对坐标，

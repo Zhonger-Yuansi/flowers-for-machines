@@ -5,8 +5,9 @@ import (
 	"slices"
 	"time"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+	"github.com/OmineDev/flowers-for-machines/game_control/game_interface"
+	"github.com/OmineDev/flowers-for-machines/game_control/resources_control"
+
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/pterm/pterm"
 )

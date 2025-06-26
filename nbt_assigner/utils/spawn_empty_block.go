@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
+	"github.com/OmineDev/flowers-for-machines/game_control/game_interface"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/block_helper"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_cache"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
+	"github.com/OmineDev/flowers-for-machines/utils"
 )
 
 // EmptyBlockData 指示一个空的方块，

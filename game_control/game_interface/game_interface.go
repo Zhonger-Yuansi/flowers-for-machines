@@ -1,7 +1,7 @@
 package game_interface
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+	"github.com/OmineDev/flowers-for-machines/game_control/resources_control"
 )
 
 // ResourcesWrapper 是基于资源中心包装的机器人资源

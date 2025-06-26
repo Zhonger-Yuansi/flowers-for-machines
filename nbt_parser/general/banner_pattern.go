@@ -1,8 +1,8 @@
 package nbt_parser_general
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/mapping"
 )
 
 // 描述旗帜的种类

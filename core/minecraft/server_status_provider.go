@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/raknet"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/raknet"
 )
 
 // ServerStatusProvider represents a type that is able to provide the visual status of a server, in specific

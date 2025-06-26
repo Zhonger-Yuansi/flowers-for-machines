@@ -3,8 +3,8 @@ package minecraft_test
 import (
 	"fmt"
 
-	minecraft "github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
+	minecraft "github.com/OmineDev/flowers-for-machines/core/minecraft"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol/packet"
 )
 
 func ExampleListen() {

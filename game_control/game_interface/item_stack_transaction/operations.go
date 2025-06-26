@@ -1,10 +1,10 @@
 package item_stack_transaction
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface/item_stack_operation"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/game_control/game_interface/item_stack_operation"
+	"github.com/OmineDev/flowers-for-machines/game_control/resources_control"
+	"github.com/OmineDev/flowers-for-machines/mapping"
 )
 
 // MoveItem 将 source 处的物品移动到 destination 处，

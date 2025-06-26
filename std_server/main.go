@@ -7,13 +7,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/client"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
+	"github.com/OmineDev/flowers-for-machines/client"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/game_control/game_interface"
+	"github.com/OmineDev/flowers-for-machines/game_control/resources_control"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_cache"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
+
 	"github.com/pterm/pterm"
 )
 

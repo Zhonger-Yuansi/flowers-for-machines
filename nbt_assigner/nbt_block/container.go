@@ -3,19 +3,19 @@ package nbt_block
 import (
 	"fmt"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
-	nbt_assigner_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/interface"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
-	nbt_assigner_utils "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/utils"
-	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
-	nbt_hash "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/hash"
-	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
-	nbt_parser_item "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/item"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/game_control/game_interface"
+	"github.com/OmineDev/flowers-for-machines/game_control/resources_control"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/block_helper"
+	nbt_assigner_interface "github.com/OmineDev/flowers-for-machines/nbt_assigner/interface"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_cache"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
+	nbt_assigner_utils "github.com/OmineDev/flowers-for-machines/nbt_assigner/utils"
+	nbt_parser_block "github.com/OmineDev/flowers-for-machines/nbt_parser/block"
+	nbt_hash "github.com/OmineDev/flowers-for-machines/nbt_parser/hash"
+	nbt_parser_interface "github.com/OmineDev/flowers-for-machines/nbt_parser/interface"
+	nbt_parser_item "github.com/OmineDev/flowers-for-machines/nbt_parser/item"
+	"github.com/OmineDev/flowers-for-machines/utils"
 )
 
 // 容器

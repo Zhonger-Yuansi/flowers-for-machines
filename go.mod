@@ -1,4 +1,4 @@
-module github.com/Happy2018new/the-last-problem-of-the-humankind
+module github.com/OmineDev/flowers-for-machines
 
 go 1.24
 

@@ -1,8 +1,9 @@
 package nbt_hash
 
 import (
-	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
-	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
+	nbt_parser_block "github.com/OmineDev/flowers-for-machines/nbt_parser/block"
+	nbt_parser_interface "github.com/OmineDev/flowers-for-machines/nbt_parser/interface"
+
 	"github.com/cespare/xxhash/v2"
 )
 

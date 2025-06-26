@@ -1,6 +1,6 @@
 package block_helper
 
-import "github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
+import "github.com/OmineDev/flowers-for-machines/utils"
 
 // ComplexBlock 描述一种复杂的方块，它除了具有名称和方块状态以外，
 // 它还具有很多其他的数据。为了方便，此处不会记录额外的数据

@@ -1,7 +1,7 @@
 package mod_event_server_to_client
 
 import (
-	mei "github.com/Happy2018new/the-last-problem-of-the-humankind/core/py_rpc/mod_event/interface"
+	mei "github.com/OmineDev/flowers-for-machines/core/py_rpc/mod_event/interface"
 )
 
 // Return a pool/map that contains

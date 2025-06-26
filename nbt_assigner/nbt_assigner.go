@@ -4,17 +4,18 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	nbt_assigner_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/interface"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
-	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
+	nbt_assigner_interface "github.com/OmineDev/flowers-for-machines/nbt_assigner/interface"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_cache"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
+	nbt_parser_interface "github.com/OmineDev/flowers-for-machines/nbt_parser/interface"
+
 	"github.com/google/uuid"
 
-	_ "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_block"
-	_ "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_item"
-	_ "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
-	_ "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/item"
+	_ "github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_block"
+	_ "github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_item"
+	_ "github.com/OmineDev/flowers-for-machines/nbt_parser/block"
+	_ "github.com/OmineDev/flowers-for-machines/nbt_parser/item"
 )
 
 // NBTAssigner 是封装好的 NBT 方块放置实现

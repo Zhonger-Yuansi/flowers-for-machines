@@ -7,8 +7,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/nbt"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/nbt"
+	"github.com/OmineDev/flowers-for-machines/utils"
+
 	"github.com/gin-gonic/gin"
 )
 

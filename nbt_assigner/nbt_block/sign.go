@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
-	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol/packet"
+	"github.com/OmineDev/flowers-for-machines/game_control/game_interface"
+	"github.com/OmineDev/flowers-for-machines/mapping"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/block_helper"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
+	nbt_parser_block "github.com/OmineDev/flowers-for-machines/nbt_parser/block"
+	"github.com/OmineDev/flowers-for-machines/utils"
+
 	"github.com/go-gl/mathgl/mgl32"
 )
 

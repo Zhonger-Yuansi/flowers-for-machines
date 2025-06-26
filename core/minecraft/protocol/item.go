@@ -1,7 +1,7 @@
 package protocol
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/nbt"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/nbt"
 )
 
 // ItemInstance represents a unique instance of an item stack. These instances carry a specific network ID

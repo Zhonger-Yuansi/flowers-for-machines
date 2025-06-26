@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/block_helper"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
+	"github.com/OmineDev/flowers-for-machines/utils"
+
 	"github.com/pterm/pterm"
 )
 

@@ -3,13 +3,14 @@ package nbt_block
 import (
 	"fmt"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	nbt_assigner_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/interface"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
-	nbt_parser_block "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/block"
-	nbt_hash "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/hash"
-	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
+	nbt_assigner_interface "github.com/OmineDev/flowers-for-machines/nbt_assigner/interface"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_cache"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
+	nbt_parser_block "github.com/OmineDev/flowers-for-machines/nbt_parser/block"
+	nbt_hash "github.com/OmineDev/flowers-for-machines/nbt_parser/hash"
+	nbt_parser_interface "github.com/OmineDev/flowers-for-machines/nbt_parser/interface"
+
 	"github.com/google/uuid"
 )
 

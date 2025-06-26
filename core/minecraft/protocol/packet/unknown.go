@@ -3,7 +3,7 @@ package packet
 import (
 	"fmt"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
 )
 
 // Unknown is an implementation of the Packet interface for unknown/unimplemented packets. It holds the packet

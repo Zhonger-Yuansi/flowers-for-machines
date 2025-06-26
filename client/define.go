@@ -1,9 +1,9 @@
 package client
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/bunker/auth"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
+	"github.com/OmineDev/flowers-for-machines/core/bunker/auth"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol/packet"
 )
 
 // ------------------------- Config -------------------------

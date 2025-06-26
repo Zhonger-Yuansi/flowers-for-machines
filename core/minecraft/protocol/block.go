@@ -1,6 +1,6 @@
 package protocol
 
-import "github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/nbt"
+import "github.com/OmineDev/flowers-for-machines/core/minecraft/nbt"
 
 // BlockEntry is an entry for a custom block found in the StartGame packet. The runtime ID of these custom
 // block entries is based on the index they have in the block palette when the palette is ordered

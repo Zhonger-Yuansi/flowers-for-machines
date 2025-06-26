@@ -3,12 +3,12 @@ package nbt_item
 import (
 	"fmt"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
-	nbt_assigner_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/interface"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
-	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
-	nbt_parser_item "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/item"
+	"github.com/OmineDev/flowers-for-machines/game_control/resources_control"
+	nbt_assigner_interface "github.com/OmineDev/flowers-for-machines/nbt_assigner/interface"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_cache"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
+	nbt_parser_interface "github.com/OmineDev/flowers-for-machines/nbt_parser/interface"
+	nbt_parser_item "github.com/OmineDev/flowers-for-machines/nbt_parser/item"
 )
 
 func init() {

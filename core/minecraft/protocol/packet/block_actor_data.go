@@ -1,8 +1,8 @@
 package packet
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/nbt"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/nbt"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
 )
 
 // BlockActorData is sent by the server to update data of a block entity client-side, for example the data of

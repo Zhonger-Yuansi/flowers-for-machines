@@ -4,8 +4,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol/packet"
+	"github.com/OmineDev/flowers-for-machines/utils"
+
 	"github.com/google/uuid"
 	"github.com/pterm/pterm"
 )

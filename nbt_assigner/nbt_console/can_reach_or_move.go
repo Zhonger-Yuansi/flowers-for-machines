@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
 )
 
 // CanReachOrMove 判断机器人是否可以操作 targetPos 处的方块。

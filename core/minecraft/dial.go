@@ -21,10 +21,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/bunker/auth"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/login"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
+	"github.com/OmineDev/flowers-for-machines/core/bunker/auth"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol/login"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol/packet"
+
 	"github.com/go-jose/go-jose/v3/jwt"
 	"github.com/google/uuid"
 )

@@ -1,6 +1,6 @@
 package item_stack_transaction
 
-import "github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+import "github.com/OmineDev/flowers-for-machines/game_control/resources_control"
 
 // responseMapping ..
 type responseMapping struct {

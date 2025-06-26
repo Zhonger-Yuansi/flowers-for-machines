@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/block_helper"
+
 	"github.com/cespare/xxhash/v2"
 	"github.com/google/uuid"
 )

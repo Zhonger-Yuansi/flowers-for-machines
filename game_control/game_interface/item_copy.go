@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+	"github.com/OmineDev/flowers-for-machines/game_control/resources_control"
 )
 
 type (

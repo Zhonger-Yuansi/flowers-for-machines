@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	I18n "github.com/Happy2018new/the-last-problem-of-the-humankind/core/bunker/i18n"
+	I18n "github.com/OmineDev/flowers-for-machines/core/bunker/i18n"
 )
 
 type AccessWrapper struct {

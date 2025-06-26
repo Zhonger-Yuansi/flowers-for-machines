@@ -1,6 +1,6 @@
 package packet
 
-import "github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+import "github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
 
 // TickingAreasLoadStatus is sent by the server to the client to notify the client of a ticking area's loading status.
 type TickingAreasLoadStatus struct {

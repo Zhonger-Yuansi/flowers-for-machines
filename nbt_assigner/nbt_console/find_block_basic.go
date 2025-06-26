@@ -1,8 +1,8 @@
 package nbt_console
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/block_helper"
 )
 
 // BlockByIndex 按 index 查找操作台上的方块。

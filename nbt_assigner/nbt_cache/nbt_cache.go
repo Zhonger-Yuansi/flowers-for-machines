@@ -1,9 +1,9 @@
 package nbt_cache
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache/base_container_cache"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_cache/nbt_block_cache"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_cache/base_container_cache"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_cache/nbt_block_cache"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
 )
 
 // NBTCacheSystem 是基于操作台实现的 NBT 缓存命中系统

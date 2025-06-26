@@ -1,6 +1,6 @@
 package nbt_parser_interface
 
-import "github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+import "github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
 
 var (
 	// ParseNBTBlock 从方块实体数据 blockNBT 解析一个方块实体。

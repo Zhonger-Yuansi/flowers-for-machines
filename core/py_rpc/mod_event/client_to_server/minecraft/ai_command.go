@@ -1,8 +1,8 @@
 package minecraft
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/py_rpc/mod_event/client_to_server/minecraft/ai_command"
-	mei "github.com/Happy2018new/the-last-problem-of-the-humankind/core/py_rpc/mod_event/interface"
+	"github.com/OmineDev/flowers-for-machines/core/py_rpc/mod_event/client_to_server/minecraft/ai_command"
+	mei "github.com/OmineDev/flowers-for-machines/core/py_rpc/mod_event/interface"
 )
 
 // 魔法指令

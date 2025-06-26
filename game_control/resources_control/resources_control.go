@@ -1,9 +1,9 @@
 package resources_control
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/client"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
+	"github.com/OmineDev/flowers-for-machines/client"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol/packet"
 )
 
 // BotInfo 记载机器人的基本信息

@@ -1,7 +1,8 @@
 package nbt_block_cache
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/nbt_console"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
+
 	"github.com/google/uuid"
 )
 

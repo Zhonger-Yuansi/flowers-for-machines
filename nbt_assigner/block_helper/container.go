@@ -3,7 +3,7 @@ package block_helper
 import (
 	"strings"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
+	"github.com/OmineDev/flowers-for-machines/utils"
 )
 
 // ContainerBlockOpenInfo 描述了要

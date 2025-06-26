@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/raknet"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/raknet"
 )
 
 func TestListen(t *testing.T) {

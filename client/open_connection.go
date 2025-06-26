@@ -4,15 +4,15 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/bunker/auth"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/py_rpc"
-	cts "github.com/Happy2018new/the-last-problem-of-the-humankind/core/py_rpc/mod_event/client_to_server"
-	cts_mc "github.com/Happy2018new/the-last-problem-of-the-humankind/core/py_rpc/mod_event/client_to_server/minecraft"
-	cts_mc_p "github.com/Happy2018new/the-last-problem-of-the-humankind/core/py_rpc/mod_event/client_to_server/minecraft/preset"
-	cts_mc_v "github.com/Happy2018new/the-last-problem-of-the-humankind/core/py_rpc/mod_event/client_to_server/minecraft/vip_event_system"
-	mei "github.com/Happy2018new/the-last-problem-of-the-humankind/core/py_rpc/mod_event/interface"
+	"github.com/OmineDev/flowers-for-machines/core/bunker/auth"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/protocol/packet"
+	"github.com/OmineDev/flowers-for-machines/core/py_rpc"
+	cts "github.com/OmineDev/flowers-for-machines/core/py_rpc/mod_event/client_to_server"
+	cts_mc "github.com/OmineDev/flowers-for-machines/core/py_rpc/mod_event/client_to_server/minecraft"
+	cts_mc_p "github.com/OmineDev/flowers-for-machines/core/py_rpc/mod_event/client_to_server/minecraft/preset"
+	cts_mc_v "github.com/OmineDev/flowers-for-machines/core/py_rpc/mod_event/client_to_server/minecraft/vip_event_system"
+	mei "github.com/OmineDev/flowers-for-machines/core/py_rpc/mod_event/interface"
 )
 
 // openConnection 通过 authenticator 连接到租赁服，

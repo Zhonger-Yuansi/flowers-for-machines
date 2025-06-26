@@ -1,8 +1,8 @@
 package nbt_console
 
 import (
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_assigner/block_helper"
+	"github.com/OmineDev/flowers-for-machines/game_control/resources_control"
+	"github.com/OmineDev/flowers-for-machines/nbt_assigner/block_helper"
 )
 
 // SetSlotUseCallback 设置当特定的背包物品栏被使用时应当执行的回调函数。

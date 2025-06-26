@@ -13,8 +13,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/raknet/internal"
-	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/raknet/internal/message"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/raknet/internal"
+	"github.com/OmineDev/flowers-for-machines/core/minecraft/raknet/internal/message"
 )
 
 const (

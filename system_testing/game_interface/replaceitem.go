@@ -7,6 +7,7 @@ import (
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/pterm/pterm"
 )
 
@@ -39,6 +40,7 @@ func SystemTestingReplaceitem() {
 		success, err := api.ContainerOpenAndClose().OpenContainer(
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: 0,
+				BotPos:       mgl32.Vec3{0, 0, 0},
 				BlockPos:     [3]int32{0, 0, 0},
 				BlockName:    "chest",
 				BlockStates: map[string]any{
@@ -105,7 +107,7 @@ func SystemTestingReplaceitem() {
 		if item.Stack.Count != 8 {
 			panic("SystemTestingReplaceitem: Test round 2 failed")
 		}
-		if !slices.Equal(item.Stack.CanBePlacedOn, []string{"minecraft:grass"}) {
+		if !slices.Equal(item.Stack.CanBePlacedOn, []string{"minecraft:grass_block"}) {
 			panic("SystemTestingReplaceitem: Test round 2 failed")
 		}
 	}

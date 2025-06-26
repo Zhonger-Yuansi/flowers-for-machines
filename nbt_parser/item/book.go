@@ -2,6 +2,7 @@ package nbt_parser_item
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 )
@@ -17,6 +18,29 @@ type BookNBT struct {
 type Book struct {
 	DefaultItem
 	NBT BookNBT
+}
+
+func (b Book) formatNBT(prefix string) string {
+	result := ""
+
+	if len(b.NBT.Title) > 0 {
+		result += prefix + fmt.Sprintf("标题名: %s\n", b.NBT.Title)
+	}
+	if len(b.NBT.Author) > 0 {
+		result += prefix + fmt.Sprintf("创造主: %s\n", b.NBT.Author)
+	}
+	result += prefix + fmt.Sprintf("页数: %d\n", len(b.NBT.Pages))
+
+	return result
+}
+
+func (b *Book) Format(prefix string) string {
+	result := b.DefaultItem.Format(prefix)
+	if b.IsComplex() {
+		result += prefix + "附加数据: \n"
+		result += b.formatNBT(prefix + "\t")
+	}
+	return result
 }
 
 // parse ..

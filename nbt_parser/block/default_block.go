@@ -2,6 +2,7 @@ package nbt_parser_block
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
@@ -10,8 +11,9 @@ import (
 
 // 默认 NBT 实体
 type DefaultBlock struct {
-	Name   string
-	States map[string]any
+	Name        string
+	States      map[string]any
+	NameChecker func(name string) bool
 }
 
 func (d *DefaultBlock) BlockName() string {
@@ -40,6 +42,12 @@ func (DefaultBlock) NeedSpecialHandle() bool {
 
 func (DefaultBlock) NeedCheckCompletely() bool {
 	return false
+}
+
+func (d *DefaultBlock) Format(prefix string) string {
+	result := prefix + fmt.Sprintf("方块名称: %s\n", d.BlockName())
+	result += prefix + fmt.Sprintf("方块状态: %s\n", d.BlockStatesString())
+	return result
 }
 
 func (DefaultBlock) NBTStableBytes() []byte {

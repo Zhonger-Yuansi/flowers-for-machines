@@ -7,6 +7,7 @@ import (
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/pterm/pterm"
 )
 
@@ -42,6 +43,7 @@ func SystemTestingBotClick() {
 		api.BotClick().ClickBlock(
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: 2,
+				BotPos:       mgl32.Vec3{0, 0, 0},
 				BlockPos:     [3]int32{0, 0, 0},
 				BlockName:    "glow_frame",
 				BlockStates: map[string]any{
@@ -85,6 +87,46 @@ func SystemTestingBotClick() {
 		}
 		if !strings.Contains(fmt.Sprintf("%#v", item.Stack.NBTData), "(+DATA)") {
 			panic("SystemTestingBotClick: `PickBlock` failed on test round 4")
+		}
+	}
+
+	// PlaceBlockHighLevel
+	{
+		api.Commands().SendSettingsCommand("clear", true)
+		api.Commands().AwaitChangesGeneral()
+		api.Commands().SendSettingsCommand("give @s lime_shulker_box", true)
+		api.Commands().AwaitChangesGeneral()
+		api.Commands().SendSettingsCommand("tp 30 0 30", true)
+		api.Commands().AwaitChangesGeneral()
+		api.BotClick().ChangeSelectedHotbarSlot(0)
+		api.Commands().AwaitChangesGeneral()
+		api.Commands().SendSettingsCommand("setblock 30 0 29 air", true)
+		api.Commands().AwaitChangesGeneral()
+
+		api.BotClick().PlaceBlockHighLevel(
+			[3]int32{30, 0, 30},
+			mgl32.Vec3{30.5, 1.5, 30.5},
+			0,
+			2,
+		)
+
+		success, err := api.ContainerOpenAndClose().OpenContainer(
+			game_interface.UseItemOnBlocks{
+				HotbarSlotID: 0,
+				BotPos:       mgl32.Vec3{30.5, 1.5, 30.5},
+				BlockPos:     [3]int32{30, 0, 30},
+				BlockName:    "lime_shulker_box",
+				BlockStates:  map[string]any{},
+			},
+			false,
+		)
+		if !success || err != nil {
+			panic("SystemTestingBotClick: `PlaceBlockHighLevel` failed on test round 1")
+		}
+
+		err = api.ContainerOpenAndClose().CloseContainer()
+		if err != nil {
+			panic("SystemTestingBotClick: `PlaceBlockHighLevel` failed on test round 2")
 		}
 	}
 

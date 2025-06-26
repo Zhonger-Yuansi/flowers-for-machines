@@ -108,7 +108,7 @@ func (m *MCPCheckChallengesSolver) waitMCPCheckChallengesDown(commandOutput chan
 			UnLimited: false,
 			// PhoenixBuilder specific changes.
 			// Author: Liliya233
-			Version: 0x24,
+			Version: 39,
 		})
 
 		if err != nil {

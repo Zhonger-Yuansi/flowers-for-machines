@@ -1,6 +1,9 @@
 package nbt_parser_general
 
-import "github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+import (
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
+)
 
 // 描述旗帜的种类
 const (
@@ -15,6 +18,16 @@ const BannerBaseColorDefault int32 = iota
 type BannerPattern struct {
 	Color   int32  `mapstructure:"Color"`
 	Pattern string `mapstructure:"Pattern"`
+}
+
+// Format ..
+func (b BannerPattern) Format(prefix string) string {
+	if b.Pattern == mapping.BannerPatternOminous {
+		return prefix + "不祥\n"
+	}
+	colorName := mapping.ColorFormat[b.Color]
+	patternName := mapping.BannerPatternFormat[b.Pattern]
+	return prefix + colorName + patternName + "\n"
 }
 
 // Marshal ..

@@ -40,7 +40,7 @@ func (r *Resources) handleRespawn(p *packet.Respawn) {
 			ActionType:      protocol.PlayerActionRespawn,
 			BlockFace:       -1,
 		})
-		for range 2 {
+		for range 5 {
 			_ = r.WritePacket(&packet.PlayerAuthInput{
 				InputData: packet.InputFlagStartFlying,
 				Position:  p.Position,
@@ -217,6 +217,8 @@ func (r *Resources) handlePacket(pk packet.Packet) {
 		r.handleContainerClose(p)
 	case *packet.CreativeContent:
 		r.constant.onCreativeContent(p)
+	case *packet.AvailableCommands:
+		r.constant.onAvailableCommands(p)
 	}
 	// for other implements
 	r.listener.onPacket(pk)

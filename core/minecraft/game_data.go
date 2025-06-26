@@ -33,6 +33,8 @@ type GameData struct {
 	// This field may be set to 5 to make the client fall back to the game mode set in the WorldGameMode
 	// field.
 	PlayerGameMode int32
+	// Hardcore is if the world is in hardcore mode. In hardcore mode, the player cannot respawn after dying.
+	Hardcore bool
 	// PersonaDisabled is true if persona skins are disabled for the current game session.
 	PersonaDisabled bool
 	// CustomSkinsDisabled is true if custom skins are disabled for the current game session.

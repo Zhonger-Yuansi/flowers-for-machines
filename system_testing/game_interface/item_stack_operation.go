@@ -8,6 +8,7 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/resources_control"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/pterm/pterm"
 )
 
@@ -70,6 +71,7 @@ func SystemTestingItemStackOperation() {
 		success, err := api.ContainerOpenAndClose().OpenContainer(
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: 2,
+				BotPos:       mgl32.Vec3{0, 0, 0},
 				BlockPos:     [3]int32{0, 0, 0},
 				BlockName:    "anvil",
 				BlockStates:  states,
@@ -138,7 +140,7 @@ func SystemTestingItemStackOperation() {
 		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
 			GetCreativeItemToInventory(1, 0, 64).
 			GetCreativeItemToInventory(2, 1, 64).
-			GetCreativeItemToInventory(0x5bc, 8, 1).
+			GetCreativeItemToInventory(1570, 8, 1).
 			DropInventoryItem(0, 64).
 			DropInventoryItem(1, 64).
 			DropInventoryItem(8, 1).
@@ -184,6 +186,7 @@ func SystemTestingItemStackOperation() {
 		success, err := api.ContainerOpenAndClose().OpenContainer(
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: 2,
+				BotPos:       mgl32.Vec3{0, 0, 0},
 				BlockPos:     protocol.BlockPos{0, 0, 0},
 				BlockName:    "loom",
 				BlockStates: map[string]any{
@@ -233,10 +236,10 @@ func SystemTestingItemStackOperation() {
 		success, _, _, _ = api.ItemStackOperation().OpenTransaction().
 			MoveToCraftingTable(6, 28, 1).
 			MoveToCraftingTable(8, 29, 1).
-			Crafting(0x8f9, 10, 1, resources_control.ExpectedNewItem{}).
+			Crafting(2418, 10, 1, resources_control.ExpectedNewItem{}).
 			MoveToCraftingTable(9, 28, 1). // Hacking attempt
 			MoveToCraftingTable(0, 31, 1). // Hacking attempt
-			Crafting(0x8f9, 0, 1, resources_control.ExpectedNewItem{}).
+			Crafting(2418, 0, 1, resources_control.ExpectedNewItem{}).
 			MoveBetweenInventory(10, 8, 1).
 			DropInventoryItem(8, 1).
 			DropInventoryItem(0, 1).

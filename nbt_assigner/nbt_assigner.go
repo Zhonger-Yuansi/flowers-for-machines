@@ -59,7 +59,12 @@ func (n *NBTAssigner) PlaceNBTBlock(blockName string, blockStates map[string]any
 	offset protocol.BlockPos,
 	err error,
 ) {
-	nbtBlock, err := nbt_parser_interface.ParseBlock(blockName, blockStates, blockNBT)
+	nbtBlock, err := nbt_parser_interface.ParseBlock(
+		n.console.API().Resources().ConstantPacket().ItemCanGetByCommand,
+		blockName,
+		blockStates,
+		blockNBT,
+	)
 	if err != nil {
 		return false, uuid.UUID{}, protocol.BlockPos{}, fmt.Errorf("PlaceNBTBlock: %v", err)
 	}

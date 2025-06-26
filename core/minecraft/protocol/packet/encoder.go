@@ -22,9 +22,7 @@ type Encoder struct {
 // NewEncoder returns a new Encoder for the io.Writer passed. Each final packet produced by the Encoder is
 // sent with a single call to io.Writer.Write().
 func NewEncoder(w io.Writer) *Encoder {
-	return &Encoder{
-		w: w,
-	}
+	return &Encoder{w: w}
 }
 
 // EnableEncryption enables encryption for the Encoder using the secret key bytes passed. Each packet sent
@@ -55,30 +53,32 @@ func (encoder *Encoder) Encode(packets [][]byte) error {
 	for _, packet := range packets {
 		// Each packet is prefixed with a varuint32 specifying the length of the packet.
 		if err := writeVaruint32(buf, uint32(len(packet)), l); err != nil {
-			return fmt.Errorf("error writing varuint32 length: %v", err)
+			return fmt.Errorf("encode batch: write packet length: %w", err)
 		}
 		if _, err := buf.Write(packet); err != nil {
-			return fmt.Errorf("error writing packet payload: %v", err)
+			return fmt.Errorf("encode batch: write packet payload: %w", err)
 		}
 	}
 
 	data := buf.Bytes()
+	prepend := []byte{header}
 	if encoder.compression != nil {
+		prepend = append(prepend, byte(encoder.compression.EncodeCompression()))
 		var err error
 		data, err = encoder.compression.Compress(data)
 		if err != nil {
-			return fmt.Errorf("error compressing packet: %v", err)
+			return fmt.Errorf("compress batch: %w", err)
 		}
 	}
 
-	data = append([]byte{header}, data...)
+	data = append(prepend, data...)
 	if encoder.encrypt != nil {
 		// If the encryption session is not nil, encryption is enabled, meaning we should encrypt the
 		// compressed data of this packet.
 		data = encoder.encrypt.encrypt(data)
 	}
 	if _, err := encoder.w.Write(data); err != nil {
-		return fmt.Errorf("error writing compressed packet to io.Writer: %v", err)
+		return fmt.Errorf("write batch: %w", err)
 	}
 	return nil
 }
@@ -86,12 +86,7 @@ func (encoder *Encoder) Encode(packets [][]byte) error {
 // writeVaruint32 writes a uint32 to the destination buffer passed with a size of 1-5 bytes. It uses byte
 // slice b in order to prevent allocations.
 func writeVaruint32(dst io.Writer, x uint32, b []byte) error {
-	b[4] = 0
-	b[3] = 0
-	b[2] = 0
-	b[1] = 0
-	b[0] = 0
-
+	clear(b[:5])
 	i := 0
 	for x >= 0x80 {
 		b[i] = byte(x) | 0x80

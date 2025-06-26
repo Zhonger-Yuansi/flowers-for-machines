@@ -74,15 +74,15 @@ const (
 	CommandArgTypeWildcardTarget  = 10
 	CommandArgTypeFilepath        = 17
 	CommandArgTypeIntegerRange    = 23
-	CommandArgTypeEquipmentSlots  = 43
-	CommandArgTypeString          = 44
-	CommandArgTypeBlockPosition   = 52
-	CommandArgTypePosition        = 53
-	CommandArgTypeMessage         = 55
-	CommandArgTypeRawText         = 58
-	CommandArgTypeJSON            = 62
-	CommandArgTypeBlockStates     = 71
-	CommandArgTypeCommand         = 74
+	CommandArgTypeEquipmentSlots  = 47
+	CommandArgTypeString          = 56
+	CommandArgTypeBlockPosition   = 64
+	CommandArgTypePosition        = 65
+	CommandArgTypeMessage         = 67
+	CommandArgTypeRawText         = 70
+	CommandArgTypeJSON            = 74
+	CommandArgTypeBlockStates     = 83
+	CommandArgTypeCommand         = 86
 )
 
 const (
@@ -267,8 +267,7 @@ type CommandOrigin struct {
 	// depending on what part of the client actually called the command. The command may be issued by a
 	// websocket server, for example.
 	Origin uint32
-	// UUID is the UUID of the command called. This UUID is a bit odd as it is not specified by the server. It
-	// is not clear what exactly this UUID is meant to identify, but it is unique for each command called.
+	// UUID is a unique identifier for every instantiation of a command.
 	UUID uuid.UUID
 	// RequestID is an ID that identifies the request of the client. The server should send a CommandOrigin
 	// with the same request ID to ensure it can be matched with the request by the caller of the command.

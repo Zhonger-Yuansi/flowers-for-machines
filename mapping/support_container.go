@@ -37,4 +37,6 @@ var ContainerStorageKey map[string]string = map[string]string{
 	"minecraft:green_shulker_box":      "Items",
 	"minecraft:red_shulker_box":        "Items",
 	"minecraft:black_shulker_box":      "Items",
+	// 合成器
+	"minecraft:crafter": "Items",
 }

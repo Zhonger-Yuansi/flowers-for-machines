@@ -143,6 +143,7 @@ func (b *Banner) Make() error {
 	// 放置旗帜
 	_, offsetPos, err := api.BotClick().PlaceBlockHighLevel(
 		b.console.Center(),
+		b.console.Position(),
 		b.console.HotbarSlotID(),
 		uint8(blockFacing),
 	)

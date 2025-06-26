@@ -49,6 +49,39 @@ func (s Sign) NeedCheckCompletely() bool {
 	return true
 }
 
+func (s Sign) formatNBT(prefix string) string {
+	result := prefix + fmt.Sprintf("是否涂蜡: %s\n", utils.FormatByte(s.NBT.IsWaxed))
+
+	rgb, _ := utils.DecodeVarRGBA(s.NBT.FrontText.SignTextColor)
+	frontBestColor := utils.SearchForBestColor(rgb, mapping.DefaultDyeColor)
+	rgb, _ = utils.DecodeVarRGBA(s.NBT.BackText.SignTextColor)
+	backBestColor := utils.SearchForBestColor(rgb, mapping.DefaultDyeColor)
+
+	if len(s.NBT.FrontText.Text) > 0 {
+		result += prefix + "告示牌正面: \n"
+		result += prefix + "\t" + fmt.Sprintf("文字: %s\n", s.NBT.FrontText.Text)
+		result += prefix + "\t" + fmt.Sprintf("颜色: %s\n", mapping.RGBFormat[frontBestColor])
+		result += prefix + "\t" + fmt.Sprintf("高亮: %s\n", utils.FormatByte(s.NBT.FrontText.IgnoreLighting))
+	}
+	if len(s.NBT.BackText.Text) > 0 {
+		result += prefix + "告示牌背面: \n"
+		result += prefix + "\t" + fmt.Sprintf("文字: %s\n", s.NBT.BackText.Text)
+		result += prefix + "\t" + fmt.Sprintf("颜色: %s\n", mapping.RGBFormat[backBestColor])
+		result += prefix + "\t" + fmt.Sprintf("高亮: %s\n", utils.FormatByte(s.NBT.BackText.IgnoreLighting))
+	}
+
+	return result
+}
+
+func (s *Sign) Format(prefix string) string {
+	result := s.DefaultBlock.Format(prefix)
+	if s.NeedSpecialHandle() {
+		result += prefix + "附加数据: \n"
+		result += s.formatNBT(prefix + "\t")
+	}
+	return result
+}
+
 func (s *Sign) Parse(nbtMap map[string]any) error {
 	var result SignNBT
 	var legacy SignText

@@ -6,7 +6,12 @@ import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol/packet"
+	"github.com/pterm/pterm"
 )
+
+// DebugPrintUnknownItem 指示在调用 ItemCanGetByCommand 之后，
+// 若 ItemCanGetByCommand 返回假，是否需要在控制台打印相应的警告
+const DebugPrintUnknownItem = true
 
 // ConstantPacket 记载在登录序列期间，
 // 由租赁服发送的在整个连接期间不会变化的常量
@@ -20,6 +25,9 @@ type ConstantPacket struct {
 	creativeContent    []protocol.CreativeItem
 	creativeNIMapping  map[int32][]int // NI: Network ID
 	creativeCNIMapping map[uint32]int  // CNI: Creative Network ID
+	// 所有可通过指令获得的物品
+	commandItems        []string
+	commandItemsMapping map[string]bool
 }
 
 // NewConstantPacket 创建并返回一个新的 ConstantPacket
@@ -32,6 +40,8 @@ func NewConstantPacket() *ConstantPacket {
 		creativeContent:      nil,
 		creativeNIMapping:    make(map[int32][]int),
 		creativeCNIMapping:   make(map[uint32]int),
+		commandItems:         nil,
+		commandItemsMapping:  make(map[string]bool),
 	}
 }
 
@@ -112,4 +122,52 @@ func (c *ConstantPacket) updateByGameData(data minecraft.GameData) {
 		c.itemNameMapping[item.Name] = index
 		c.itemNameMappingInv[index] = item.Name
 	}
+}
+
+// AllCommandItems 返回可以通过指令获得的全部物品。
+// 使用者不应修改返回的值，否则不保证程序的行为是正确的
+func (c ConstantPacket) AllCommandItems() []string {
+	return c.commandItems
+}
+
+// ItemCanGetByCommand 检查物品名为 name 的物品是否可以通过命令获取
+func (c ConstantPacket) ItemCanGetByCommand(name string) bool {
+	name = strings.ToLower(name)
+	if !strings.HasPrefix(name, "minecraft:") {
+		name = "minecraft:" + name
+	}
+
+	result := c.commandItemsMapping[name]
+	if DebugPrintUnknownItem && !result {
+		pterm.Warning.Printfln("ItemCanGetByCommand: Item %#v is unknown, due to it can not get by command", name)
+	}
+
+	return result
+}
+
+// onAvailableCommands ..
+func (c *ConstantPacket) onAvailableCommands(p *packet.AvailableCommands) {
+	c.commandItems = []string{"minecraft:written_book"}
+	c.commandItemsMapping = map[string]bool{
+		"minecraft:written_book": true,
+	}
+
+	for _, enum := range p.Enums {
+		if enum.Type != "Item" {
+			continue
+		}
+
+		for _, index := range enum.ValueIndices {
+			itemName := p.EnumValues[index]
+			if !strings.HasPrefix(itemName, "minecraft:") {
+				continue
+			}
+			c.commandItems = append(c.commandItems, itemName)
+			c.commandItemsMapping[itemName] = true
+		}
+
+		return
+	}
+
+	panic("onAvailableCommands: Should nerver happened")
 }

@@ -26,13 +26,14 @@ const (
 	// 这里则选择了绿宝石块作为被点击的方块。
 	//
 	// SuperScript 最喜欢绿宝石块了！
-	BasePlaceBlock string = "emerald_block"
+	BasePlaceBlock string = "minecraft:emerald_block"
 )
 
 // UseItemOnBlocks 是机器人在使用手
 // 持物品对方块进行操作时的通用结构体
 type UseItemOnBlocks struct {
 	HotbarSlotID resources_control.SlotID // 指代机器人当前已选择的快捷栏编号
+	BotPos       mgl32.Vec3               // 指代机器人操作该方块时的位置
 	BlockPos     protocol.BlockPos        // 指代被操作方块的位置
 	BlockName    string                   // 指代被操作方块的名称
 	BlockStates  map[string]any           // 指代被操作方块的方块状态
@@ -120,24 +121,20 @@ func (b *BotClick) clickBlock(
 		return fmt.Errorf("clickBlock: %v", err)
 	}
 
-	// Step 4: 额外操作 (自 v1.20.50 以外的必须更改)
-	{
-		// !!! NOTE - MUST SEND AUTH INPUT TWICE !!!
-		// await changes and send auth
-		// input to submit changes
+	// Step 4: 额外操作 (自 v1.20.50 以来的必须更改)
+	//
+	// !!! NOTE - MUST SEND AUTH INPUT TWICE !!!
+	// await changes and send auth
+	// input to submit changes
+	for range 2 {
 		err = b.c.AwaitChangesGeneral()
 		if err != nil {
 			return fmt.Errorf("clickBlock: %v", err)
 		}
-		err = b.r.WritePacket(&packet.PlayerAuthInput{InputData: packet.InputFlagStartFlying})
-		if err != nil {
-			return fmt.Errorf("clickBlock: %v", err)
-		}
-		err = b.c.AwaitChangesGeneral()
-		if err != nil {
-			return fmt.Errorf("clickBlock: %v", err)
-		}
-		err = b.r.WritePacket(&packet.PlayerAuthInput{InputData: packet.InputFlagStartFlying})
+		err = b.r.WritePacket(&packet.PlayerAuthInput{
+			InputData: packet.InputFlagStartFlying,
+			Position:  request.BotPos,
+		})
 		if err != nil {
 			return fmt.Errorf("clickBlock: %v", err)
 		}
@@ -189,8 +186,9 @@ func (b *BotClick) ClickBlock(request UseItemOnBlocks) error {
 }
 
 // 使用快捷栏 hotbarSlotID 进行一次空点击操作。
+// realPosition 指示机器人在操作时的实际位置。
 // 此函数不会自动切换物品栏，但会等待租赁服响应更改
-func (b *BotClick) ClickAir(hotbarSlot resources_control.SlotID) error {
+func (b *BotClick) ClickAir(hotbarSlot resources_control.SlotID, realPosition mgl32.Vec3) error {
 	// Step 1: 获取手持物品栏物品数据信息
 	item, inventoryExisted := b.r.Inventories().GetItemStack(0, hotbarSlot)
 	if !inventoryExisted {
@@ -211,12 +209,15 @@ func (b *BotClick) ClickAir(hotbarSlot resources_control.SlotID) error {
 		return fmt.Errorf("ClickAir: %v", err)
 	}
 
-	// Step 3: 额外操作 (自 v1.20.50 以外的必须更改)
+	// Step 3: 额外操作 (自 v1.20.50 以来的必须更改)
 	err = b.c.AwaitChangesGeneral()
 	if err != nil {
 		return fmt.Errorf("ClickAir: %v", err)
 	}
-	err = b.r.WritePacket(&packet.PlayerAuthInput{InputData: packet.InputFlagStartFlying})
+	err = b.r.WritePacket(&packet.PlayerAuthInput{
+		InputData: packet.InputFlagStartFlying,
+		Position:  realPosition,
+	})
 	if err != nil {
 		return fmt.Errorf("ClickAir: %v", err)
 	}
@@ -246,18 +247,19 @@ func (b *BotClick) PlaceBlock(
 
 // PlaceBlockHighLevel 是对 PlaceBlock 的进一步封装。
 //
-// 它通过方块点击的方式，直接在 pos 处创建朝向为 facing
+// 它通过方块点击的方式，直接在 blockPos 处创建朝向为 facing
 // 的方块。其中 hotBarSlot 指代要放置的方块在快捷栏的位置。
+// 而 botPos 则指示当前方块放置操作时，机器人所处的实际位置。
 //
 // 应当说明的是，PlaceBlockHighLevel 的调用者有义务保证
-// 调用 PlaceBlockHighLevel 前，机器人以及出现在 pos 所指示的位置。
+// 调用 PlaceBlockHighLevel 前，机器人以及出现在 blockPos 所指示的位置。
 //
-// clickPos 指示为了生成目标方块而使用的基方块，它与 pos 是不等价的，
-// 但可以确保 clickPos 和 pos 是相邻的。
-// offsetPos 是 clickPos 相对于 pos 的偏移量。
+// clickPos 指示为了生成目标方块而使用的基方块，它与 blockPos 是不等价的，
+// 但可以确保 clickPos 和 blockPos 是相邻的。
+// offsetPos 是 clickPos 相对于 blockPos 的偏移量。
 //
-// 这意味着，您有义务确保 pos 的相邻方块没有被使用，否则它们可能被替换。
-// 最后，当您使用完 pos 处的方块后，您可以清除 clickPos 处的方块
+// 这意味着，您有义务确保 blockPos 的相邻方块没有被使用，否则它们可能被替换。
+// 最后，当您使用完 blockPos 处的方块后，您可以清除 clickPos 处的方块
 //
 // 值得注意的是，facing 必须是 0 到 5 之间的整数，
 // 否则调用 PlaceBlockHighLevel 将返回错误。
@@ -265,7 +267,8 @@ func (b *BotClick) PlaceBlock(
 // 最后，您希望要创建的方块可以是潜影盒，亦可以是旗帜。
 // 另外，此函数会等待方块放置完成，但不会自动切换物品栏
 func (b *BotClick) PlaceBlockHighLevel(
-	pos protocol.BlockPos,
+	blockPos protocol.BlockPos,
+	botPos mgl32.Vec3,
 	hotBarSlot resources_control.SlotID,
 	facing uint8,
 ) (clickPos protocol.BlockPos, offsetPos protocol.BlockPos, err error) {
@@ -288,12 +291,12 @@ func (b *BotClick) PlaceBlockHighLevel(
 		offsetPos = protocol.BlockPos{-1, 0, 0}
 	}
 	clickPos = protocol.BlockPos{
-		pos[0] + offsetPos[0],
-		pos[1] + offsetPos[1],
-		pos[2] + offsetPos[2],
+		blockPos[0] + offsetPos[0],
+		blockPos[1] + offsetPos[1],
+		blockPos[2] + offsetPos[2],
 	}
 
-	err = b.s.SetBlock(pos, "air", "[]")
+	err = b.s.SetBlock(blockPos, "air", "[]")
 	if err != nil {
 		return clickPos, offsetPos, fmt.Errorf("PlaceBlockHighLevel: %v", err)
 	}
@@ -305,6 +308,7 @@ func (b *BotClick) PlaceBlockHighLevel(
 	err = b.PlaceBlock(
 		UseItemOnBlocks{
 			HotbarSlotID: hotBarSlot,
+			BotPos:       botPos,
 			BlockPos:     clickPos,
 			BlockName:    BasePlaceBlock,
 			BlockStates:  map[string]any{},

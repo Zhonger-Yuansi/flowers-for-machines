@@ -106,6 +106,28 @@ func (s StructureBlock) NeedCheckCompletely() bool {
 	return false
 }
 
+func (s StructureBlock) formatNBT(prefix string) string {
+	result := ""
+
+	if len(s.NBT.StructureName) > 0 {
+		result += prefix + fmt.Sprintf("结构名称: %s\n", s.NBT.StructureName)
+	}
+
+	result += prefix + fmt.Sprintf("结构尺寸: %d×%d×%d\n", s.NBT.XStructureSize, s.NBT.YStructureSize, s.NBT.ZStructureSize)
+	result += prefix + fmt.Sprintf("结构偏移: (%d,%d,%d)\n", s.NBT.XStructureOffset, s.NBT.YStructureOffset, s.NBT.ZStructureOffset)
+
+	return result
+}
+
+func (s *StructureBlock) Format(prefix string) string {
+	result := s.DefaultBlock.Format(prefix)
+	if s.NeedSpecialHandle() {
+		result += prefix + "附加数据: \n"
+		result += s.formatNBT(prefix + "\t")
+	}
+	return result
+}
+
 func (s *StructureBlock) Parse(nbtMap map[string]any) error {
 	var result StructureBlockNBT
 	err := mapstructure.Decode(&nbtMap, &result)

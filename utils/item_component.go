@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
@@ -24,6 +25,54 @@ type ItemComponent struct {
 	KeepOnDeath bool
 }
 
+// NeedFormat ..
+func (i ItemComponent) NeedFormat() bool {
+	if len(i.CanPlaceOn) > 0 || len(i.CanDestroy) > 0 {
+		return true
+	}
+	if i.LockInInventory || i.LockInSlot {
+		return true
+	}
+	if i.KeepOnDeath {
+		return true
+	}
+	return false
+}
+
+// Format ..
+func (i ItemComponent) Format(prefix string) string {
+	result := ""
+
+	if canPlaceOnCount := len(i.CanPlaceOn); canPlaceOnCount > 0 {
+		result += prefix + fmt.Sprintf("冒险放置 (合计 %d 个): \n", canPlaceOnCount)
+		for _, canPlaceOn := range i.CanPlaceOn {
+			result += prefix + "\t- " + canPlaceOn
+		}
+	} else {
+		result += prefix + "冒险放置: 不存在\n"
+	}
+
+	if canDestroyCount := len(i.CanDestroy); canDestroyCount > 0 {
+		result += prefix + fmt.Sprintf("冒险破坏 (合计 %d 个): \n", canDestroyCount)
+		for _, canDestroy := range i.CanDestroy {
+			result += prefix + "\t- " + canDestroy
+		}
+	} else {
+		result += prefix + "冒险破坏: 不存在\n"
+	}
+
+	if i.LockInInventory {
+		result += prefix + "物品锁定: 物品锁定在背包\n"
+	} else if i.LockInSlot {
+		result += prefix + "物品锁定: 物品锁定在物品栏\n"
+	} else {
+		result += prefix + "物品锁定: 无\n"
+	}
+	result += prefix + fmt.Sprintf("在死亡时保留: %s\n", FormatBool(i.KeepOnDeath))
+
+	return result
+}
+
 // Marshal ..
 func (i *ItemComponent) Marshal(io protocol.IO) {
 	protocol.FuncSliceUint16Length(io, &i.CanPlaceOn, io.String)
@@ -43,6 +92,7 @@ func ParseItemComponent(nbtMap map[string]any) (result ItemComponent) {
 				continue
 			}
 
+			val = strings.ToLower(val)
 			if !strings.HasPrefix(val, "minecraft:") {
 				val = "minecraft:" + val
 			}
@@ -59,6 +109,7 @@ func ParseItemComponent(nbtMap map[string]any) (result ItemComponent) {
 				continue
 			}
 
+			val = strings.ToLower(val)
 			if !strings.HasPrefix(val, "minecraft:") {
 				val = "minecraft:" + val
 			}
@@ -90,8 +141,10 @@ func ParseItemComponent(nbtMap map[string]any) (result ItemComponent) {
 
 // ParseItemComponentNetwork 从 item 解析一个物品的物品组件数据
 func ParseItemComponentNetwork(item protocol.ItemStack) (result ItemComponent) {
-	result.CanDestroy = item.CanBreak
-	result.CanPlaceOn = item.CanBePlacedOn
+	result.CanDestroy = make([]string, len(item.CanBreak))
+	result.CanPlaceOn = make([]string, len(item.CanBePlacedOn))
+	copy(result.CanDestroy, item.CanBreak)
+	copy(result.CanPlaceOn, item.CanBePlacedOn)
 
 	if item.NBTData == nil {
 		return

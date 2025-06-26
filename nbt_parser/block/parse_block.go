@@ -9,9 +9,22 @@ import (
 	"github.com/df-mc/worldupgrader/blockupgrader"
 )
 
-// ParseNBTBlock 从方块实体数据 blockNBT 解析一个方块实体。
-// blockName 和 blockStates 分别指示这个方块实体的名称和方块状态
-func ParseNBTBlock(blockName string, blockStates map[string]any, blockNBT map[string]any) (block nbt_parser_interface.Block, err error) {
+// ParseBlock 从方块实体数据 blockNBT 解析一个方块实体。
+// blockName 和 blockStates 分别指示这个方块实体的名称和方块状态。
+//
+// nameChecker 是一个可选的函数，用于检查 name 所指示的物品名称是
+// 否可通过指令获取。如果不能，则 nameChecker 返回假。
+//
+// nameChecker 对于大多数方块的解析可能没有帮助，但它可以帮助验证
+// 容器内的物品是否是可以通过指令获取的物品。
+//
+// 另外，如果没有这样的 nameChecker 函数，则可以将其简单的置为 nil
+func ParseBlock(
+	nameChecker func(name string) bool,
+	blockName string,
+	blockStates map[string]any,
+	blockNBT map[string]any,
+) (block nbt_parser_interface.Block, err error) {
 	name := strings.ToLower(blockName)
 	if !strings.HasPrefix(name, "minecraft:") {
 		name = "minecraft:" + name
@@ -22,14 +35,20 @@ func ParseNBTBlock(blockName string, blockStates map[string]any, blockNBT map[st
 		Properties: blockStates,
 	})
 	defaultBlock := DefaultBlock{
-		Name:   newBlock.Name,
-		States: newBlock.Properties,
+		Name:        newBlock.Name,
+		States:      newBlock.Properties,
+		NameChecker: nameChecker,
 	}
 
 	blockType, ok := mapping.SupportBlocksPool[newBlock.Name]
 	if !ok {
 		return &defaultBlock, nil
 	}
+	defaultBlock.States = nbt_parser_interface.DeepCopyAndFixStates(
+		blockType,
+		defaultBlock.BlockName(),
+		defaultBlock.BlockStates(),
+	)
 
 	switch blockType {
 	case mapping.SupportNBTBlockTypeCommandBlock:
@@ -50,6 +69,8 @@ func ParseNBTBlock(blockName string, blockStates map[string]any, blockNBT map[st
 		block = &JukeBox{DefaultBlock: defaultBlock}
 	case mapping.SupportNBTBlockTypeBrewingStand:
 		block = &BrewingStand{DefaultBlock: defaultBlock}
+	case mapping.SupportNBTBlockTypeCrafter:
+		block = &Crafter{DefaultBlock: defaultBlock}
 	default:
 		panic("ParseNBTBlock: Should nerver happened")
 	}
@@ -62,5 +83,5 @@ func ParseNBTBlock(blockName string, blockStates map[string]any, blockNBT map[st
 }
 
 func init() {
-	nbt_parser_interface.ParseBlock = ParseNBTBlock
+	nbt_parser_interface.ParseBlock = ParseBlock
 }

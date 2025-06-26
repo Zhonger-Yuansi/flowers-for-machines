@@ -353,7 +353,7 @@ func (b *Banner) makeNormal(
 		if bannerWeGet.Stack.NetworkID != int32(api.Resources().ConstantPacket().ItemByName("minecraft:banner").RuntimeID) {
 			panic("Make: Should nerver happened")
 		}
-		newBanner, err := nbt_parser_item.ParseItemNetwork(bannerWeGet.Stack, "minecraft:banner")
+		newBanner, err := nbt_parser_interface.ParseItemNetwork(bannerWeGet.Stack, "minecraft:banner")
 		if err != nil {
 			return nil, fmt.Errorf("Make: %v", err)
 		}

@@ -7,13 +7,15 @@ import (
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/core/minecraft/protocol"
 	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
+	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 )
 
 // 默认 NBT 物品
 type DefaultItem struct {
-	Basic   ItemBasicData
-	Enhance ItemEnhanceData
-	Block   ItemBlockData
+	Basic       ItemBasicData
+	Enhance     ItemEnhanceData
+	Block       ItemBlockData
+	NameChecker func(name string) bool
 }
 
 func init() {
@@ -40,6 +42,35 @@ func (d DefaultItem) ItemCount() uint8 {
 
 func (d DefaultItem) ItemMetadata() int16 {
 	return d.Basic.Metadata
+}
+
+func (d *DefaultItem) Format(prefix string) string {
+	result := prefix + "物品基本信息: \n"
+	result += prefix + "\t" + fmt.Sprintf("名称: %s\n", d.ItemName())
+	result += prefix + "\t" + fmt.Sprintf("数据值: %d\n", d.ItemMetadata())
+	result += prefix + "\t" + fmt.Sprintf("数量: %d\n", d.ItemCount())
+	if len(d.Enhance.DisplayName) > 0 {
+		result += prefix + "\t" + fmt.Sprintf("显示名称: %s\n", d.Enhance.DisplayName)
+	}
+
+	if enchCount := len(d.Enhance.EnchList); enchCount > 0 {
+		result += prefix + fmt.Sprintf("物品附魔信息 (合计 %d 个附魔): \n", enchCount)
+		for _, ench := range d.Enhance.EnchList {
+			result += prefix + fmt.Sprintf("\t- %s\n", utils.FormatEnch(ench.ID, ench.Level))
+		}
+	}
+
+	if d.Enhance.ItemComponent.NeedFormat() {
+		result += prefix + "物品组件数据: \n"
+		result += d.Enhance.ItemComponent.Format(prefix + "\t")
+	}
+
+	if d.Block.SubBlock != nil {
+		result += prefix + "子方块数据: \n"
+		result += d.Block.SubBlock.Format(prefix + "\t")
+	}
+
+	return result
 }
 
 func (d *DefaultItem) parse(basic ItemBasicData, enhance ItemEnhanceData, block ItemBlockData) {
@@ -79,7 +110,7 @@ func (d *DefaultItem) ParseNormal(nbtMap map[string]any) error {
 		return fmt.Errorf("ParseNormal: %v", err)
 	}
 	// Parse item block data
-	block, err := ParseItemBlock(basic.Name, nbtMap)
+	block, err := ParseItemBlock(d.NameChecker, basic.Name, nbtMap)
 	if err != nil {
 		return fmt.Errorf("ParseNormal: %v", err)
 	}

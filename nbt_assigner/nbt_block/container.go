@@ -194,7 +194,7 @@ func (c *Container) makeNormal() error {
 			IsCanOpenConatiner:    true,
 			ConsiderOpenDirection: c.data.ConsiderOpenDirection(),
 			ShulkerFacing:         c.data.NBT.ShulkerFacing,
-			BlockCustomName:       c.data.CustomName,
+			BlockCustomName:       c.data.NBT.CustomName,
 		},
 	)
 	if err != nil {
@@ -318,7 +318,7 @@ func (c *Container) makeNormal() error {
 				continue
 			}
 
-			newItem, err := nbt_parser_item.ParseItemNetwork(
+			newItem, err := nbt_parser_interface.ParseItemNetwork(
 				value.Stack,
 				api.Resources().ConstantPacket().ItemNameByNetworkID(value.Stack.NetworkID),
 			)
@@ -491,6 +491,7 @@ func (c *Container) makeNormal() error {
 		err = api.ItemCopy().CopyItem(
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: c.console.HotbarSlotID(),
+				BotPos:       c.console.Position(),
 				BlockPos:     c.console.Center(),
 				BlockName:    c.data.BlockName(),
 				BlockStates:  c.data.BlockStates(),

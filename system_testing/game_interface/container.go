@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/game_control/game_interface"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/pterm/pterm"
 )
 
@@ -69,6 +70,7 @@ func SystemTestingContainer() {
 		success, err := api.ContainerOpenAndClose().OpenContainer(
 			game_interface.UseItemOnBlocks{
 				HotbarSlotID: 8,
+				BotPos:       mgl32.Vec3{0, 0, 0},
 				BlockPos:     [3]int32{0, 0, 0},
 				BlockName:    "chest",
 				BlockStates: map[string]any{

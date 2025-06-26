@@ -23,6 +23,28 @@ type Shield struct {
 	NBT ShieldNBT
 }
 
+func (s Shield) formatNBT(prefix string) string {
+	result := prefix + fmt.Sprintf("盾牌基色: %s\n", mapping.ColorFormat[s.NBT.Base])
+
+	if patternCount := len(s.NBT.Patterns); patternCount > 0 {
+		result += prefix + fmt.Sprintf("旗帜图案 (合计 %d 个图案): \n", patternCount)
+	}
+	for _, pattern := range s.NBT.Patterns {
+		result += pattern.Format(prefix + "\t- ")
+	}
+
+	return result
+}
+
+func (s *Shield) Format(prefix string) string {
+	result := s.DefaultItem.Format(prefix)
+	if s.IsComplex() {
+		result += prefix + "附加数据: \n"
+		result += s.formatNBT(prefix + "\t")
+	}
+	return result
+}
+
 // parse ..
 func (s *Shield) parse(tag map[string]any) error {
 	var isOminousShield bool

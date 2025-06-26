@@ -29,16 +29,32 @@ func (f Frame) NeedCheckCompletely() bool {
 	return true
 }
 
+func (f Frame) formatNBT(prefix string) string {
+	result := prefix + fmt.Sprintf("旋转角度: %v 度\n", f.NBT.ItemRotation)
+	result += prefix + "物品数据: \n"
+	result += f.NBT.Item.Format(prefix + "\t")
+	return result
+}
+
+func (f *Frame) Format(prefix string) string {
+	result := f.DefaultBlock.Format(prefix)
+	if f.NeedSpecialHandle() {
+		result += prefix + "附加数据: \n"
+		result += f.formatNBT(prefix + "\t")
+	}
+	return result
+}
+
 func (f *Frame) Parse(nbtMap map[string]any) error {
 	f.NBT.ItemRotation, _ = nbtMap["ItemRotation"].(float32)
 
 	itemMap, ok := nbtMap["Item"].(map[string]any)
 	if ok {
-		item, err := nbt_parser_interface.ParseItemNormal(itemMap)
+		item, canGetByCommand, err := nbt_parser_interface.ParseItemNormal(f.NameChecker, itemMap)
 		if err != nil {
 			return fmt.Errorf("Parse: %v", err)
 		}
-		if item.ItemName() != "minecraft:filled_map" {
+		if canGetByCommand && item.ItemName() != "minecraft:filled_map" {
 			f.NBT.HaveItem = true
 			f.NBT.Item = item
 		}

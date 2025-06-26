@@ -60,7 +60,7 @@ type enc struct {
 // the stack or removes a colour from the stack.
 func (e *enc) process(tok html.Token) {
 	if e.first {
-		e.w.WriteString(reset)
+		e.w.WriteString(Reset)
 		e.first = false
 	}
 	switch tok.Type {
@@ -92,6 +92,6 @@ func (e *enc) writeText(s string) {
 	}
 	e.w.WriteString(s)
 	if len(e.formatStack) != 0 {
-		e.w.WriteString(reset)
+		e.w.WriteString(Reset)
 	}
 }

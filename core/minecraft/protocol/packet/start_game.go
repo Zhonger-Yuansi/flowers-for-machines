@@ -69,6 +69,8 @@ type StartGame struct {
 	// WorldGameMode is the game mode that a player gets when it first spawns in the world. It is shown in the
 	// settings and is used if the PlayerGameMode is set to 5.
 	WorldGameMode int32
+	// Hardcore is if the world is in hardcore mode. In hardcore mode, the player cannot respawn after dying.
+	Hardcore bool
 	// Difficulty is the difficulty of the world. It is a value from 0-3, with 0 being peaceful, 1 being easy,
 	// 2 being normal and 3 being hard.
 	Difficulty int32
@@ -240,6 +242,12 @@ type StartGame struct {
 	ChatRestrictionLevel uint8
 	// DisablePlayerInteractions is true if the client should ignore other players when interacting with the world.
 	DisablePlayerInteractions bool
+	// ServerID is always empty in vanilla and its usage is currently unknown.
+	ServerID string
+	// WorldID is always empty in vanilla and its usage is currently unknown.
+	WorldID string
+	// ScenarioID is always empty in vanilla and its usage is currently unknown.
+	ScenarioID string
 	// UseBlockNetworkIDHashes is true if the client should use the hash of a block's name as its network ID rather than
 	// its index in the expected block palette. This is useful for servers that wish to support multiple protocol versions
 	// and custom blocks, but it will result in extra bytes being written for every block in a sub chunk palette.
@@ -266,6 +274,7 @@ func (pk *StartGame) Marshal(io protocol.IO) {
 	io.Varint32(&pk.Dimension)
 	io.Varint32(&pk.Generator)
 	io.Varint32(&pk.WorldGameMode)
+	io.Bool(&pk.Hardcore)
 	io.Varint32(&pk.Difficulty)
 	io.UBlockPos(&pk.WorldSpawn)
 	io.Bool(&pk.AchievementsDisabled)
@@ -310,6 +319,9 @@ func (pk *StartGame) Marshal(io protocol.IO) {
 	protocol.OptionalFunc(io, &pk.ForceExperimentalGameplay, io.Bool)
 	io.Uint8(&pk.ChatRestrictionLevel)
 	io.Bool(&pk.DisablePlayerInteractions)
+	io.String(&pk.ServerID)
+	io.String(&pk.WorldID)
+	io.String(&pk.ScenarioID)
 	io.String(&pk.LevelID)
 	io.String(&pk.WorldName)
 	io.String(&pk.TemplateContentIdentity)

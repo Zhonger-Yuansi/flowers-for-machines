@@ -71,7 +71,7 @@ const (
 	IDMapInfoRequest
 	IDRequestChunkRadius
 	IDChunkRadiusUpdated
-	IDItemFrameDropItem
+	_
 	IDGameRulesChanged
 	IDCamera
 	IDBossEvent
@@ -127,21 +127,11 @@ const (
 	IDLevelEventGeneric
 	IDLecternUpdate
 	_
-	IDAddEntity
-	IDRemoveEntity
+	_
+	_
 	IDClientCacheStatus
-
-	// PhoenixBuilder specific changes.
-	// Author: Liliya233
-	//
-	// Netease: 131 -> 130
 	IDOnScreenTextureAnimation
-	// PhoenixBuilder specific changes.
-	// Author: Liliya233
-	//
-	// Netease: 130 -> 131
 	IDMapCreateLockedCopy
-
 	IDStructureTemplateDataRequest
 	IDStructureTemplateDataResponse
 	_
@@ -223,6 +213,8 @@ const (
 	// Netease: new packet
 	IDNeteaseJson
 
+	// PhoenixBuilder specific changes.
+	// Author: Liliya233
 	_
 	_
 	_
@@ -244,6 +236,9 @@ const (
 	_
 	_
 	_
+
+	// PhoenixBuilder specific changes.
+	// Author: Liliya233
 	IDCameraInstruction = iota + 76
 	IDCompressedBiomeDefinitionList
 	IDTrimData
@@ -252,4 +247,7 @@ const (
 	IDRefreshEntitlements
 	IDPlayerToggleCrafterSlotRequest
 	IDSetPlayerInventoryOptions
+	IDSetHud
+	IDAwardAchievement
+	IDClientBoundCloseForm
 )

@@ -295,6 +295,7 @@ func (f *Frame) Make() error {
 	for range 1 + int(f.data.NBT.ItemRotation/45) {
 		err = api.BotClick().ClickBlock(game_interface.UseItemOnBlocks{
 			HotbarSlotID: f.console.HotbarSlotID(),
+			BotPos:       f.console.Position(),
 			BlockPos:     f.console.Center(),
 			BlockName:    f.data.BlockName(),
 			BlockStates: map[string]any{

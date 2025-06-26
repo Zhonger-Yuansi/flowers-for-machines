@@ -212,7 +212,7 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 		transaction.
 			MoveToCraftingTable(bannerSlots[index], 28, 1).
 			MoveToCraftingTable(shieldSlots[index], 29, 1).
-			Crafting(0x8f9, shieldSlots[index], 1, shieldExpectedItem[index])
+			Crafting(2418, shieldSlots[index], 1, shieldExpectedItem[index])
 	}
 
 	// Step 6: Commit changes
@@ -250,7 +250,7 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 		if shieldWeGet.Stack.NetworkID != int32(api.Resources().ConstantPacket().ItemByName("minecraft:shield").RuntimeID) {
 			panic("Make: Should nerver happened")
 		}
-		newShield, err := nbt_parser_item.ParseItemNetwork(shieldWeGet.Stack, "minecraft:shield")
+		newShield, err := nbt_parser_interface.ParseItemNetwork(shieldWeGet.Stack, "minecraft:shield")
 		if err != nil {
 			return nil, fmt.Errorf("Make: %v", err)
 		}

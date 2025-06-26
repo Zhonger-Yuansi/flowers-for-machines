@@ -178,7 +178,7 @@ func SpawnNewEmptyBlock(
 		}
 
 		// 放置目标方块
-		_, offsetPos, err := api.BotClick().PlaceBlockHighLevel(console.Center(), console.HotbarSlotID(), facing)
+		_, offsetPos, err := api.BotClick().PlaceBlockHighLevel(console.Center(), console.Position(), console.HotbarSlotID(), facing)
 		if err != nil {
 			return fmt.Errorf("makeNormal: %v", err)
 		}

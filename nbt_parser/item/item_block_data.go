@@ -58,13 +58,32 @@ func HaveSubBlockData(tag map[string]any) bool {
 }
 
 // ParseItemBlock ..
-func ParseItemBlock(itemName string, nbtMap map[string]any) (result ItemBlockData, err error) {
+func ParseItemBlock(
+	nameChecker func(name string) bool,
+	itemName string,
+	nbtMap map[string]any,
+) (result ItemBlockData, err error) {
 	var blockMap map[string]any
 	var haveBlock bool
 
+	// Step 1: Get data from nbtMap
 	blockMap, haveBlock = nbtMap["Block"].(map[string]any)
 	tag, _ := nbtMap["tag"].(map[string]any)
 
+	// Step 2: Get block type of this sub block
+	blockName, ok := mapping.ItemNameToBlockName[itemName]
+	if !ok {
+		return
+	}
+	blockType, ok := mapping.SupportBlocksPool[blockName]
+	if !ok {
+		panic("ParseItemBlock: Should nerver happened")
+	}
+	if !mapping.SubBlocksPool[blockType] {
+		return
+	}
+
+	// Step 3: If exist, then we use the states directly
 	if haveBlock {
 		name, _ := blockMap["name"].(string)
 		states, _ := blockMap["states"].(map[string]any)
@@ -75,21 +94,10 @@ func ParseItemBlock(itemName string, nbtMap map[string]any) (result ItemBlockDat
 			Properties: states,
 			Version:    version,
 		})
+
 		result.Name = newBlock.Name
 		result.States = newBlock.Properties
 	} else {
-		blockName, ok := mapping.ItemNameToBlockName[itemName]
-		if !ok {
-			return
-		}
-		blockType, ok := mapping.SupportBlocksPool[blockName]
-		if !ok {
-			panic("ParseItemBlock: Should nerver happened")
-		}
-		if !mapping.SubBlocksPool[blockType] {
-			return
-		}
-
 		rid, found := block.StateToRuntimeID(blockName, map[string]any{})
 		if !found {
 			panic("ParseItemBlock: Should nerver happened")
@@ -104,21 +112,41 @@ func ParseItemBlock(itemName string, nbtMap map[string]any) (result ItemBlockDat
 		result.States = states
 	}
 
-	if HaveSubBlockData(tag) {
-		subBlock, err := nbt_parser_interface.ParseBlock(result.Name, result.States, tag)
-		if err != nil {
-			return ItemBlockData{}, fmt.Errorf("ParseItemBlock: %v", err)
-		}
-		if subBlock.NeedSpecialHandle() {
-			result.SubBlock = subBlock
-		}
+	// Step 4: Fix block states, and check have sub block data
+	result.States = nbt_parser_interface.DeepCopyAndFixStates(blockType, result.Name, result.States)
+	if !HaveSubBlockData(tag) {
+		return
 	}
 
+	// Step 5: Parse sub block data
+	subBlock, err := nbt_parser_interface.ParseBlock(nameChecker, result.Name, result.States, utils.DeepCopyNBT(tag))
+	if err != nil {
+		return ItemBlockData{}, fmt.Errorf("ParseItemBlock: %v", err)
+	}
+	if subBlock.NeedSpecialHandle() {
+		result.SubBlock = subBlock
+	}
+
+	// Step 6: Return
 	return
 }
 
 // ParseItemBlockNetwork ..
 func ParseItemBlockNetwork(itemName string, item protocol.ItemStack) (result ItemBlockData, err error) {
+	// Step 1: Get block type of this sub block
+	blockName, ok := mapping.ItemNameToBlockName[itemName]
+	if !ok {
+		return
+	}
+	blockType, ok := mapping.SupportBlocksPool[blockName]
+	if !ok {
+		panic("ParseItemBlockNetwork: Should nerver happened")
+	}
+	if !mapping.SubBlocksPool[blockType] {
+		return
+	}
+
+	// Step 2: If exist, then we use the states directly
 	if item.BlockRuntimeID != 0 {
 		name, states, found := block.RuntimeIDToState(uint32(item.BlockRuntimeID))
 		if !found {
@@ -127,18 +155,6 @@ func ParseItemBlockNetwork(itemName string, item protocol.ItemStack) (result Ite
 		result.Name = name
 		result.States = states
 	} else {
-		blockName, ok := mapping.ItemNameToBlockName[itemName]
-		if !ok {
-			return
-		}
-		blockType, ok := mapping.SupportBlocksPool[blockName]
-		if !ok {
-			panic("ParseItemBlockNetwork: Should nerver happened")
-		}
-		if !mapping.SubBlocksPool[blockType] {
-			return
-		}
-
 		rid, found := block.StateToRuntimeID(blockName, map[string]any{})
 		if !found {
 			panic("ParseItemBlockNetwork: Should nerver happened")
@@ -153,15 +169,21 @@ func ParseItemBlockNetwork(itemName string, item protocol.ItemStack) (result Ite
 		result.States = states
 	}
 
-	if HaveSubBlockData(item.NBTData) {
-		subBlock, err := nbt_parser_interface.ParseBlock(result.Name, result.States, item.NBTData)
-		if err != nil {
-			return ItemBlockData{}, fmt.Errorf("ParseItemBlock: %v", err)
-		}
-		if subBlock.NeedSpecialHandle() {
-			result.SubBlock = subBlock
-		}
+	// Step 3: Fix block states, and check have sub block data
+	result.States = nbt_parser_interface.DeepCopyAndFixStates(blockType, result.Name, result.States)
+	if !HaveSubBlockData(item.NBTData) {
+		return
 	}
 
+	// Step 4: Parse sub block data
+	subBlock, err := nbt_parser_interface.ParseBlock(nil, result.Name, result.States, utils.DeepCopyNBT(item.NBTData))
+	if err != nil {
+		return ItemBlockData{}, fmt.Errorf("ParseItemBlockNetwork: %v", err)
+	}
+	if subBlock.NeedSpecialHandle() {
+		result.SubBlock = subBlock
+	}
+
+	// Step 5: Return
 	return
 }

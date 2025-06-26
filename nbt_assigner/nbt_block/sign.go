@@ -65,6 +65,7 @@ func (s *Sign) Make() error {
 	// 初始化
 	blockAction := game_interface.UseItemOnBlocks{
 		HotbarSlotID: s.console.HotbarSlotID(),
+		BotPos:       s.console.Position(),
 		BlockPos:     s.console.Center(),
 		BlockName:    helperSignBlock,
 		BlockStates:  utils.ParseBlockStatesString(helperBlockStates),

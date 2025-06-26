@@ -80,7 +80,7 @@ func ItemTransition(
 			IsCanOpenConatiner:    true,
 			ConsiderOpenDirection: dstContainer.ConsiderOpenDirection(),
 			ShulkerFacing:         dstContainer.NBT.ShulkerFacing,
-			BlockCustomName:       dstContainer.CustomName,
+			BlockCustomName:       dstContainer.NBT.CustomName,
 		},
 	)
 	if err != nil {

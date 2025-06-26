@@ -63,7 +63,6 @@ type IO interface {
 	ShieldID() int32
 	UnknownEnumOption(value any, enum string)
 	InvalidValue(value any, forField, reason string)
-	USoundPos(x *mgl32.Vec3)
 
 	/*
 		PhoenixBuilder specific func.

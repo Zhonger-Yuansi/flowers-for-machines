@@ -4,10 +4,7 @@ package mapping
 const BannerPatternOminous = "ill"
 
 // 此表描述了当前版本不存在，但未来版本出现的旗帜图案
-var BannerPatternUnsupported = map[string]bool{
-	"flw": true, // 涡流; flow_banner_pattern
-	"gus": true, // 旋风; guster_banner_pattern
-}
+var BannerPatternUnsupported = map[string]bool{}
 
 // 此表描述了旗帜中 Pattern 字段到 旗帜图案 的映射
 var BannerPatternToItemName = map[string]string{
@@ -19,6 +16,8 @@ var BannerPatternToItemName = map[string]string{
 	"cbo": "bordure_indented_banner_pattern", // 波纹边
 	"pig": "piglin_banner_pattern",           // 猪鼻
 	"glb": "globe_banner_pattern",            // 地球
+	"flw": "flow_banner_pattern",             // 涡流
+	"gus": "guster_banner_pattern",           // 旋风
 }
 
 // 此表描述了旗帜中 Color 字段到 染料物品名 的映射

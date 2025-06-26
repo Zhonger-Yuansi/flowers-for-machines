@@ -9,7 +9,7 @@ import (
 	"github.com/df-mc/worldupgrader/blockupgrader"
 )
 
-// ParseNBTBlock 从方块实体数据 blockNBT 解析一个方块实体。
+// ParseBlock 从方块实体数据 blockNBT 解析一个方块实体。
 // blockName 和 blockStates 分别指示这个方块实体的名称和方块状态。
 //
 // nameChecker 是一个可选的函数，用于检查 name 所指示的物品名称是
@@ -19,7 +19,7 @@ import (
 // 容器内的物品是否是可以通过指令获取的物品。
 //
 // 另外，如果没有这样的 nameChecker 函数，则可以将其简单的置为 nil
-func ParseNBTBlock(
+func ParseBlock(
 	nameChecker func(name string) bool,
 	blockName string,
 	blockStates map[string]any,
@@ -44,6 +44,7 @@ func ParseNBTBlock(
 	if !ok {
 		return &defaultBlock, nil
 	}
+	defaultBlock.States = DeepCopyAndFixStates(blockType, defaultBlock.BlockName(), defaultBlock.BlockStates())
 
 	switch blockType {
 	case mapping.SupportNBTBlockTypeCommandBlock:
@@ -78,5 +79,5 @@ func ParseNBTBlock(
 }
 
 func init() {
-	nbt_parser_interface.ParseBlock = ParseNBTBlock
+	nbt_parser_interface.ParseBlock = ParseBlock
 }

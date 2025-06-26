@@ -169,7 +169,7 @@ func placeNBTBlock(
 			return false, uuid.UUID{}, protocol.BlockPos{}, fmt.Errorf("PlaceNBTBlock: %v", err)
 		}
 
-		newBlock, err := nbt_parser_block.ParseNBTBlock(nil, nbtBlock.BlockName(), nbtBlock.BlockStates(), nbtMap)
+		newBlock, err := nbt_parser_interface.ParseBlock(nil, nbtBlock.BlockName(), nbtBlock.BlockStates(), nbtMap)
 		if err != nil {
 			return false, uuid.UUID{}, protocol.BlockPos{}, fmt.Errorf("PlaceNBTBlock: %v", err)
 		}

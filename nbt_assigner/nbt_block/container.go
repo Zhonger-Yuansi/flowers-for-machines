@@ -318,7 +318,7 @@ func (c *Container) makeNormal() error {
 				continue
 			}
 
-			newItem, err := nbt_parser_item.ParseItemNetwork(
+			newItem, err := nbt_parser_interface.ParseItemNetwork(
 				value.Stack,
 				api.Resources().ConstantPacket().ItemNameByNetworkID(value.Stack.NetworkID),
 			)

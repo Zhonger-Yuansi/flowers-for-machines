@@ -138,7 +138,7 @@ func (b *Book) Make() (resultSlot map[uint64]resources_control.SlotID, err error
 				break
 			}
 
-			bookWeGet, err := nbt_parser_item.ParseItemNetwork(item.Stack, book.ItemName())
+			bookWeGet, err := nbt_parser_interface.ParseItemNetwork(item.Stack, book.ItemName())
 			if err != nil {
 				return nil, fmt.Errorf("Make: %v", err)
 			}

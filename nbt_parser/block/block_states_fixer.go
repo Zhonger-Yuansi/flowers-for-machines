@@ -2,8 +2,13 @@ package nbt_parser_block
 
 import (
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/mapping"
+	nbt_parser_interface "github.com/Happy2018new/the-last-problem-of-the-humankind/nbt_parser/interface"
 	"github.com/Happy2018new/the-last-problem-of-the-humankind/utils"
 )
+
+func init() {
+	nbt_parser_interface.DeepCopyAndFixStates = DeepCopyAndFixStates
+}
 
 // DeepCopyAndFixStates 先深拷贝 blockStates，然后修复类型为 blockType，
 // 方块名称为 blockName 且方块状态为 blockStates 的方块的方块状态。

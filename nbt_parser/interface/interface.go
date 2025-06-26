@@ -53,9 +53,23 @@ var (
 	)
 )
 
-// SetItemCount 设置 item 的物品数量为 count。
-// 它目前是对酿造台中烈焰粉所在槽位的特殊处理
-var SetItemCount func(item Item, count uint8)
+var (
+	// DeepCopyAndFixStates 先深拷贝 blockStates，然后修复类型为 blockType，
+	// 方块名称为 blockName 且方块状态为 blockStates 的方块的方块状态。
+	//
+	// 这主要用于解决导入时产生的不可能问题，即用户提供的方块状态可能包含
+	// 一些不可能抵达的成分，例如一些方块状态字段指示了这个方块是否被红石
+	// 激活等。
+	// 在实际导入时，我们并不会提供红石信号，这意味着放置的方块在很大程度上，
+	// 其方块状态会被纠正 (例如改变为没有红石激活的情况)。
+	//
+	// 基于此，我们需要结合导入的实际环境，修正传入方块的方块状态。
+	// DeepCopyAndFixStates 在实现上是深拷贝的，这意味着使用者可以安全的修改返回值
+	DeepCopyAndFixStates func(blockType uint8, blockName string, blockStates map[string]any) map[string]any
+	// SetItemCount 设置 item 的物品数量为 count。
+	// 它目前是对酿造台中烈焰粉所在槽位的特殊处理
+	SetItemCount func(item Item, count uint8)
+)
 
 // Block 是所有已实现的 NBT 方块的统称
 type Block interface {

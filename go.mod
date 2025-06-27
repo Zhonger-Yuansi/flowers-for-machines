@@ -3,7 +3,7 @@ module github.com/OmineDev/flowers-for-machines
 go 1.24
 
 require (
-	github.com/TriM-Organization/bedrock-world-operator v1.1.4
+	github.com/TriM-Organization/bedrock-world-operator v1.2.0
 	github.com/go-gl/mathgl v1.2.0
 	github.com/go-jose/go-jose/v3 v3.0.4
 	github.com/google/uuid v1.6.0
@@ -59,7 +59,3 @@ require (
 	golang.org/x/crypto v0.39.0 // indirect
 	golang.org/x/net v0.41.0
 )
-
-// TODO: Remove this when bedrock world operator bump its version
-// See https://github.com/TriM-Organization/bedrock-world-operator/tree/nemc-1.21.0 for more information.
-replace github.com/TriM-Organization/bedrock-world-operator => ../bedrock-world-operator

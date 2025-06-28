@@ -179,5 +179,16 @@ func SystemTestingCommands() {
 		}
 	}
 
+	// Long command
+	{
+		_, isTimeout, err := api.Commands().SendWSCommandWithTimeout("system testing"+strings.Repeat("-", 256), 0)
+		if isTimeout {
+			panic("SystemTestingCommands: `Long command` time out")
+		}
+		if err != nil {
+			panic(fmt.Sprintf("SystemTestingCommands: `Long command` failed due to %v", err))
+		}
+	}
+
 	pterm.Success.Printfln("SystemTestingCommands: PASS (Time used = %v)", time.Since(tA))
 }

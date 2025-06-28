@@ -30,7 +30,7 @@ func DeepCopyAndFixStates(blockType uint8, blockName string, blockStates map[str
 		case "minecraft:barrel":
 			result["open_bit"] = byte(0)
 		case "minecraft:hopper":
-			result["toggle_bit"] = byte(1)
+			result["toggle_bit"] = byte(0)
 		case "minecraft:dispenser", "minecraft:dropper":
 			result["triggered_bit"] = byte(0)
 		}

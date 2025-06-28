@@ -44,22 +44,22 @@ func (r *Replaceitem) replaceitemInInventoryNormal(request string, blocked bool)
 		if isTimeout {
 			err = api.SendSettingsCommand(request, true)
 			if err != nil {
-				return fmt.Errorf("ReplaceitemInInventory: %v", err)
+				return fmt.Errorf("replaceitemInInventoryNormal: %v", err)
 			}
 			err = api.AwaitChangesGeneral()
 			if err != nil {
-				return fmt.Errorf("ReplaceitemInInventory: %v", err)
+				return fmt.Errorf("replaceitemInInventoryNormal: %v", err)
 			}
 		}
 		if err != nil {
-			return fmt.Errorf("ReplaceitemInInventory: %v", err)
+			return fmt.Errorf("replaceitemInInventoryNormal: %v", err)
 		}
 		return nil
 	}
 
 	err := api.SendSettingsCommand(request, true)
 	if err != nil {
-		return fmt.Errorf("ReplaceitemInInventory: %v", err)
+		return fmt.Errorf("replaceitemInInventoryNormal: %v", err)
 	}
 
 	return nil
@@ -71,13 +71,13 @@ func (r *Replaceitem) replaceitemInInventorySpecial(request string, blocked bool
 
 	err := api.SendSettingsCommand(request, true)
 	if err != nil {
-		return fmt.Errorf("ReplaceitemInInventory: %v", err)
+		return fmt.Errorf("replaceitemInInventorySpecial: %v", err)
 	}
 
 	if blocked {
 		err = api.AwaitChangesGeneral()
 		if err != nil {
-			return fmt.Errorf("ReplaceitemInInventory: %v", err)
+			return fmt.Errorf("replaceitemInInventorySpecial: %v", err)
 		}
 	}
 

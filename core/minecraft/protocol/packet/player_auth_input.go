@@ -51,7 +51,15 @@ const (
 	InputFlagStopCrawling
 	InputFlagStartFlying
 	InputFlagStopFlying
-	InputFlagClientAckServerData
+
+	// PhoenixBuilder specific constants.
+	// Author: Happy2018new, Liliya233
+	//
+	// InputFlagClientAckServerData is in InputFlagUnknown1
+	// or InputFlagUnknown2, but we don't know
+	InputFlagUnknown1
+	InputFlagUnknown2
+
 	InputFlagClientPredictedVehicle
 	InputFlagPaddlingLeft
 	InputFlagPaddlingRight
@@ -136,12 +144,14 @@ type PlayerAuthInput struct {
 	// PhoenixBuilder specific fields.
 	// Author: Liliya233
 	//
-	// The following fields are NetEase specific.
+	// The following fields are all NetEase specific.
 	Unknown1 float32
 	Unknown2 float32
 	Unknown3 bool
 	Unknown4 bool
 	Unknown5 bool
+	Unknown6 bool
+	Unknown7 float32
 }
 
 // ID ...
@@ -159,7 +169,6 @@ func (pk *PlayerAuthInput) Marshal(io protocol.IO) {
 	io.Varuint32(&pk.InputMode)
 	io.Varuint32(&pk.PlayMode)
 	io.Varuint32(&pk.InteractionModel)
-
 	if pk.PlayMode == PlayModeReality {
 		io.Vec3(&pk.GazeDirection)
 	}
@@ -200,5 +209,7 @@ func (pk *PlayerAuthInput) Marshal(io protocol.IO) {
 		io.Float32(&pk.Unknown1)
 		io.Float32(&pk.Unknown2)
 		io.Bool(&pk.Unknown4)
+		io.Bool(&pk.Unknown6)
+		io.ByteFloat(&pk.Unknown7)
 	}
 }

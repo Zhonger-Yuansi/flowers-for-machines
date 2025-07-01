@@ -87,7 +87,9 @@ func (s *Shield) parse(tag map[string]any) error {
 	}
 
 	s.NBT.Base, s.NBT.HaveBase = tag["Base"].(int32)
-	s.NBT.HaveBase = len(s.NBT.Patterns) > 0
+	if len(s.NBT.Patterns) > 0 {
+		s.NBT.HaveBase = true
+	}
 
 	if isOminousShield {
 		s.DefaultItem.Basic.Metadata = 0

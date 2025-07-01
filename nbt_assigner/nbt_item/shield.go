@@ -79,6 +79,9 @@ func (s *Shield) Make() (resultSlot map[uint64]resources_control.SlotID, err err
 	}
 
 	// Step 2: Make banners
+	// Note that due to we consider non-complex banners (like banners without any pattern)
+	// when we construct the Make func of banner, so here we can call banners.Make directly.
+	// However, the define of Make is refer to make complex item (with NBT data).
 	resultBanner, err := banners.Make()
 	if err != nil {
 		return nil, fmt.Errorf("Make: %v", err)

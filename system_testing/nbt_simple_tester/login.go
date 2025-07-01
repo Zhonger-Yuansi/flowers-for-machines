@@ -7,7 +7,6 @@ import (
 	"github.com/OmineDev/flowers-for-machines/client"
 	"github.com/OmineDev/flowers-for-machines/game_control/game_interface"
 	"github.com/OmineDev/flowers-for-machines/game_control/resources_control"
-	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_cache/base_container_cache"
 	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
 
 	"github.com/pterm/pterm"
@@ -36,7 +35,6 @@ func SystemTestingLogin() {
 	if err != nil {
 		panic(fmt.Sprintf("SystemTestingSetblock: Failed on init new console, and the err is %v", err))
 	}
-	baseContainerCache = base_container_cache.NewBaseContainerCache(console)
 
 	pterm.Success.Printfln("SystemTestingLogin: PASS (Time used = %v)", time.Since(tA))
 }

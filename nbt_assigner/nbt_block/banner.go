@@ -12,6 +12,7 @@ import (
 	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_cache"
 	"github.com/OmineDev/flowers-for-machines/nbt_assigner/nbt_console"
 	nbt_parser_block "github.com/OmineDev/flowers-for-machines/nbt_parser/block"
+	nbt_parser_general "github.com/OmineDev/flowers-for-machines/nbt_parser/general"
 	nbt_parser_item "github.com/OmineDev/flowers-for-machines/nbt_parser/item"
 )
 
@@ -45,41 +46,65 @@ func (b *Banner) Make() error {
 	}
 	b.console.UseHelperBlock(nbt_console.RequesterUser, nbt_console.ConsoleIndexCenterBlock, block_helper.Air{})
 
-	// 取得生成旗帜所需要的旗帜物品
-	bannerItem := nbt_assigner_interface.MakeNBTItemMethod(
-		b.console,
-		b.cache,
-		&nbt_parser_item.Banner{
-			DefaultItem: nbt_parser_item.DefaultItem{
-				Basic: nbt_parser_item.ItemBasicData{
-					Name:     "minecraft:banner",
-					Count:    1,
-					Metadata: int16(b.data.NBT.Base),
+	// 这是一个需要通过织布机来制作的旗帜。
+	// 否则，这是一个可以直接通过命令得到的旗帜
+	if len(b.data.NBT.Patterns) > 0 || b.data.NBT.Type == nbt_parser_general.BannerTypeOminous {
+		// 取得生成旗帜所需要的旗帜物品
+		bannerItem := nbt_assigner_interface.MakeNBTItemMethod(
+			b.console,
+			b.cache,
+			&nbt_parser_item.Banner{
+				DefaultItem: nbt_parser_item.DefaultItem{
+					Basic: nbt_parser_item.ItemBasicData{
+						Name:     "minecraft:banner",
+						Count:    1,
+						Metadata: int16(b.data.NBT.Base),
+					},
+				},
+				NBT: nbt_parser_item.BannerNBT{
+					Patterns: b.data.NBT.Patterns,
+					Type:     b.data.NBT.Type,
 				},
 			},
-			NBT: nbt_parser_item.BannerNBT{
-				Patterns: b.data.NBT.Patterns,
-				Type:     b.data.NBT.Type,
+		)
+		if len(bannerItem) != 1 {
+			panic("Make: Should nerver happened")
+		}
+
+		// 制作旗帜物品
+		resultSlot, err := bannerItem[0].Make()
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
+		if len(resultSlot) != 1 {
+			panic("Make: Should nerver happened")
+		}
+
+		// 确定旗帜所在的槽位
+		for _, slotID := range resultSlot {
+			resultSlotID = slotID
+		}
+	} else {
+		err = b.console.API().Replaceitem().ReplaceitemInInventory(
+			"@s",
+			game_interface.ReplacePathHotbarOnly,
+			game_interface.ReplaceitemInfo{
+				Name:     "minecraft:banner",
+				Count:    1,
+				MetaData: int16(b.data.NBT.Base),
+				Slot:     b.console.HotbarSlotID(),
 			},
-		},
-	)
-	if len(bannerItem) != 1 {
-		panic("Make: Should nerver happened")
+			"",
+			true,
+		)
+		if err != nil {
+			return fmt.Errorf("Make: %v", err)
+		}
+		resultSlotID = b.console.HotbarSlotID()
 	}
 
-	// 制作旗帜物品
-	resultSlot, err := bannerItem[0].Make()
-	if err != nil {
-		return fmt.Errorf("Make: %v", err)
-	}
-	if len(resultSlot) != 1 {
-		panic("Make: Should nerver happened")
-	}
-
-	// 移动目标物品到快捷栏并切换手持物品栏
-	for _, slotID := range resultSlot {
-		resultSlotID = slotID
-	}
+	// 如果目标物品所在位置不在快捷栏中，
+	// 则将该物品移动到快捷栏中
 	if resultSlotID > 8 {
 		err = api.Replaceitem().ReplaceitemInInventory(
 			"@s",

@@ -19,7 +19,6 @@ type CommandBlockNBT struct {
 	TrackOutput        byte   `mapstructure:"TrackOutput"`
 	ConditionalMode    byte   `mapstructure:"conditionalMode"`
 	Auto               byte   `mapstructure:"auto"`
-	Version            int32  `mapstructure:"Version"`
 }
 
 // 命令方块

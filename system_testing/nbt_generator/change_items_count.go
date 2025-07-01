@@ -36,6 +36,8 @@ func ChangeItemsCount() {
 
 			if strings.Contains(itemName, "sign") || strings.Contains(itemName, "banner") {
 				itemCount = byte(rand.Intn(16) + 1)
+			} else if strings.Contains(itemName, "shield") {
+				itemCount = 1
 			} else {
 				itemCount = byte(rand.Intn(64) + 1)
 			}

@@ -86,12 +86,15 @@ func (s *Shield) parse(tag map[string]any) error {
 		s.NBT.Patterns = append(s.NBT.Patterns, pattern)
 	}
 
+	s.NBT.Base, s.NBT.HaveBase = tag["Base"].(int32)
+	s.NBT.HaveBase = len(s.NBT.Patterns) > 0
+
 	if isOminousShield {
 		s.DefaultItem.Basic.Metadata = 0
 		s.DefaultItem.Enhance.ItemComponent.KeepOnDeath = false
+		s.NBT.Base = 15
 	}
 
-	s.NBT.Base, s.NBT.HaveBase = tag["Base"].(int32)
 	return nil
 }
 

@@ -15,10 +15,10 @@ func SystemTestingLogin() {
 	tA := time.Now()
 
 	cfg := client.Config{
-		AuthServerAddress:    "...",
+		AuthServerAddress:    "154.201.73.104:8080",
 		AuthServerToken:      "...",
-		RentalServerCode:     "48285363",
-		RentalServerPasscode: "",
+		RentalServerCode:     "34022234",
+		RentalServerPasscode: "107210",
 	}
 
 	c, err = client.LoginRentalServer(cfg)
